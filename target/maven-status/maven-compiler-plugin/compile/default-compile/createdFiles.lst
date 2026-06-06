@@ -1,0 +1,14 @@
+com/vnmine/drop/DropManager$ToolConfig.class
+com/vnmine/VNMinePlugin$TimeManager$1.class
+com/vnmine/world/WorldConfig.class
+com/vnmine/permission/Group.class
+com/vnmine/VNMinePlugin$TimeManager.class
+com/vnmine/VNMinePlugin.class
+com/vnmine/permission/PermissionCommand.class
+com/vnmine/permission/PermissionManager.class
+com/vnmine/world/WorldManager.class
+com/vnmine/permission/PlayerData.class
+com/vnmine/drop/BlockDropListener.class
+com/vnmine/drop/DropManager.class
+com/vnmine/drop/DropManager$DropRule.class
+com/vnmine/drop/BlockDropListener$1.class

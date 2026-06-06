@@ -1,0 +1,9 @@
+/home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/VNMinePlugin.java
+/home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/drop/BlockDropListener.java
+/home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/drop/DropManager.java
+/home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/permission/Group.java
+/home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/permission/PermissionCommand.java
+/home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/permission/PermissionManager.java
+/home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/permission/PlayerData.java
+/home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/world/WorldConfig.java
+/home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/world/WorldManager.java

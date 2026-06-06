@@ -1,0 +1,101 @@
+name: VNMine
+version: 1.0.0
+main: com.vnmine.VNMinePlugin
+api-version: '1.21'
+author: vnmine
+description: Plugin đa năng - Quản lý thời gian, phân quyền, world generation, block drop
+
+commands:
+  vnmine:
+    description: Lệnh chính của VNMine plugin
+    usage: /vnmine <time|perm|world|drop|reload>
+    aliases: [vm]
+    permission: vnmine.command.vnmine
+  tps:
+    description: Xem TPS server
+    usage: /tps
+    permission: vnmine.command.tps
+  save-all:
+    description: Lưu toàn bộ world
+    usage: /save-all
+    aliases: [save]
+    permission: vnmine.command.saveall
+
+permissions:
+  vnmine.*:
+    description: Toàn bộ quyền của plugin
+    default: op
+    children:
+      vnmine.command.*: true
+      vnmine.perm.*: true
+      vnmine.world.*: true
+      vnmine.drop.*: true
+      vnmine.time.*: true
+  vnmine.command.*:
+    description: Tất cả quyền command
+    default: op
+    children:
+      vnmine.command.vnmine: true
+      vnmine.command.tps: true
+      vnmine.command.saveall: true
+      vnmine.command.reload: true
+  vnmine.command.vnmine:
+    description: Cho phép dùng lệnh /vnmine
+    default: true
+  vnmine.command.tps:
+    description: Cho phép xem TPS server
+    default: op
+  vnmine.command.saveall:
+    description: Cho phép save-all world
+    default: op
+  vnmine.command.reload:
+    description: Cho phép reload config
+    default: op
+  vnmine.time.*:
+    description: Tất cả quyền time command
+    default: op
+    children:
+      vnmine.time.set: true
+      vnmine.time.toggle: true
+      vnmine.time.status: true
+  vnmine.time.set:
+    description: Cho phép set thời gian ngày/đêm
+    default: op
+  vnmine.time.toggle:
+    description: Cho phép bật/tắt custom time cycle
+    default: op
+  vnmine.time.status:
+    description: Cho phép xem trạng thái thời gian
+    default: true
+  vnmine.perm.*:
+    description: Tất cả quyền quản lý permission
+    default: op
+    children:
+      vnmine.perm.admin: true
+  vnmine.perm.admin:
+    description: Cho phép quản lý permission groups và players
+    default: op
+  vnmine.world.*:
+    description: Tất cả quyền world generation
+    default: op
+    children:
+      vnmine.world.gen: true
+      vnmine.world.toggle: true
+  vnmine.world.gen:
+    description: Cho phép tạo world mới
+    default: op
+  vnmine.world.toggle:
+    description: Cho phép bật/tắt world generation
+    default: op
+  vnmine.drop.*:
+    description: Tất cả quyền quản lý block drop
+    default: op
+    children:
+      vnmine.drop.toggle: true
+      vnmine.drop.status: true
+  vnmine.drop.toggle:
+    description: Cho phép bật/tắt block drop features
+    default: op
+  vnmine.drop.status:
+    description: Cho phép xem trạng thái block drop
+    default: op

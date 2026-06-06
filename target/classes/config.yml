@@ -1,0 +1,305 @@
+# =============================================
+# ██   ██ ███    ███ ██ ███    ██ ███████
+# ██   ██ ████  ████ ██ ████   ██ ██
+# ███████ ██ ████ ██ ██ ██ ██  ██ █████
+# ██   ██ ██  ██  ██ ██ ██  ██ ██ ██
+# ██   ██ ██      ██ ██ ██   ████ ███████
+# =============================================
+# Plugin đa năng - VNMine
+# Cấu hình đầy đủ
+
+# =============================================
+# I. THỜI GIAN NGÀY/ĐÊM
+# =============================================
+# Thời gian ban ngày (phút)
+day-minutes: 10
+
+# Thời gian ban đêm (phút)
+night-minutes: 10
+
+# =============================================
+# II. HỆ THỐNG PHÂN QUYỀN (Like LuckPerms)
+# =============================================
+permission-system:
+  enabled: true
+
+  # Danh sách các nhóm (groups)
+  groups:
+    default:
+      weight: 0
+      prefix: "&7"
+      suffix: ""
+      default: true
+      parents: []
+      permissions:
+        - vnmine.time.status
+        - vnmine.command.vnmine
+        - minecraft.command.me
+        - minecraft.command.tell
+        - minecraft.command.help
+        - minecraft.command.list
+
+    member:
+      weight: 10
+      prefix: "&7[Member]"
+      suffix: ""
+      default: false
+      parents:
+        - default
+      permissions:
+        - vnmine.command.tps
+
+    vip:
+      weight: 20
+      prefix: "&6[VIP]"
+      suffix: ""
+      default: false
+      parents:
+        - member
+      permissions:
+        - essentials.fly
+        - essentials.feed
+        - essentials.heal
+        - minecraft.command.fly
+
+    admin:
+      weight: 100
+      prefix: "&c[Admin]"
+      suffix: ""
+      default: false
+      parents:
+        - member
+      permissions:
+        - vnmine.*
+        - vnmine.time.*
+        - vnmine.command.*
+        - vnmine.perm.*
+        - vnmine.world.*
+        - vnmine.drop.*
+        - minecraft.command.op
+        - minecraft.command.deop
+        - minecraft.command.gamemode
+        - minecraft.command.ban
+        - minecraft.command.kick
+
+  # Gán group cho từng player (UUID hoặc tên)
+  # Nếu không có trong danh sách, player sẽ thuộc group "default"
+  players:
+    # Ví dụ:
+    # Steve:
+    #   group: admin
+    #   permissions:
+    #     - vnmine.time.set: false
+    #   prefix: "&4[Owner]"
+    #   suffix: ""
+
+# =============================================
+# III. WORLD GENERATION (Tạo world khó hơn)
+# =============================================
+world-settings:
+  enabled: true
+
+  # Danh sách các world sẽ được tạo/tùy chỉnh
+  worlds:
+    # Tên world
+    vnmine_world:
+      # Tạo world nếu chưa tồn tại
+      generate-if-not-exists: true
+      # Seed cho world (để trống để random)
+      seed: ""
+      # Loại world: NORMAL, FLAT, LARGE_BIOMES, AMPLIFIED
+      type: NORMAL
+      # Cấu trúc môi trường
+      environment: NORMAL
+      # ===== TỈ LỆ KHOÁNG SẢN (multiplier so với mặc định) =====
+      ore-rates:
+        coal_ore: 1.0
+        iron_ore: 0.8
+        gold_ore: 0.6
+        diamond_ore: 0.5
+        emerald_ore: 0.3
+        redstone_ore: 0.7
+        lapis_ore: 0.7
+        copper_ore: 0.9
+        ancient_debris: 0.4
+      # ===== TỈ LỆ CÔNG TRÌNH/STRUCTURE =====
+      structure-rates:
+        ancient_city: 0.3
+        stronghold: 0.5
+        mineshaft: 0.6
+        fortress: 0.4
+        bastion_remnant: 0.5
+        monument: 0.4
+        mansion: 0.3
+        village: 0.8
+        trial_chambers: 0.5
+        ruined_portal: 0.7
+        shipwreck: 0.6
+        desert_pyramid: 0.5
+        jungle_pyramid: 0.5
+        igloo: 0.6
+        swamp_hut: 0.6
+      # ===== TỈ LỆ MOB =====
+      mob-rates:
+        hostiles: 2.0
+        passive: 0.5
+        ambient: 1.0
+        water: 0.8
+
+# =============================================
+# IV. BLOCK DROP, TOOL BREAK & EXPLOSION SYSTEM
+# =============================================
+block-drop-settings:
+  enabled: true
+  replace-enabled: true
+  break-enabled: true
+  explode-enabled: true
+
+  # Danh sách các rule cho từng block
+  rules:
+    # ===== DIAMOND ORE =====
+    - block: diamond_ore
+      iron_pickaxe:
+        drop-replace:
+          enabled: true
+          replace-block: coal
+          chance: 30
+        tool-break:
+          enabled: true
+          chance: 5
+          message: "&cCúp sắt của bạn đã bị gãy khi đào kim cương!"
+        explode:
+          enabled: true
+          power: 3.0
+          break-blocks: true
+          set-fire: false
+          damage-player: true
+          chance: 10
+          message: "&cBùm! Khối kim cương phát nổ khi bạn đào nó!"
+      diamond_pickaxe:
+        drop-replace:
+          enabled: true
+          replace-block: coal
+          chance: 10
+        tool-break:
+          enabled: true
+          chance: 1
+          message: "&cCúp kim cương của bạn bị nứt!"
+        explode:
+          enabled: true
+          power: 3.0
+          break-blocks: true
+          set-fire: false
+          damage-player: true
+          chance: 5
+          message: "&cKhối kim cương phát nổ!"
+
+    # ===== DEEPSLATE DIAMOND ORE =====
+    - block: deepslate_diamond_ore
+      iron_pickaxe:
+        drop-replace:
+          enabled: true
+          replace-block: cobblestone
+          chance: 50
+        tool-break:
+          enabled: true
+          chance: 8
+          message: "&cCúp sắt của bạn vỡ tan!"
+        explode:
+          enabled: true
+          power: 3.5
+          break-blocks: true
+          set-fire: false
+          damage-player: true
+          chance: 15
+          message: "&cKhối deepslate kim cương phát nổ dữ dội!"
+      diamond_pickaxe:
+        drop-replace:
+          enabled: true
+          replace-block: coal
+          chance: 15
+        tool-break:
+          enabled: true
+          chance: 2
+          message: "&cCúp kim cương của bạn bị hư hại!"
+        explode:
+          enabled: true
+          power: 3.5
+          break-blocks: true
+          set-fire: false
+          damage-player: true
+          chance: 8
+          message: "&cKhối deepslate kim cương phát nổ!"
+
+    # ===== ANCIENT DEBRIS =====
+    - block: ancient_debris
+      diamond_pickaxe:
+        drop-replace:
+          enabled: true
+          replace-block: netherrack
+          chance: 25
+        tool-break:
+          enabled: true
+          chance: 3
+          message: "&cCúp kim cương của bạn nứt vỡ dưới sức nóng!"
+        explode:
+          enabled: true
+          power: 5.0
+          break-blocks: true
+          set-fire: true
+          damage-player: true
+          chance: 20
+          message: "&4Ancient Debris phát nổ! Lửa nether lan ra xung quanh!"
+
+    # ===== GOLD ORE =====
+    - block: gold_ore
+      stone_pickaxe:
+        explode:
+          enabled: true
+          power: 2.0
+          break-blocks: true
+          set-fire: false
+          damage-player: true
+          chance: 5
+          message: "&eVàng phát nổ!"
+      iron_pickaxe:
+        explode:
+          enabled: true
+          power: 2.0
+          break-blocks: true
+          set-fire: false
+          damage-player: true
+          chance: 3
+          message: "&eVàng phát nổ!"
+
+    # ===== EMERALD ORE =====
+    - block: emerald_ore
+      iron_pickaxe:
+        drop-replace:
+          enabled: true
+          replace-block: emerald
+          chance: 20
+        explode:
+          enabled: true
+          power: 2.5
+          break-blocks: true
+          set-fire: false
+          damage-player: true
+          chance: 8
+          message: "&aKhối ngọc lục bảo phát nổ!"
+
+    # ===== NETHER GOLD ORE =====
+    - block: nether_gold_ore
+      stone_pickaxe:
+        drop-replace:
+          enabled: true
+          replace-block: netherrack
+          chance: 40
+        explode:
+          enabled: true
+          power: 2.0
+          break-blocks: true
+          set-fire: true
+          damage-player: true
+          chance: 12
+          message: "&6Vàng nether phát nổ và bốc cháy!"
