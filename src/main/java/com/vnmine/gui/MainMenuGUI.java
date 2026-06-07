@@ -336,22 +336,26 @@ public class MainMenuGUI implements Listener {
         String currentMenu = openMenus.get(player.getUniqueId());
         if (currentMenu == null) return;
 
-        event.setCancelled(true);
-
+        // Chỉ cancel khi click vào top inventory (GUI slots 0-53)
+        // Cho phép click vào bottom inventory (kho đồ người chơi, slot >= 54)
         int slot = event.getRawSlot();
-        ItemStack clicked = event.getCurrentItem();
-        if (clicked == null || clicked.getType() == Material.AIR) return;
+        if (slot >= 0 && slot < 54) {
+            event.setCancelled(true);
 
-        switch (currentMenu) {
-            case "main":
-                handleMainMenuClick(player, slot);
-                break;
-            case "cultivation_info":
-                if (slot == 22) openMainMenu(player);
-                break;
-            case "guide":
-                if (slot == 26) openMainMenu(player);
-                break;
+            ItemStack clicked = event.getCurrentItem();
+            if (clicked == null || clicked.getType() == Material.AIR) return;
+
+            switch (currentMenu) {
+                case "main":
+                    handleMainMenuClick(player, slot);
+                    break;
+                case "cultivation_info":
+                    if (slot == 22) openMainMenu(player);
+                    break;
+                case "guide":
+                    if (slot == 26) openMainMenu(player);
+                    break;
+            }
         }
     }
 

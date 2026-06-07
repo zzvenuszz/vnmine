@@ -111,26 +111,30 @@ public class NPCShopGUI implements Listener {
         String npcId = openShops.get(player.getUniqueId());
         if (npcId == null) return;
 
-        event.setCancelled(true);
-
+        // Chỉ cancel khi click vào top inventory (GUI slots 0-53)
+        // Cho phép click vào bottom inventory (kho đồ người chơi, slot >= 54)
         int slot = event.getRawSlot();
-        if (slot == 49) {
-            player.closeInventory();
-            return;
+        if (slot >= 0 && slot < 54) {
+            event.setCancelled(true);
+
+            if (slot == 49) {
+                player.closeInventory();
+                return;
+            }
+
+            if (slot < 9 || slot >= 54) return;
+            if (event.getCurrentItem() == null || event.getCurrentItem().getType() == Material.AIR) return;
+
+            NPCData data = npcManager.getNPCData(npcId);
+            if (data == null) return;
+
+            int index = slot - 9;
+            List<NPCTrade> trades = data.getTrades();
+            if (index >= trades.size()) return;
+
+            NPCTrade trade = trades.get(index);
+            handlePurchase(player, trade);
         }
-
-        if (slot < 9 || slot >= 54) return;
-        if (event.getCurrentItem() == null || event.getCurrentItem().getType() == Material.AIR) return;
-
-        NPCData data = npcManager.getNPCData(npcId);
-        if (data == null) return;
-
-        int index = slot - 9;
-        List<NPCTrade> trades = data.getTrades();
-        if (index >= trades.size()) return;
-
-        NPCTrade trade = trades.get(index);
-        handlePurchase(player, trade);
     }
 
     private void handlePurchase(Player player, NPCTrade trade) {
