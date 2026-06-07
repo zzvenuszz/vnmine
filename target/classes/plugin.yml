@@ -1,9 +1,9 @@
 name: VNMine
-version: 1.2.0
+version: 2.1.0
 main: com.vnmine.VNMinePlugin
 api-version: '1.21'
 author: vnmine
-description: Plugin đa năng - Time, Permission, World Gen, Drop, Cultivation, Elite Mob, Skill, Alchemy
+description: Plugin đa năng - Time, Permission, World Gen, Drop, Cultivation, Elite Mob, Skill, Alchemy, NPC, Mount, Currency
 
 commands:
   vnmine:
@@ -14,7 +14,6 @@ commands:
   vn:
     description: Mở menu chính nhanh
     usage: /vn
-    aliases: []
     permission: vnmine.command.vnmine
   tps:
     description: Xem TPS server
@@ -41,6 +40,26 @@ commands:
     description: Hệ thống linh điền
     usage: /vnfarm
     permission: vnmine.command.vnmine
+  vnnpc:
+    description: Quản lý NPC shop
+    usage: /vnnpc <create|remove|list|reload>
+    permission: vnmine.command.npc
+  vngive:
+    description: Give item/skill/pill cho người chơi
+    usage: /vngive <player> <type> <id> [amount]
+    permission: vnmine.command.give
+  mount:
+    description: Hệ thống tọa kỵ phi hành
+    usage: /mount <summon|dismiss|list>
+    permission: vnmine.command.mount
+  vnbalance:
+    description: Xem số dư linh thạch
+    usage: /vnbalance
+    permission: vnmine.command.vnmine
+  vnpay:
+    description: Chuyển linh thạch cho người chơi khác
+    usage: /vnpay <player> <amount>
+    permission: vnmine.command.vnmine
 
 permissions:
   vnmine.*:
@@ -60,6 +79,9 @@ permissions:
       vnmine.command.tps: true
       vnmine.command.saveall: true
       vnmine.command.reload: true
+      vnmine.command.npc: true
+      vnmine.command.give: true
+      vnmine.command.mount: true
   vnmine.command.vnmine:
     description: Cho phép dùng lệnh /vnmine và /vn
     default: true
@@ -72,6 +94,15 @@ permissions:
   vnmine.command.reload:
     description: Cho phép reload config
     default: op
+  vnmine.command.npc:
+    description: Cho phép quản lý NPC
+    default: op
+  vnmine.command.give:
+    description: Cho phép give item cho người chơi
+    default: op
+  vnmine.command.mount:
+    description: Cho phép sử dụng tọa kỵ
+    default: true
   vnmine.time.*:
     description: Tất cả quyền time command
     default: op

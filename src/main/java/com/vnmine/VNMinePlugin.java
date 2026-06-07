@@ -1,13 +1,23 @@
 package com.vnmine;
 
+import com.vnmine.command.GiveCommand;
 import com.vnmine.cultivation.CultivationListener;
 import com.vnmine.cultivation.CultivationManager;
 import com.vnmine.cultivation.PlayerCultivationData;
+import com.vnmine.currency.CurrencyCommand;
+import com.vnmine.currency.CurrencyListener;
+import com.vnmine.currency.CurrencyManager;
 import com.vnmine.drop.BlockDropListener;
 import com.vnmine.drop.DropManager;
 import com.vnmine.gui.AlchemyCraftGUI;
 import com.vnmine.gui.ArtifactCraftGUI;
 import com.vnmine.gui.MainMenuGUI;
+import com.vnmine.mount.MountCommand;
+import com.vnmine.mount.MountManager;
+import com.vnmine.npc.NPCCommand;
+import com.vnmine.npc.NPCListener;
+import com.vnmine.npc.NPCManager;
+import com.vnmine.npc.NPCShopGUI;
 import com.vnmine.permission.PermissionCommand;
 import com.vnmine.permission.PermissionManager;
 import com.vnmine.skill.SkillManager;
@@ -26,9 +36,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
+import java.util.UUID;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class VNMinePlugin extends JavaPlugin implements TabCompleter {
 
@@ -36,14 +46,12 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
     private int dayMinutes;
     private int nightMinutes;
 
-    // New systems
     private PermissionManager permissionManager;
     private PermissionCommand permissionCommand;
     private WorldManager worldManager;
     private DropManager dropManager;
     private BlockDropListener blockDropListener;
 
-    // === NEW CULTIVATION SYSTEMS ===
     private CultivationManager cultivationManager;
     private CultivationListener cultivationListener;
     private SkillManager skillManager;
@@ -51,22 +59,41 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
     private AlchemyCraftGUI alchemyCraftGUI;
     private ArtifactCraftGUI artifactCraftGUI;
 
+    // === NEW SYSTEMS: NPC, CURRENCY, MOUNT ===
+    private NPCManager npcManager;
+    private NPCShopGUI npcShopGUI;
+    private NPCListener npcListener;
+    private NPCCommand npcCommand;
+    private CurrencyManager currencyManager;
+    private CurrencyListener currencyListener;
+    private CurrencyCommand currencyCommand;
+    private MountManager mountManager;
+    private MountCommand mountCommand;
+    private GiveCommand giveCommand;
+
+    // === GETTERS ===
+    public CultivationManager getCultivationManager() { return cultivationManager; }
+    public SkillManager getSkillManager() { return skillManager; }
+    public MainMenuGUI getMainMenuGUI() { return mainMenuGUI; }
+    public PermissionManager getPermissionManager() { return permissionManager; }
+    public CurrencyManager getCurrencyManager() { return currencyManager; }
+    public NPCManager getNPCManager() { return npcManager; }
+    public MountManager getMountManager() { return mountManager; }
+
     @Override
     public void onEnable() {
         saveDefaultConfig();
         loadConfig();
 
-        // Initialize time manager (existing)
         timeManager = new TimeManager();
 
-        // Initialize new systems
+        // Initialize systems
         permissionManager = new PermissionManager(this);
         permissionCommand = new PermissionCommand(permissionManager);
         worldManager = new WorldManager(this);
         dropManager = new DropManager(this);
         blockDropListener = new BlockDropListener(this, dropManager);
 
-        // === INITIALIZE CULTIVATION SYSTEMS ===
         cultivationManager = new CultivationManager(this);
         cultivationListener = new CultivationListener(this, cultivationManager);
         skillManager = new SkillManager(this);
@@ -74,7 +101,22 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         alchemyCraftGUI = new AlchemyCraftGUI(this, mainMenuGUI);
         artifactCraftGUI = new ArtifactCraftGUI(this, mainMenuGUI);
 
-        // Load all configurations
+        // Initialize NEW systems
+        currencyManager = new CurrencyManager(this);
+        currencyListener = new CurrencyListener(this, currencyManager);
+        currencyCommand = new CurrencyCommand(this, currencyManager);
+
+        npcManager = new NPCManager(this);
+        npcShopGUI = new NPCShopGUI(this, npcManager);
+        npcListener = new NPCListener(this, npcManager, npcShopGUI);
+        npcCommand = new NPCCommand(this, npcManager);
+
+        mountManager = new MountManager(this);
+        mountCommand = new MountCommand(this, mountManager);
+
+        giveCommand = new GiveCommand(this);
+
+        // Load configs
         permissionManager.load();
         worldManager.load();
         dropManager.load();
@@ -85,8 +127,11 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         getServer().getPluginManager().registerEvents(mainMenuGUI, this);
         getServer().getPluginManager().registerEvents(alchemyCraftGUI, this);
         getServer().getPluginManager().registerEvents(artifactCraftGUI, this);
+        getServer().getPluginManager().registerEvents(currencyListener, this);
+        getServer().getPluginManager().registerEvents(npcListener, this);
+        getServer().getPluginManager().registerEvents(npcShopGUI, this);
 
-        // Set command executor
+        // Register commands
         getCommand("vnmine").setExecutor(this);
         getCommand("vnmine").setTabCompleter(this);
         getCommand("vn").setExecutor(this);
@@ -99,22 +144,22 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         getCommand("vnalchemy").setTabCompleter(this);
         getCommand("vnfarm").setExecutor(this);
         getCommand("vnfarm").setTabCompleter(this);
+        getCommand("vnnpc").setExecutor(npcCommand);
+        getCommand("vngive").setExecutor(giveCommand);
+        getCommand("mount").setExecutor(mountCommand);
+        getCommand("vnbalance").setExecutor(currencyCommand);
+        getCommand("vnpay").setExecutor(currencyCommand);
 
-        getLogger().info(ColorUtils.colorize("&aVNMine plugin da duoc bat! &7Version " + getDescription().getVersion()));
-        getLogger().info(ColorUtils.colorize("&e✦ Hệ thống Tu Tiên đã được kích hoạt! ✦"));
+        getLogger().info(ColorUtils.colorize("&aVNMine v2.1.0 da duoc bat! &7Big Update Tu Tien"));
+        getLogger().info(ColorUtils.colorize("&e✦ NPC, Linh Thach, Toa Ky da san sang! ✦"));
     }
 
     @Override
     public void onDisable() {
-        if (timeManager != null) {
-            timeManager.stop();
-        }
-
-        // Save cultivation data
-        if (cultivationManager != null) {
-            cultivationManager.saveData();
-        }
-
+        if (timeManager != null) timeManager.stop();
+        if (cultivationManager != null) cultivationManager.saveData();
+        if (npcManager != null) npcManager.despawnAll();
+        if (mountManager != null) mountManager.reload();
         getLogger().info("VNMine plugin da duoc tat!");
     }
 
@@ -128,9 +173,7 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
     private boolean hasPermission(CommandSender sender, String permission) {
         if (!(sender instanceof Player)) return true;
         Player player = (Player) sender;
-        if (permissionManager != null) {
-            return permissionManager.hasPermission(player, permission);
-        }
+        if (permissionManager != null) return permissionManager.hasPermission(player, permission);
         return player.hasPermission(permission);
     }
 
@@ -139,40 +182,35 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         String cmdName = command.getName().toLowerCase();
 
         switch (cmdName) {
-            case "tps":
-                return handleTps(sender);
-            case "save-all":
-                return handleSaveAll(sender);
+            case "tps": return handleTps(sender);
+            case "save-all": return handleSaveAll(sender);
             case "vnmine":
             case "vn":
                 return handleVnmine(sender, command, label, args);
-            case "vnitem":
-                return handleItemCommand(sender, args);
-            case "vnskill":
-                return handleSkillCommand(sender, args);
+            case "vnitem": return handleItemCommand(sender, args);
+            case "vnskill": return handleSkillCommand(sender, args);
             case "vnalchemy":
-                return handleAlchemyCommand(sender, args);
+                if (sender instanceof Player && mainMenuGUI != null) {
+                    mainMenuGUI.openAlchemyMenu((Player) sender);
+                }
+                return true;
             case "vnfarm":
-                return handleFarmCommand(sender, args);
-            default:
-                return false;
+                sender.sendMessage("§6=== Linh Điền ===\n§eTính năng đang phát triển...");
+                return true;
+            default: return false;
         }
     }
 
-    // ==================== TPS ====================
     private boolean handleTps(CommandSender sender) {
         if (!hasPermission(sender, "vnmine.command.tps")) {
             sender.sendMessage("§6[VNMine] §cBạn không có quyền xem TPS!");
             return true;
         }
         double[] tps = Bukkit.getTPS();
-        double tps1m = Math.min(20.0, tps[0]);
-        double tps5m = Math.min(20.0, tps[1]);
-        double tps15m = Math.min(20.0, tps[2]);
         sender.sendMessage("§6=== Server TPS ===");
-        sender.sendMessage("§f1 phút: " + getTpsColor(tps1m) + String.format("%.2f", tps1m));
-        sender.sendMessage("§f5 phút: " + getTpsColor(tps5m) + String.format("%.2f", tps5m));
-        sender.sendMessage("§f15 phút: " + getTpsColor(tps15m) + String.format("%.2f", tps15m));
+        sender.sendMessage("§f1 phút: " + getTpsColor(tps[0]) + String.format("%.2f", Math.min(20.0, tps[0])));
+        sender.sendMessage("§f5 phút: " + getTpsColor(tps[1]) + String.format("%.2f", Math.min(20.0, tps[1])));
+        sender.sendMessage("§f15 phút: " + getTpsColor(tps[2]) + String.format("%.2f", Math.min(20.0, tps[2])));
         return true;
     }
 
@@ -182,106 +220,118 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         return "§c";
     }
 
-    // ==================== SAVE ALL ====================
     private boolean handleSaveAll(CommandSender sender) {
         if (!hasPermission(sender, "vnmine.command.saveall")) {
-            sender.sendMessage("§6[VNMine] §cBạn không có quyền sử dụng lệnh này!");
+            sender.sendMessage("§6[VNMine] §cBạn không có quyền!");
             return true;
         }
         sender.sendMessage("§6[VNMine] §aĐang lưu dữ liệu...");
-        for (World world : Bukkit.getWorlds()) {
-            world.save();
-        }
-        if (cultivationManager != null) {
-            cultivationManager.saveData();
-        }
+        for (World world : Bukkit.getWorlds()) world.save();
+        if (cultivationManager != null) cultivationManager.saveData();
         sender.sendMessage("§6[VNMine] §aĐã lưu toàn bộ dữ liệu!");
         return true;
     }
 
-    // ==================== VNMINE MAIN COMMAND ====================
     private boolean handleVnmine(CommandSender sender, Command command, String label, String[] args) {
         if (!hasPermission(sender, "vnmine.command.vnmine")) {
-            sender.sendMessage("§6[VNMine] §cBạn không có quyền sử dụng lệnh này!");
+            sender.sendMessage("§6[VNMine] §cBạn không có quyền!");
             return true;
         }
 
         if (args.length < 1) {
-            // Mở menu chính nếu là player
             if (sender instanceof Player && mainMenuGUI != null) {
                 mainMenuGUI.openMainMenu((Player) sender);
             } else {
-                sendMainHelp(sender);
+                sendHelp(sender);
             }
             return true;
         }
 
-        String subCommand = args[0].toLowerCase();
-
-        switch (subCommand) {
+        String sub = args[0].toLowerCase();
+        switch (sub) {
             case "menu":
             case "gui":
-                if (sender instanceof Player && mainMenuGUI != null) {
+                if (sender instanceof Player && mainMenuGUI != null)
                     mainMenuGUI.openMainMenu((Player) sender);
-                }
-                break;
-            case "time":
-                return handleTime(sender, args);
+                return true;
+            case "start":
+                return handleStart(sender);
+            case "time": return handleTime(sender, args);
             case "perm":
                 if (!sender.hasPermission("vnmine.perm.admin")) {
-                    sender.sendMessage("§6[VNMine] §cBạn không có quyền sử dụng lệnh này!");
+                    sender.sendMessage("§6[VNMine] §cBạn không có quyền!");
                     return true;
                 }
                 return permissionCommand.onCommand(sender, command, label, args);
-            case "world":
-                return handleWorld(sender, args);
-            case "drop":
-                return handleDrop(sender, args);
+            case "world": return handleWorld(sender, args);
+            case "drop": return handleDrop(sender, args);
             case "cultivate":
             case "cultivation":
                 return handleCultivationCommand(sender, args);
-            case "elite":
-                return handleEliteCommand(sender, args);
-            case "reload":
-                return handleReload(sender);
+            case "elite": return handleEliteCommand(sender, args);
+            case "reload": return handleReload(sender);
             default:
-                sendMainHelp(sender);
+                sendHelp(sender);
                 return true;
         }
+    }
+
+    private boolean handleStart(CommandSender sender) {
+        if (!(sender instanceof Player)) {
+            sender.sendMessage("§cChỉ người chơi mới có thể dùng lệnh này!");
+            return true;
+        }
+        Player player = (Player) sender;
+        UUID uuid = player.getUniqueId();
+
+        // Kiểm tra đã có dữ liệu chưa
+        if (cultivationManager.getPlayerData(uuid) != null) {
+            MessageUtils.send(player, "&cBạn đã bắt đầu tu tiên rồi! Dùng &e/vn &cđể mở menu.");
+            return true;
+        }
+
+        // Tạo dữ liệu mới
+        PlayerCultivationData data = cultivationManager.getOrCreatePlayerData(uuid, player.getName());
+
+        // Thông báo
+        MessageUtils.sendTitle(player, "&6&l✦ BẮT ĐẦU TU TIÊN ✦",
+                "&fChào mừng đến với &eTu Tiên Giới&f!", 10, 60, 10);
+        MessageUtils.send(player, "&a✦ Bạn đã bắt đầu hành trình tu tiên!");
+        MessageUtils.send(player, "&a✦ Hiện tại: " + data.getRealmPrefix() + "&r&a]");
+        MessageUtils.send(player, "&a✦ Dùng &e/vn &ađể mở menu chính.");
+        MessageUtils.send(player, "&a✦ Dùng &e/vnskill &ađể xem công pháp.");
+        MessageUtils.send(player, "&a✦ Dùng &e/vnalchemy &ađể luyện đan.");
+
+        // Give starter items
+        currencyManager.deposit(player, 10);
+        MessageUtils.send(player, "&b✦ Khởi đầu: +10 Linh Thạch!");
+
         return true;
     }
 
-    private void sendMainHelp(CommandSender sender) {
-        sender.sendMessage("§6=== VNMine Plugin Help ===");
+    private void sendHelp(CommandSender sender) {
+        sender.sendMessage("§6=== VNMine v2.1.0 Help ===");
         sender.sendMessage("§e/vn §f- Mở menu chính");
-        sender.sendMessage("§e/vnmine time ... §f- Quản lý thời gian");
-        sender.sendMessage("§e/vnmine perm ... §f- Quản lý phân quyền");
-        sender.sendMessage("§e/vnmine cultivate §f- Hệ thống tu luyện");
-        sender.sendMessage("§e/vnmine elite §f- Hệ thống quái tinh anh");
-        sender.sendMessage("§e/vnmine world ... §f- Quản lý world");
-        sender.sendMessage("§e/vnmine drop ... §f- Quản lý block drop");
-        sender.sendMessage("§e/vnskill §f- Hệ thống công pháp/kỹ năng");
+        sender.sendMessage("§e/vn start §f- Bắt đầu tu tiên");
+        sender.sendMessage("§e/vnskill §f- Công pháp/kỹ năng");
         sender.sendMessage("§e/vnalchemy §f- Luyện đan");
-        sender.sendMessage("§e/vnitem §f- Quản lý item/pháp bảo");
-        sender.sendMessage("§e/vnmine reload §f- Reload toàn bộ config");
-        sender.sendMessage("§e/tps §f- Xem TPS server");
-        sender.sendMessage("§e/save-all §f- Lưu toàn bộ dữ liệu");
+        sender.sendMessage("§e/vnitem list §f- Danh sách pháp bảo");
+        sender.sendMessage("§e/mount list §f- Tọa kỵ phi hành");
+        sender.sendMessage("§e/vnbalance §f- Xem linh thạch");
+        sender.sendMessage("§e/vnmine elite §f- Quái tinh anh");
+        sender.sendMessage("§e/vnmine reload §f- Reload config");
     }
 
-    // ==================== CULTIVATION COMMAND ====================
+    // ==================== CULTIVATION ====================
     private boolean handleCultivationCommand(CommandSender sender, String[] args) {
         if (args.length < 2) {
             sender.sendMessage("§6=== VNMine Tu Luyện ===");
             sender.sendMessage("§e/vnmine cultivate info §f- Xem thông tin tu vi");
             sender.sendMessage("§e/vnmine cultivate toggle §f- Bật/tắt hệ thống");
-            if (sender instanceof Player) {
-                if (mainMenuGUI != null) {
-                    mainMenuGUI.openMainMenu((Player) sender);
-                }
-            }
+            if (sender instanceof Player && mainMenuGUI != null)
+                mainMenuGUI.openMainMenu((Player) sender);
             return true;
         }
-
         String action = args[1].toLowerCase();
         switch (action) {
             case "info":
@@ -311,7 +361,7 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         return true;
     }
 
-    // ==================== ELITE COMMAND ====================
+    // ==================== ELITE ====================
     private boolean handleEliteCommand(CommandSender sender, String[] args) {
         if (args.length < 2) {
             sender.sendMessage("§6=== VNMine Elite Mob ===");
@@ -322,8 +372,7 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         String action = args[1].toLowerCase();
         switch (action) {
             case "toggle":
-                boolean eliteEnabled = getConfig().getBoolean("elite-mob-settings.enabled", true);
-                eliteEnabled = !eliteEnabled;
+                boolean eliteEnabled = !getConfig().getBoolean("elite-mob-settings.enabled", true);
                 getConfig().set("elite-mob-settings.enabled", eliteEnabled);
                 saveConfig();
                 sender.sendMessage("§6[VNMine] §aĐã " + (eliteEnabled ? "bật" : "tắt") + " elite mob system!");
@@ -338,14 +387,14 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         return true;
     }
 
-    // ==================== ITEM COMMAND ====================
+    // ==================== ITEM ====================
     private boolean handleItemCommand(CommandSender sender, String[] args) {
         if (!hasPermission(sender, "vnmine.command.vnmine")) {
             sender.sendMessage("§cBạn không có quyền!");
             return true;
         }
         if (args.length < 1) {
-            sender.sendMessage("§6=== VNItem Commands ===");
+            sender.sendMessage("§6=== VNItem ===");
             sender.sendMessage("§e/vnitem toggle §f- Bật/tắt");
             sender.sendMessage("§e/vnitem reload §f- Reload config");
             sender.sendMessage("§e/vnitem list §f- Danh sách item");
@@ -353,38 +402,31 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         }
         switch (args[0].toLowerCase()) {
             case "toggle":
-                boolean itemEnabled = getConfig().getBoolean("items.enabled", true);
-                itemEnabled = !itemEnabled;
+                boolean itemEnabled = !getConfig().getBoolean("items.enabled", true);
                 getConfig().set("items.enabled", itemEnabled);
                 saveConfig();
                 sender.sendMessage("§6[VNMine] §aĐã " + (itemEnabled ? "bật" : "tắt") + " hệ thống item!");
                 break;
-            case "reload":
-                reloadConfig();
-                sender.sendMessage("§6[VNMine] §aĐã reload config!");
-                break;
+            case "reload": reloadConfig(); sender.sendMessage("§6[VNMine] §aĐã reload config!"); break;
             case "list":
                 sender.sendMessage("§6=== Danh Sách Item ===");
-                sender.sendMessage("§b- Kiếm Phi Hành: &b&l◆ Kiếm Phi Hành ◆");
-                sender.sendMessage("§6- Linh Chung: &6&l◆ Linh Chung ◆");
-                sender.sendMessage("§5- Bát Quái Kính: &5&l◆ Bát Quái Kính ◆");
-                sender.sendMessage("§a- Hồn Ngọc: &a&l◆ Hồn Ngọc ◆");
-                sender.sendMessage("§4- Thiên Linh Thuẫn: &4&l◆ Thiên Linh Thuẫn ◆");
-                sender.sendMessage("§e- Lôi Ấn: &e&l◆ Lôi Ấn ◆");
-                sender.sendMessage("§6- Phượng Hoàng Lệnh: &6&l◆ Phượng Hoàng Lệnh ◆");
+                sender.sendMessage("§b- &b&l◆ Kiếm Phi Hành ◆");
+                sender.sendMessage("§6- &6&l◆ Linh Chung ◆");
+                sender.sendMessage("§5- &5&l◆ Bát Quái Kính ◆");
+                sender.sendMessage("§a- &a&l◆ Hồn Ngọc ◆");
+                sender.sendMessage("§4- &4&l◆ Thiên Linh Thuẫn ◆");
+                sender.sendMessage("§e- &e&l◆ Lôi Ấn ◆");
+                sender.sendMessage("§6- &6&l◆ Phượng Hoàng Lệnh ◆");
                 break;
-            default:
-                sender.sendMessage("§cSử dụng: /vnitem <toggle|reload|list>");
+            default: sender.sendMessage("§cSử dụng: /vnitem <toggle|reload|list>");
         }
         return true;
     }
 
-    // ==================== SKILL COMMAND ====================
+    // ==================== SKILL ====================
     private boolean handleSkillCommand(CommandSender sender, String[] args) {
         if (args.length < 1) {
-            if (sender instanceof Player && skillManager != null) {
-                skillManager.openSkillMenu((Player) sender);
-            }
+            if (sender instanceof Player && skillManager != null) skillManager.openSkillMenu((Player) sender);
             return true;
         }
         switch (args[0].toLowerCase()) {
@@ -397,224 +439,123 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
                 }
                 break;
             case "reload":
-                if (skillManager != null) {
-                    skillManager.reload();
-                    sender.sendMessage("§6[VNMine] §aĐã reload công pháp!");
-                }
+                if (skillManager != null) { skillManager.reload(); sender.sendMessage("§6[VNMine] §aĐã reload công pháp!"); }
                 break;
             case "my":
-                if (sender instanceof Player && skillManager != null) {
-                    skillManager.openSkillMenu((Player) sender);
-                }
+                if (sender instanceof Player && skillManager != null) skillManager.openSkillMenu((Player) sender);
                 break;
-            default:
-                sender.sendMessage("§cSử dụng: /vnskill <toggle|reload|my>");
+            default: sender.sendMessage("§cSử dụng: /vnskill <toggle|reload|my>");
         }
         return true;
     }
 
-    // ==================== ALCHEMY COMMAND ====================
-    private boolean handleAlchemyCommand(CommandSender sender, String[] args) {
-        if (sender instanceof Player && mainMenuGUI != null) {
-            mainMenuGUI.openAlchemyMenu((Player) sender);
-        }
-        return true;
-    }
-
-    // ==================== FARM COMMAND ====================
-    private boolean handleFarmCommand(CommandSender sender, String[] args) {
-        sender.sendMessage("§6=== Linh Điền ===");
-        sender.sendMessage("§eTính năng đang phát triển...");
-        return true;
-    }
-
-    // ==================== TIME COMMANDS ====================
+    // ==================== TIME ====================
     private boolean handleTime(CommandSender sender, String[] args) {
         if (args.length < 2) {
             sender.sendMessage("§6[VNMine] §cSu dung: /vnmine time <set day <phut>|set night <phut>|on|off|status>");
             return true;
         }
-        String subCommand = args[1].toLowerCase();
-        switch (subCommand) {
+        String sub = args[1].toLowerCase();
+        switch (sub) {
             case "set":
-                if (args.length < 4) {
-                    sender.sendMessage("§6[VNMine] §cSu dung: /vnmine time set <day|night> <phut>");
-                    return true;
-                }
+                if (args.length < 4) { sender.sendMessage("§6[VNMine] §cSu dung: /vnmine time set <day|night> <phut>"); return true; }
                 handleSet(sender, args[2].toLowerCase(), args[3]);
                 break;
             case "on": handleOn(sender); break;
             case "off": handleOff(sender); break;
             case "status": handleStatus(sender); break;
-            default:
-                sender.sendMessage("§6[VNMine] §cSu dung: /vnmine time <set day <phut>|set night <phut>|on|off|status>");
+            default: sender.sendMessage("§6[VNMine] §cSu dung: /vnmine time <set day <phut>|set night <phut>|on|off|status>");
         }
         return true;
     }
 
     private void handleSet(CommandSender sender, String type, String minutesStr) {
-        if (!hasPermission(sender, "vnmine.time.set")) {
-            sender.sendMessage("§6[VNMine] §cBan khong co quyen!");
-            return;
-        }
+        if (!hasPermission(sender, "vnmine.time.set")) { sender.sendMessage("§6[VNMine] §cBan khong co quyen!"); return; }
         int minutes;
-        try {
-            minutes = Integer.parseInt(minutesStr);
-            if (minutes < 1) { sender.sendMessage("§6[VNMine] §cThoi gian phai lon hon 0 phut!"); return; }
-        } catch (NumberFormatException e) {
-            sender.sendMessage("§6[VNMine] §cThoi gian phai la so nguyen duong!"); return;
-        }
-        switch (type) {
-            case "day":
-                dayMinutes = minutes;
-                getConfig().set("day-minutes", minutes);
-                saveConfig();
-                if (timeManager.isRunning()) timeManager.updateSpeeds(dayMinutes, nightMinutes);
-                sender.sendMessage("§6[VNMine] §aDa set thoi gian ban ngay thanh §e" + minutes + " §aphut!");
-                break;
-            case "night":
-                nightMinutes = minutes;
-                getConfig().set("night-minutes", minutes);
-                saveConfig();
-                if (timeManager.isRunning()) timeManager.updateSpeeds(dayMinutes, nightMinutes);
-                sender.sendMessage("§6[VNMine] §aDa set thoi gian ban dem thanh §e" + minutes + " §aphut!");
-                break;
-            default:
-                sender.sendMessage("§6[VNMine] §cSu dung: /vnmine time set <day|night> <phut>");
-        }
+        try { minutes = Integer.parseInt(minutesStr); if (minutes < 1) { sender.sendMessage("§6[VNMine] §cThoi gian phai lon hon 0 phut!"); return; } }
+        catch (NumberFormatException e) { sender.sendMessage("§6[VNMine] §cThoi gian phai la so nguyen duong!"); return; }
+        if (type.equals("day")) { dayMinutes = minutes; getConfig().set("day-minutes", minutes); saveConfig(); if (timeManager.isRunning()) timeManager.updateSpeeds(dayMinutes, nightMinutes); sender.sendMessage("§6[VNMine] §aDa set ban ngay thanh §e" + minutes + " §aphut!"); }
+        else if (type.equals("night")) { nightMinutes = minutes; getConfig().set("night-minutes", minutes); saveConfig(); if (timeManager.isRunning()) timeManager.updateSpeeds(dayMinutes, nightMinutes); sender.sendMessage("§6[VNMine] §aDa set ban dem thanh §e" + minutes + " §aphut!"); }
+        else sender.sendMessage("§6[VNMine] §cSu dung: /vnmine time set <day|night> <phut>");
     }
 
     private void handleOn(CommandSender sender) {
-        if (!hasPermission(sender, "vnmine.time.toggle")) {
-            sender.sendMessage("§6[VNMine] §cBan khong co quyen!"); return;
-        }
-        if (timeManager.isRunning()) {
-            sender.sendMessage("§6[VNMine] §eCustom time cycle dang chay roi!"); return;
-        }
+        if (!hasPermission(sender, "vnmine.time.toggle")) { sender.sendMessage("§6[VNMine] §cBan khong co quyen!"); return; }
+        if (timeManager.isRunning()) { sender.sendMessage("§6[VNMine] §eCustom time cycle dang chay roi!"); return; }
         timeManager.start(dayMinutes, nightMinutes);
-        sender.sendMessage("§6[VNMine] §aDa bat custom time cycle! Ngay: §e" + dayMinutes + "§a phut, Dem: §e" + nightMinutes + "§a phut.");
+        sender.sendMessage("§6[VNMine] §aDa bat custom time cycle!");
     }
 
     private void handleOff(CommandSender sender) {
-        if (!hasPermission(sender, "vnmine.time.toggle")) {
-            sender.sendMessage("§6[VNMine] §cBan khong co quyen!"); return;
-        }
-        if (!timeManager.isRunning()) {
-            sender.sendMessage("§6[VNMine] §eCustom time cycle chua duoc bat!"); return;
-        }
+        if (!hasPermission(sender, "vnmine.time.toggle")) { sender.sendMessage("§6[VNMine] §cBan khong co quyen!"); return; }
+        if (!timeManager.isRunning()) { sender.sendMessage("§6[VNMine] §eCustom time cycle chua duoc bat!"); return; }
         timeManager.stop();
-        sender.sendMessage("§6[VNMine] §aDa tat custom time cycle, tra ve mac dinh Minecraft.");
+        sender.sendMessage("§6[VNMine] §aDa tat custom time cycle!");
     }
 
     private void handleStatus(CommandSender sender) {
-        if (!hasPermission(sender, "vnmine.time.status")) {
-            sender.sendMessage("§6[VNMine] §cBan khong co quyen!"); return;
-        }
+        if (!hasPermission(sender, "vnmine.time.status")) { sender.sendMessage("§6[VNMine] §cBan khong co quyen!"); return; }
         boolean active = timeManager.isRunning();
-        World world = Bukkit.getWorlds().get(0);
-        long time = world.getFullTime();
-        long timeOfDay = time % 24000;
-        String phase = (timeOfDay < 12000) ? "§6Ban ngay" : "§8Ban dem";
         sender.sendMessage("§6=== VNMine Time Status ===");
         sender.sendMessage("§fTrang thai: " + (active ? "§aBAT" : "§cTAT"));
         sender.sendMessage("§fBan ngay: §e" + dayMinutes + " §fphut | Ban dem: §e" + nightMinutes + " §fphut");
-        sender.sendMessage("§fThoi gian hien tai: " + phase + " §f(tick: " + timeOfDay + ")");
     }
 
-    // ==================== WORLD COMMANDS ====================
+    // ==================== WORLD ====================
     private boolean handleWorld(CommandSender sender, String[] args) {
-        if (args.length < 2) {
-            sender.sendMessage("§6[VNMine] §cSử dụng: /vnmine world <gen <world>|toggle>");
-            return true;
-        }
-        String subCommand = args[1].toLowerCase();
-        switch (subCommand) {
+        if (args.length < 2) { sender.sendMessage("§6[VNMine] §cSử dụng: /vnmine world <gen <world>|toggle>"); return true; }
+        String sub = args[1].toLowerCase();
+        switch (sub) {
             case "gen":
-                if (!sender.hasPermission("vnmine.world.gen")) {
-                    sender.sendMessage("§6[VNMine] §cBạn không có quyền!"); return true;
-                }
+                if (!sender.hasPermission("vnmine.world.gen")) { sender.sendMessage("§6[VNMine] §cBạn không có quyền!"); return true; }
                 if (args.length < 3) { sender.sendMessage("§6[VNMine] §cSử dụng: /vnmine world gen <world>"); return true; }
-                String worldName = args[2];
-                sender.sendMessage("§6[VNMine] §aĐang tạo world '" + worldName + "'...");
-                boolean created = worldManager.generateWorld(worldName);
-                sender.sendMessage("§6[VNMine] " + (created ? "§aĐã tạo" : "§eWorld đã tồn tại") + " world '" + worldName + "'!");
+                boolean created = worldManager.generateWorld(args[2]);
+                sender.sendMessage("§6[VNMine] " + (created ? "§aĐã tạo" : "§eĐã tồn tại") + " world!");
                 break;
             case "toggle":
-                if (!sender.hasPermission("vnmine.world.toggle")) {
-                    sender.sendMessage("§6[VNMine] §cBạn không có quyền!"); return true;
-                }
+                if (!sender.hasPermission("vnmine.world.toggle")) { sender.sendMessage("§6[VNMine] §cBạn không có quyền!"); return true; }
                 boolean newState = !worldManager.isEnabled();
                 worldManager.setEnabled(newState);
                 getConfig().set("world-settings.enabled", newState);
                 saveConfig();
                 sender.sendMessage("§6[VNMine] §aĐã " + (newState ? "bật" : "tắt") + " world generation!");
                 break;
-            default:
-                sender.sendMessage("§6[VNMine] §cSử dụng: /vnmine world <gen <world>|toggle>");
+            default: sender.sendMessage("§6[VNMine] §cSử dụng: /vnmine world <gen <world>|toggle>");
         }
         return true;
     }
 
-    // ==================== DROP COMMANDS ====================
+    // ==================== DROP ====================
     private boolean handleDrop(CommandSender sender, String[] args) {
-        if (args.length < 2) {
-            sender.sendMessage("§6[VNMine] §cSử dụng: /vnmine drop <toggle|status|replace toggle|break toggle|explode toggle>");
-            return true;
-        }
-        String subCommand = args[1].toLowerCase();
-        switch (subCommand) {
+        if (args.length < 2) { sender.sendMessage("§6[VNMine] §cSử dụng: /vnmine drop <toggle|status|replace toggle|break toggle|explode toggle>"); return true; }
+        String sub = args[1].toLowerCase();
+        switch (sub) {
             case "toggle": {
                 if (!sender.hasPermission("vnmine.drop.toggle")) { sender.sendMessage("§6[VNMine] §cBạn không có quyền!"); return true; }
                 boolean newState = !dropManager.isEnabled();
                 dropManager.setEnabled(newState);
                 getConfig().set("block-drop-settings.enabled", newState);
                 saveConfig();
-                sender.sendMessage("§6[VNMine] §aĐã " + (newState ? "bật" : "tắt") + " block drop system!");
+                sender.sendMessage("§6[VNMine] §aĐã " + (newState ? "bật" : "tắt") + " block drop!");
                 break;
             }
             case "status": {
                 if (!sender.hasPermission("vnmine.drop.status")) { sender.sendMessage("§6[VNMine] §cBạn không có quyền!"); return true; }
                 sender.sendMessage("§6=== Block Drop Status ===");
                 sender.sendMessage("§fHệ thống: " + (dropManager.isEnabled() ? "§aBẬT" : "§cTẮT"));
-                sender.sendMessage("§fThay thế block: " + (dropManager.isReplaceEnabled() ? "§aBẬT" : "§cTẮT"));
-                sender.sendMessage("§fGãy cúp: " + (dropManager.isBreakEnabled() ? "§aBẬT" : "§cTẮT"));
-                sender.sendMessage("§fPhát nổ: " + (dropManager.isExplodeEnabled() ? "§aBẬT" : "§cTẮT"));
-                sender.sendMessage("§fSố lượng rules: §e" + dropManager.getRules().size());
+                sender.sendMessage("§fReplace: " + (dropManager.isReplaceEnabled() ? "§aBẬT" : "§cTẮT"));
+                sender.sendMessage("§fBreak: " + (dropManager.isBreakEnabled() ? "§aBẬT" : "§cTẮT"));
+                sender.sendMessage("§fExplode: " + (dropManager.isExplodeEnabled() ? "§aBẬT" : "§cTẮT"));
                 break;
             }
-            case "replace": case "break": case "explode":
-                // Toggle các sub-features
-                if (!sender.hasPermission("vnmine.drop.toggle")) { sender.sendMessage("§6[VNMine] §cBạn không có quyền!"); return true; }
-                boolean toggleState;
-                String configPath;
-                if (subCommand.equals("replace")) {
-                    toggleState = !dropManager.isReplaceEnabled();
-                    dropManager.setReplaceEnabled(toggleState);
-                    configPath = "block-drop-settings.replace-enabled";
-                } else if (subCommand.equals("break")) {
-                    toggleState = !dropManager.isBreakEnabled();
-                    dropManager.setBreakEnabled(toggleState);
-                    configPath = "block-drop-settings.break-enabled";
-                } else {
-                    toggleState = !dropManager.isExplodeEnabled();
-                    dropManager.setExplodeEnabled(toggleState);
-                    configPath = "block-drop-settings.explode-enabled";
-                }
-                getConfig().set(configPath, toggleState);
-                saveConfig();
-                sender.sendMessage("§6[VNMine] §aĐã " + (toggleState ? "bật" : "tắt") + " " + subCommand + "!");
-                break;
-            default:
-                sender.sendMessage("§6[VNMine] §cSử dụng: /vnmine drop <toggle|status|replace toggle|break toggle|explode toggle>");
+            default: sender.sendMessage("§6[VNMine] §cSử dụng: /vnmine drop <toggle|status|replace toggle|break toggle|explode toggle>");
         }
         return true;
     }
 
     // ==================== RELOAD ====================
     private boolean handleReload(CommandSender sender) {
-        if (!hasPermission(sender, "vnmine.command.reload")) {
-            sender.sendMessage("§6[VNMine] §cBạn không có quyền reload!"); return true;
-        }
+        if (!hasPermission(sender, "vnmine.command.reload")) { sender.sendMessage("§6[VNMine] §cBạn không có quyền reload!"); return true; }
         reloadConfig();
         loadConfig();
         permissionManager.load();
@@ -622,6 +563,9 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         dropManager.load();
         if (cultivationManager != null) cultivationManager.reload();
         if (skillManager != null) skillManager.reload();
+        if (currencyManager != null) currencyManager.loadConfig();
+        if (npcManager != null) npcManager.reload();
+        if (mountManager != null) mountManager.reload();
         if (timeManager.isRunning()) timeManager.updateSpeeds(dayMinutes, nightMinutes);
         sender.sendMessage("§6[VNMine] §aĐã reload toàn bộ config thành công!");
         return true;
@@ -629,94 +573,49 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        String cmdName = command.getName().toLowerCase();
+        String cmd = command.getName().toLowerCase();
         List<String> completions = new ArrayList<>();
-
-        if (cmdName.equals("vnmine") || cmdName.equals("vn")) {
-            if (args.length == 1) {
-                completions.addAll(Arrays.asList("menu", "time", "perm", "world", "drop", "cultivate", "elite", "reload"));
-            } else if (args.length == 2) {
-                String first = args[0].toLowerCase();
-                switch (first) {
-                    case "time": completions.addAll(Arrays.asList("set", "on", "off", "status")); break;
-                    case "world": completions.addAll(Arrays.asList("gen", "toggle")); break;
-                    case "drop": completions.addAll(Arrays.asList("toggle", "status", "replace", "break", "explode")); break;
-                    case "cultivate": case "cultivation": completions.addAll(Arrays.asList("info", "toggle")); break;
-                    case "elite": completions.addAll(Arrays.asList("toggle", "info")); break;
-                }
-            }
-        } else if (cmdName.equals("vnitem")) {
-            if (args.length == 1) completions.addAll(Arrays.asList("toggle", "reload", "list"));
-        } else if (cmdName.equals("vnskill")) {
-            if (args.length == 1) completions.addAll(Arrays.asList("toggle", "reload", "my"));
-        } else if (cmdName.equals("vnalchemy")) {
-            if (args.length == 0) completions.add("menu");
-        } else if (cmdName.equals("vnfarm")) {
-            if (args.length == 1) completions.add("info");
+        if (cmd.equals("vnmine") || cmd.equals("vn")) {
+            if (args.length == 1) completions.addAll(Arrays.asList("menu", "start", "time", "perm", "world", "drop", "cultivate", "elite", "reload"));
         }
-
         return completions;
     }
-
-    // ==================== GETTERS ====================
-    public CultivationManager getCultivationManager() { return cultivationManager; }
-    public SkillManager getSkillManager() { return skillManager; }
-    public MainMenuGUI getMainMenuGUI() { return mainMenuGUI; }
-    public PermissionManager getPermissionManager() { return permissionManager; }
 
     // ==================== TimeManager ====================
     private class TimeManager {
         private BukkitRunnable task;
         private boolean running = false;
-        private double daySpeed;
-        private double nightSpeed;
-        private double fractionalTime = 0;
+        private double daySpeed, nightSpeed, fractionalTime = 0;
         private static final int FULL_CYCLE = 24000;
         private static final int DAY_TICKS = 12000;
-        private static final int NIGHT_TICKS = 12000;
 
         public void start(int dayMin, int nightMin) {
             if (running) return;
             updateSpeeds(dayMin, nightMin);
-            for (World world : Bukkit.getWorlds()) {
-                world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
-            }
-            task = new BukkitRunnable() {
-                @Override
-                public void run() { tick(); }
-            };
+            for (World w : Bukkit.getWorlds()) w.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
+            task = new BukkitRunnable() { @Override public void run() { tick(); } };
             task.runTaskTimer(VNMinePlugin.this, 0L, 1L);
             running = true;
         }
-
         public void stop() {
             if (!running) return;
             running = false;
             if (task != null) { task.cancel(); task = null; }
-            for (World world : Bukkit.getWorlds()) {
-                world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, true);
-            }
+            for (World w : Bukkit.getWorlds()) w.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, true);
             fractionalTime = 0;
         }
-
         public boolean isRunning() { return running; }
         public void updateSpeeds(int dayMin, int nightMin) {
             daySpeed = (double) DAY_TICKS / (dayMin * 60.0 * 20.0);
-            nightSpeed = (double) NIGHT_TICKS / (nightMin * 60.0 * 20.0);
+            nightSpeed = (double) (FULL_CYCLE - DAY_TICKS) / (nightMin * 60.0 * 20.0);
         }
-
         private void tick() {
-            World world = Bukkit.getWorlds().get(0);
-            if (world == null) return;
-            long currentTime = world.getFullTime();
-            long timeOfDay = currentTime % FULL_CYCLE;
-            double currentSpeed = (timeOfDay < DAY_TICKS) ? daySpeed : nightSpeed;
-            fractionalTime += currentSpeed;
-            long ticksToAdd = (long) fractionalTime;
-            if (ticksToAdd > 0) {
-                fractionalTime -= ticksToAdd;
-                world.setFullTime(currentTime + ticksToAdd);
-            }
+            World w = Bukkit.getWorlds().get(0);
+            if (w == null) return;
+            long t = w.getFullTime();
+            fractionalTime += (t % FULL_CYCLE < DAY_TICKS) ? daySpeed : nightSpeed;
+            long add = (long) fractionalTime;
+            if (add > 0) { fractionalTime -= add; w.setFullTime(t + add); }
         }
     }
 }

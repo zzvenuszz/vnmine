@@ -1,6 +1,6 @@
 # VNMine Plugin - Hệ Thống Tu Tiên Huyền Huyễn 🏔️✨
 
-**Phiên bản:** 2.0.0 (Big Update - Tu Tiên)  
+**Phiên bản:** 2.1.0 (Big Update - Tu Tiên)  
 **Tác giả:** VNMine Team  
 **API:** 1.21+ (Paper)
 
@@ -18,11 +18,16 @@
 9. [Hệ Thống Linh Thảo & Linh Điền](#-hệ-thống-linh-thảo--linh-điền)
 10. [Hệ Thống Quái Tinh Anh & Boss](#-hệ-thống-quái-tinh-anh--boss)
 11. [Menu Inventory Chính](#-menu-inventory-chính)
-12. [Danh Sách Lệnh](#-danh-sách-lệnh)
-13. [Công Thức Chế Tạo - Luyện Đan](#-công-thức-chế-tạo---luyện-đan)
-14. [Công Thức Luyện Chế Pháp Bảo](#-công-thức-luyện-chế-pháp-bảo)
-15. [Bảng Cảnh Giới](#-bảng-cảnh-giới)
-16. [Tính Năng Mở Rộng (Gợi Ý)](#-tính-năng-mở-rộng-gợi-ý)
+12. [Hệ Thống NPC](#-hệ-thống-npc)
+13. [Hệ Thống Linh Thạch (Currency)](#-hệ-thống-linh-thạch-currency)
+14. [Hệ Thống Tọa Kỵ (Mount)](#-hệ-thống-tọa-kỵ-mount)
+15. [Danh Sách Lệnh & Ví Dụ](#-danh-sách-lệnh--ví-dụ)
+16. [Danh Sách Item ID (Give Command)](#-danh-sách-item-id-give-command)
+17. [Permissions (Quyền Hạn)](#-permissions-quyền-hạn)
+18. [Công Thức Chế Tạo - Luyện Đan](#-công-thức-chế-tạo---luyện-đan)
+19. [Công Thức Luyện Chế Pháp Bảo](#-công-thức-luyện-chế-pháp-bảo)
+20. [Bảng Cảnh Giới](#-bảng-cảnh-giới)
+21. [Tính Năng Mở Rộng (Gợi Ý)](#-tính-năng-mở-rộng-gợi-ý)
 
 ---
 
@@ -40,6 +45,9 @@ Plugin bao gồm các hệ thống chính:
 - ✅ **Hệ thống linh thảo & linh điền** - Trồng trọt, thu hoạch linh thảo
 - ✅ **Hệ thống quái tinh anh & boss** - Elite mob với kỹ năng đặc biệt
 - ✅ **Menu GUI trực quan** - Quản lý tất cả chức năng trong inventory
+- ✅ **Hệ thống NPC** - NPC shop với giao diện mua bán
+- ✅ **Hệ thống Linh Thạch** - Tiền tệ tu tiên
+- ✅ **Hệ thống Tọa Kỵ** - Cưỡi rồng, phượng hoàng, bạch hổ bay
 
 ---
 
@@ -359,60 +367,323 @@ Mở bằng lệnh `/vn` hoặc `/vnmine menu`
 
 ---
 
-## ⌨️ Danh Sách Lệnh
+## 🤖 Hệ Thống NPC
+
+### Giới thiệu
+Hệ thống NPC cho phép tạo các NPC shop trong game, người chơi có thể tương tác để mua bán vật phẩm.
+
+### Danh sách NPC mặc định (config.yml)
+
+| NPC ID | Tên | Chức năng |
+|--------|-----|-----------|
+| `skill_master` | Sư Tôn Công Pháp | Dạy kỹ năng và công pháp |
+| `artifact_master` | Luyện Khí Sư | Chế tạo và nâng cấp pháp bảo |
+| `pill_master` | Luyện Đan Sư | Mua bán nguyên liệu và đan dược |
+| `currency_master` | Linh Thạch Thương Nhân | Đổi linh thạch, mua vật phẩm đặc biệt |
+
+### Lệnh quản lý NPC
+
+```bash
+/vnnpc create <id>     # Tạo NPC tại vị trí đang đứng (cần config trước)
+/vnnpc remove <id>     # Xóa NPC
+/vnnpc list            # Danh sách NPC đã tạo
+/vnnpc tp <id>         # Dịch chuyển đến NPC
+/vnnpc reload          # Reload config NPC
+```
+
+### Ví dụ
+```bash
+# Tạo NPC skill_master tại vị trí hiện tại
+/vnnpc create skill_master
+
+# Xem danh sách NPC
+/vnnpc list
+
+# Xóa NPC
+/vnnpc remove skill_master
+```
+
+### Yêu cầu
+- Cần định nghĩa NPC ID trong `config.yml` trước khi tạo
+- NPC sẽ tự động tương tác khi người chơi click phải
+
+---
+
+## 💰 Hệ Thống Linh Thạch (Currency)
+
+### Giới thiệu
+Linh Thạch là đơn vị tiền tệ trong VNMine, dùng để mua bán với NPC, giao dịch giữa người chơi.
+
+### Cách kiếm Linh Thạch
+| Cách kiếm | Số lượng |
+|-----------|----------|
+| Giết quái thường | 1-3 Linh Thạch |
+| Giết quái Tinh Anh | 10-20 Linh Thạch |
+| Giết Boss | 50-100 Linh Thạch |
+| Đào quặng quý | 2-5 Linh Thạch |
+| Bán vật phẩm cho NPC | Tùy loại |
+| Người chơi khác chuyển | Tùy ý |
+
+### Lệnh
+
+```bash
+/vnbalance            # Xem số dư Linh Thạch
+/vnpay <player> <amount>  # Chuyển Linh Thạch cho người khác
+```
+
+### Ví dụ
+```bash
+# Xem số dư
+/vnbalance
+# Output: ◆ Số dư Linh Thạch: 150 ◆
+
+# Chuyển tiền
+/vnpay Steve 50
+# Output: Bạn đã chuyển 50 Linh Thạch cho Steve
+```
+
+---
+
+## 🐉 Hệ Thống Tọa Kỵ (Mount)
+
+### Giới thiệu
+Tọa Kỵ cho phép người chơi cưỡi các sinh vật thần thoại bay lượn, tiêu hao linh lực khi sử dụng.
+
+### Danh sách Tọa Kỵ
+
+| ID | Tên | Yêu cầu cấp | Yêu cầu mở khóa |
+|----|-----|-------------|-----------------|
+| `PHUONG_HOANG` | 🦅 Phượng Hoàng Lửa | Cấp 30 | `/vngive <player> mount PHUONG_HOANG` |
+| `BACH_HO` | 🐅 Bạch Hổ | Cấp 40 | `/vngive <player> mount BACH_HO` |
+| `THANH_LONG` | 🐉 Thanh Long | Cấp 50 | `/vngive <player> mount THANH_LONG` |
+
+**Linh lực tiêu hao:** 3 linh lực/giây khi bay
+
+### Lệnh
+
+```bash
+/mount summon <id>    # Triệu hồi tọa kỵ (VD: /mount summon PHUONG_HOANG)
+/mount dismiss        # Hủy tọa kỵ
+/mount list           # Xem danh sách tọa kỵ đã mở
+```
+
+### Ví dụ
+```bash
+# Xem danh sách tọa kỵ
+/mount list
+# Output:
+# • Phượng Hoàng Lửa (Cấp 30) ✓ Đã mở
+# • Bạch Hổ (Cấp 40) ✗ Chưa mở
+
+# Triệu hồi
+/mount summon PHUONG_HOANG
+
+# Hủy
+/mount dismiss
+```
+
+---
+
+## ⌨️ Danh Sách Lệnh & Ví Dụ
 
 ### Lệnh chính
-| Lệnh | Mô tả | Quyền |
-|------|-------|-------|
-| `/vn` | Mở menu chính | `vnmine.command.vnmine` |
-| `/vnmine menu` | Mở menu chính | `vnmine.command.vnmine` |
-| `/vnmine reload` | Reload toàn bộ config | `vnmine.command.reload` |
+| Lệnh | Mô tả | Quyền | Ví dụ |
+|------|-------|-------|-------|
+| `/vn` | Mở menu chính | `vnmine.command.vnmine` | `/vn` |
+| `/vnmine menu` | Mở menu chính | `vnmine.command.vnmine` | `/vnmine menu` |
+| `/vn start` | Bắt đầu hành trình tu tiên | `vnmine.command.vnmine` | `/vn start` |
+| `/vnmine reload` | Reload toàn bộ config | `vnmine.command.reload` | `/vnmine reload` |
 
 ### Hệ thống thời gian
-| Lệnh | Mô tả |
-|------|-------|
-| `/vnmine time on` | Bật custom time cycle |
-| `/vnmine time off` | Tắt custom time cycle |
-| `/vnmine time set day <phút>` | Set thời gian ban ngày |
-| `/vnmine time set night <phút>` | Set thời gian ban đêm |
-| `/vnmine time status` | Xem trạng thái |
+| Lệnh | Mô tả | Quyền | Ví dụ |
+|------|-------|-------|-------|
+| `/vnmine time on` | Bật custom time cycle | `vnmine.time.toggle` | `/vnmine time on` |
+| `/vnmine time off` | Tắt custom time cycle | `vnmine.time.toggle` | `/vnmine time off` |
+| `/vnmine time set day <phút>` | Set thời gian ban ngày | `vnmine.time.set` | `/vnmine time set day 15` |
+| `/vnmine time set night <phút>` | Set thời gian ban đêm | `vnmine.time.set` | `/vnmine time set night 5` |
+| `/vnmine time status` | Xem trạng thái | `vnmine.time.status` | `/vnmine time status` |
 
 ### Hệ thống tu luyện
-| Lệnh | Mô tả |
-|------|-------|
-| `/vnmine cultivate info` | Xem thông tin tu vi |
-| `/vnmine cultivate toggle` | Bật/tắt hệ thống |
-
-### Hệ thống quái tinh anh
-| Lệnh | Mô tả |
-|------|-------|
-| `/vnmine elite toggle` | Bật/tắt elite mob |
-| `/vnmine elite info` | Xem trạng thái |
+| Lệnh | Mô tả | Quyền | Ví dụ |
+|------|-------|-------|-------|
+| `/vnmine cultivate info` | Xem thông tin tu vi | `vnmine.command.vnmine` | `/vnmine cultivate info` |
+| `/vnmine cultivate toggle` | Bật/tắt hệ thống | `vnmine.command.vnmine` | `/vnmine cultivate toggle` |
+| `/vnmine elite toggle` | Bật/tắt elite mob | `vnmine.command.vnmine` | `/vnmine elite toggle` |
+| `/vnmine elite info` | Xem trạng thái | `vnmine.command.vnmine` | `/vnmine elite info` |
 
 ### Hệ thống công pháp
-| Lệnh | Mô tả |
-|------|-------|
-| `/vnskill` | Mở menu kỹ năng |
-| `/vnskill my` | Xem skill đã học |
-| `/vnskill toggle` | Bật/tắt hệ thống |
-| `/vnskill reload` | Reload config |
+| Lệnh | Mô tả | Quyền | Ví dụ |
+|------|-------|-------|-------|
+| `/vnskill` | Mở menu kỹ năng | `vnmine.command.vnmine` | `/vnskill` |
+| `/vnskill my` | Xem skill đã học | `vnmine.command.vnmine` | `/vnskill my` |
+| `/vnskill toggle` | Bật/tắt hệ thống | `vnmine.command.vnmine` | `/vnskill toggle` |
+| `/vnskill reload` | Reload config | `vnmine.command.vnmine` | `/vnskill reload` |
 
 ### Hệ thống luyện đan & pháp bảo
-| Lệnh | Mô tả |
-|------|-------|
-| `/vnalchemy` | Mở lò luyện đan |
-| `/vnitem toggle` | Bật/tắt hệ thống item |
-| `/vnitem reload` | Reload config |
-| `/vnitem list` | Xem danh sách item |
+| Lệnh | Mô tả | Quyền | Ví dụ |
+|------|-------|-------|-------|
+| `/vnalchemy` | Mở lò luyện đan | `vnmine.command.vnmine` | `/vnalchemy` |
+| `/vnitem toggle` | Bật/tắt hệ thống item | `vnmine.command.vnmine` | `/vnitem toggle` |
+| `/vnitem reload` | Reload config | `vnmine.command.vnmine` | `/vnitem reload` |
+| `/vnitem list` | Xem danh sách item | `vnmine.command.vnmine` | `/vnitem list` |
 
-### Hệ thống cũ
-| Lệnh | Mô tả |
-|------|-------|
-| `/tps` | Xem TPS server |
-| `/save-all` | Lưu toàn bộ dữ liệu |
-| `/vnmine perm ...` | Quản lý phân quyền |
-| `/vnmine world ...` | Quản lý world |
-| `/vnmine drop ...` | Quản lý block drop |
+### Hệ thống NPC
+| Lệnh | Mô tả | Quyền | Ví dụ |
+|------|-------|-------|-------|
+| `/vnnpc create <id>` | Tạo NPC tại vị trí đứng | `vnmine.command.npc` | `/vnnpc create skill_master` |
+| `/vnnpc remove <id>` | Xóa NPC | `vnmine.command.npc` | `/vnnpc remove skill_master` |
+| `/vnnpc list` | Danh sách NPC | `vnmine.command.npc` | `/vnnpc list` |
+| `/vnnpc tp <id>` | Dịch chuyển đến NPC | `vnmine.command.npc` | `/vnnpc tp skill_master` |
+| `/vnnpc reload` | Reload config NPC | `vnmine.command.npc` | `/vnnpc reload` |
+
+### Hệ thống Linh Thạch
+| Lệnh | Mô tả | Quyền | Ví dụ |
+|------|-------|-------|-------|
+| `/vnbalance` | Xem số dư linh thạch | `vnmine.command.vnmine` | `/vnbalance` |
+| `/vnpay <player> <amount>` | Chuyển linh thạch | `vnmine.command.vnmine` | `/vnpay Steve 50` |
+
+### Hệ thống Tọa Kỵ
+| Lệnh | Mô tả | Quyền | Ví dụ |
+|------|-------|-------|-------|
+| `/mount summon <id>` | Triệu hồi tọa kỵ | `vnmine.command.mount` | `/mount summon PHUONG_HOANG` |
+| `/mount dismiss` | Hủy tọa kỵ | `vnmine.command.mount` | `/mount dismiss` |
+| `/mount list` | Danh sách tọa kỵ | `vnmine.command.mount` | `/mount list` |
+
+### Hệ thống Give (Admin)
+| Lệnh | Mô tả | Quyền | Ví dụ |
+|------|-------|-------|-------|
+| `/vngive <player> skill <id>` | Cho người chơi học skill | `vnmine.command.give` | `/vngive Steve skill FIRE_BALL` |
+| `/vngive <player> pill <id> [amount]` | Give đan dược | `vnmine.command.give` | `/vngive Steve pill HOI_LINH_DAN 5` |
+| `/vngive <player> artifact <id>` | Give pháp bảo | `vnmine.command.give` | `/vngive Steve artifact FLYING_SWORD` |
+| `/vngive <player> currency <amount>` | Give linh thạch | `vnmine.command.give` | `/vngive Steve currency 1000` |
+| `/vngive <player> exp <amount>` | Give EXP tu luyện | `vnmine.command.give` | `/vngive Steve exp 5000` |
+| `/vngive <player> level <level>` | Set cấp độ | `vnmine.command.give` | `/vngive Steve level 50` |
+| `/vngive <player> mount <id>` | Mở khóa tọa kỵ | `vnmine.command.give` | `/vngive Steve mount PHUONG_HOANG` |
+
+### Hệ thống quản trị khác
+| Lệnh | Mô tả | Quyền | Ví dụ |
+|------|-------|-------|-------|
+| `/tps` | Xem TPS server | `vnmine.command.tps` | `/tps` |
+| `/save-all` | Lưu toàn bộ dữ liệu | `vnmine.command.saveall` | `/save-all` |
+| `/vnmine perm ...` | Quản lý phân quyền | `vnmine.perm.admin` | `/vnmine perm group add admin` |
+| `/vnmine world gen <name>` | Tạo world mới | `vnmine.world.gen` | `/vnmine world gen tu_tien` |
+| `/vnmine world toggle` | Bật/tắt world gen | `vnmine.world.toggle` | `/vnmine world toggle` |
+| `/vnmine drop toggle` | Bật/tắt block drop | `vnmine.drop.toggle` | `/vnmine drop toggle` |
+| `/vnmine drop status` | Xem trạng thái drop | `vnmine.drop.status` | `/vnmine drop status` |
+
+---
+
+## 📦 Danh Sách Item ID (Give Command)
+
+### Skill ID
+
+| ID | Kỹ năng | Mô tả |
+|----|---------|-------|
+| `BASIC_HEAL` | 🌿 Trúc Cơ Liệu Thương | Hồi 10 HP |
+| `QI_SHIELD` | 🛡️ Linh Khí Hộ Thể | Khiên 20 sát thương |
+| `FIRE_BALL` | 🔥 Hỏa Cầu Thuật | Bắn cầu lửa |
+| `WIND_BLADE` | 🌪️ Phong Nhẫn | Lưỡi gió xuyên thấu |
+| `LIGHTNING_STRIKE` | ⚡ Thiên Lôi Dẫn | Gọi sét đánh |
+| `SPEED_STEP` | 💨 Phi Vân Bộ | Tăng 40% tốc độ 15s |
+| `TELEPORT` | 🌌 Thuấn Di | Dịch chuyển tức thời |
+| `METEOR_STORM` | ☄️ Tinh Thần Bạo | Mưa sao băng hủy diệt |
+
+**Ví dụ:**
+```bash
+/vngive Steve skill FIRE_BALL
+/vngive Alex skill LIGHTNING_STRIKE
+```
+
+### Pill ID (Đan Dược)
+
+| ID | Đan dược | Tác dụng | Material |
+|----|----------|----------|----------|
+| `HOI_LINH_DAN` | 🌿 Hồi Linh Đan | Hồi 30 linh lực | Glowstone Dust |
+| `DAI_HOI_LINH_DAN` | 💎 Đại Hồi Linh Đan | Hồi 100 linh lực + 20% hồi phục 30s | Glowstone |
+| `CUONG_THE_DAN` | 💪 Cương Thể Đan | +20% sát thương 60s | Redstone Block |
+| `THANH_TAM_DAN` | 🧪 Thanh Tâm Đan | Giải trừ trạng thái xấu | Sugar |
+| `TOC_THANH_DAN` | 🏃 Tốc Thánh Đan | +50% tốc độ 30s | Feather |
+| `TU_LUYEN_DAN` | ⭐ Tu Luyện Đan | +50 EXP | Purple Dye |
+| `PHI_THANG_DAN` | 👑 Phi Thăng Đan | +500 EXP (1 lần/đại cảnh giới) | Nether Star |
+
+**Ví dụ:**
+```bash
+/vngive Steve pill HOI_LINH_DAN 10
+/vngive Alex pill PHI_THANG_DAN 1
+```
+
+### Artifact ID (Pháp Bảo)
+
+| ID | Pháp bảo | Tác dụng | Material |
+|----|----------|----------|----------|
+| `FLYING_SWORD` | 🗡️ Kiếm Phi Hành | Bay trên kiếm | Diamond Sword |
+| `SPIRIT_BELL` | 🔔 Linh Chung | Choáng quái AOE | Bell |
+| `BAGUA_MIRROR` | 🪞 Bát Quái Kính | Giảm 30% sát thương | Shield |
+| `SOUL_JADE` | 💚 Hồn Ngọc | Hồi 50% máu khi HP<20% | Emerald |
+| `HEAVEN_SHIELD` | 🛡️ Thiên Linh Thuẫn | Bất tử 5 giây | Netherite Chestplate |
+| `THUNDER_SEAL` | ⚡ Lôi Ấn | Gọi sét đánh | Trident |
+| `PHOENIX_REBIRTH` | 🐦 Phượng Hoàng Lệnh | Hồi sinh 1 lần | Feather |
+
+**Ví dụ:**
+```bash
+/vngive Steve artifact FLYING_SWORD
+/vngive Alex artifact HEAVEN_SHIELD
+```
+
+### Mount ID (Tọa Kỵ)
+
+| ID | Tọa kỵ | Yêu cầu cấp |
+|----|--------|-------------|
+| `PHUONG_HOANG` | 🦅 Phượng Hoàng Lửa | Cấp 30 |
+| `BACH_HO` | 🐅 Bạch Hổ | Cấp 40 |
+| `THANH_LONG` | 🐉 Thanh Long | Cấp 50 |
+
+**Ví dụ:**
+```bash
+/vngive Steve mount PHUONG_HOANG
+/vngive Alex mount THANH_LONG
+```
+
+---
+
+## 🔐 Permissions (Quyền Hạn)
+
+### Permission Nodes
+
+| Permission | Mô tả | Mặc định |
+|------------|-------|----------|
+| `vnmine.*` | Tất cả quyền của plugin | OP |
+| `vnmine.command.*` | Tất cả quyền command | OP |
+| `vnmine.command.vnmine` | Dùng `/vnmine`, `/vn` và hầu hết lệnh | ✅ **TRUE** (mọi người) |
+| `vnmine.command.tps` | Xem TPS server | OP |
+| `vnmine.command.saveall` | Lưu toàn bộ world | OP |
+| `vnmine.command.reload` | Reload config plugin | OP |
+| `vnmine.command.npc` | Quản lý NPC (create/remove/list/tp/reload) | OP |
+| `vnmine.command.give` | Give item/skill/pill cho người chơi | OP |
+| `vnmine.command.mount` | Sử dụng tọa kỵ (summon/dismiss/list) | ✅ **TRUE** (mọi người) |
+| `vnmine.time.*` | Tất cả quyền time command | OP |
+| `vnmine.time.set` | Set thời gian ngày/đêm | OP |
+| `vnmine.time.toggle` | Bật/tắt custom time cycle | OP |
+| `vnmine.time.status` | Xem trạng thái thời gian | ✅ **TRUE** (mọi người) |
+| `vnmine.perm.*` | Tất cả quyền quản lý permission | OP |
+| `vnmine.perm.admin` | Quản lý permission groups và players | OP |
+| `vnmine.world.*` | Tất cả quyền world generation | OP |
+| `vnmine.world.gen` | Tạo world mới | OP |
+| `vnmine.world.toggle` | Bật/tắt world generation | OP |
+| `vnmine.drop.*` | Tất cả quyền quản lý block drop | OP |
+| `vnmine.drop.toggle` | Bật/tắt block drop features | OP |
+| `vnmine.drop.status` | Xem trạng thái block drop | OP |
+
+### Cách cấp quyền
+
+```bash
+# Cấp toàn bộ quyền (OP)
+/op <player>
+
+# Hoặc dùng permission plugin (LuckPerms, PermissionsEx...)
+/lp user <player> permission set vnmine.command.mount true
+/lp user <player> permission set vnmine.command.vnmine true
+```
 
 ---
 
@@ -544,6 +815,7 @@ Hoặc reload từng hệ thống:
 ```
 /vnskill reload    # Reload công pháp
 /vnitem reload     # Reload item/pháp bảo
+/vnnpc reload      # Reload NPC
 ```
 
 ---
@@ -552,4 +824,4 @@ Hoặc reload từng hệ thống:
 
 Plugin VNMine - All Rights Reserved  
 Phát triển bởi VNMine Team  
-Version 2.0.0 - Big Update Tu Tiên 🏔️✨
+Version 2.1.0 - Big Update Tu Tiên 🏔️✨
