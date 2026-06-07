@@ -1,15 +1,20 @@
 name: VNMine
-version: 1.0.0
+version: 1.2.0
 main: com.vnmine.VNMinePlugin
 api-version: '1.21'
 author: vnmine
-description: Plugin đa năng - Quản lý thời gian, phân quyền, world generation, block drop
+description: Plugin đa năng - Time, Permission, World Gen, Drop, Cultivation, Elite Mob, Skill, Alchemy
 
 commands:
   vnmine:
     description: Lệnh chính của VNMine plugin
-    usage: /vnmine <time|perm|world|drop|reload>
+    usage: /vnmine <menu|time|perm|world|drop|cultivate|elite|reload>
     aliases: [vm]
+    permission: vnmine.command.vnmine
+  vn:
+    description: Mở menu chính nhanh
+    usage: /vn
+    aliases: []
     permission: vnmine.command.vnmine
   tps:
     description: Xem TPS server
@@ -20,6 +25,22 @@ commands:
     usage: /save-all
     aliases: [save]
     permission: vnmine.command.saveall
+  vnitem:
+    description: Quản lý item và pháp bảo
+    usage: /vnitem <toggle|reload|list>
+    permission: vnmine.command.vnmine
+  vnskill:
+    description: Hệ thống công pháp và kỹ năng
+    usage: /vnskill <toggle|reload|my>
+    permission: vnmine.command.vnmine
+  vnalchemy:
+    description: Luyện đan
+    usage: /vnalchemy
+    permission: vnmine.command.vnmine
+  vnfarm:
+    description: Hệ thống linh điền
+    usage: /vnfarm
+    permission: vnmine.command.vnmine
 
 permissions:
   vnmine.*:
@@ -40,7 +61,7 @@ permissions:
       vnmine.command.saveall: true
       vnmine.command.reload: true
   vnmine.command.vnmine:
-    description: Cho phép dùng lệnh /vnmine
+    description: Cho phép dùng lệnh /vnmine và /vn
     default: true
   vnmine.command.tps:
     description: Cho phép xem TPS server

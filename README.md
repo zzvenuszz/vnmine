@@ -1,552 +1,555 @@
-<p align="center">
-  <br/>
-  <img src="https://raw.githubusercontent.com/VNMine/plugin/main/logo.png" alt="VNMine" width="200"/>
-  <br/>
-  <h1 align="center">⛏️ VNMine</h1>
-  <p align="center">
-    <em>All-in-One Minecraft Paper Plugin — Time, Permissions, Worlds, Block Drops</em>
-    <br/>
-    <em>Plugin đa năng cho Minecraft Paper — Thời gian, Phân quyền, Thế giới, Rơi khối</em>
-  </p>
-  <p align="center">
-    <img src="https://img.shields.io/badge/version-1.0.0-blue?style=for-the-badge" alt="Version 1.0.0"/>
-    <img src="https://img.shields.io/badge/Minecraft-1.21-success?style=for-the-badge" alt="Minecraft 1.21"/>
-    <img src="https://img.shields.io/badge/API-Paper_26.1.2-informational?style=for-the-badge" alt="Paper API"/>
-    <img src="https://img.shields.io/badge/Java-25-orange?style=for-the-badge" alt="Java 25"/>
-    <img src="https://img.shields.io/badge/license-MIT-lightgrey?style=for-the-badge" alt="License MIT"/>
-  </p>
-</p>
+# VNMine Plugin - Hệ Thống Tu Tiên Huyền Huyễn 🏔️✨
+
+**Phiên bản:** 2.0.0 (Big Update - Tu Tiên)  
+**Tác giả:** VNMine Team  
+**API:** 1.21+ (Paper)
 
 ---
 
-# Tổng Quan · Overview
-
-**VNMine** là một plugin Minecraft Paper đa năng, mạnh mẽ, dành cho quản trị viên máy chủ muốn kiểm soát toàn bộ trải nghiệm chơi game. Plugin kết hợp **4 hệ thống thiết yếu** trong một file JAR duy nhất, nhẹ và dễ cấu hình.
-
-**VNMine** is a powerful all-in-one Minecraft Paper plugin designed for server administrators who want complete control over their gameplay experience. It combines **4 essential systems** into a single, lightweight, and highly configurable JAR.
-
-| Tính năng · Feature | Mô tả · Description |
-|---|---|
-| ⏰ **Quản lý Thời gian · Time Management** | Tùy chỉnh chu kỳ ngày/đêm với thời lượng cấu hình được · Customizable day/night cycle |
-| 🔐 **Hệ thống Phân quyền · Permission System** | Quản lý nhóm & quyền hạn như LuckPerms · Full group-based permission management |
-| 🌍 **Tạo Thế giới · World Generation** | Tạo thế giới tùy chỉnh với tỉ lệ quặng, công trình, mob · Custom world creation with adjustable rates |
-| ⛏️ **Hệ thống Rơi Khối · Block Drop System** | Khai thác động: thay thế vật phẩm, gãy cúp, phát nổ · Dynamic mining mechanics |
-
----
-
-# Tính Năng · Features
-
-## ⏰ Quản Lý Thời Gian · Time Management
-
-| Tiếng Việt | English |
-|---|---|
-| Đặt thời lượng ban ngày và ban đêm (phút) | Set custom duration for day and night cycles (in minutes) |
-| Bật/tắt chu kỳ thời gian tùy chỉnh | Toggle custom time cycle on/off at any time |
-| Xem trạng thái thời gian hiện tại | View current time status and phase |
-| Tiến trình thời gian dựa trên tick mượt mà | Smooth tick-based time progression |
-
-## 🔐 Hệ Thống Phân Quyền · Permission System
-
-| Tiếng Việt | English |
-|---|---|
-| Quản lý quyền dựa trên **nhóm** với thứ bậc weight | **Group-based** permission management with weight hierarchy |
-| **Kế thừa** — nhóm con có thể thừa hưởng quyền từ nhóm cha | **Inheritance** — groups inherit permissions from parent groups |
-| Ghi đè quyền **theo từng người chơi** | **Per-player** permission overrides |
-| Hỗ trợ **Prefix/Suffix** hiển thị trong chat | **Prefix/Suffix** support for chat display |
-| Kiểm tra quyền với wildcard (`vnmine.*`) | **Permission checking** with wildcard support |
-| **Quyền âm** — từ chối rõ ràng một node | **Negative permissions** to explicitly deny nodes |
-| Nhóm có sẵn: `default`, `member`, `vip`, `admin` | Pre-configured groups included |
-
-## 🌍 Tạo Thế Giới · World Generation
-
-| Tiếng Việt | English |
-|---|---|
-| Tạo thế giới tùy chỉnh với seed, loại và môi trường cụ thể | Create custom worlds with specific seeds, types, and environments |
-| **Hệ số quặng** — giảm/tăng quặng theo từng thế giới | **Ore rate multipliers** — control ore spawns per world |
-| **Hệ số công trình** — kiểm soát độ hiếm của công trình | **Structure rate multipliers** — control structure rarity |
-| **Hệ số mob** — điều chỉnh spawn của mob thù địch, hiền lành, dưới nước | **Mob rate multipliers** — adjust various mob spawns |
-| Tự động tạo thế giới khi khởi động máy chủ | Auto-generate worlds on server start |
-
-## ⛏️ Hệ Thống Rơi Khối · Block Drop System
-
-Ba cơ chế động kích hoạt khi đào một số khối nhất định:
-Three dynamic mechanics trigger when mining specific blocks:
-
-1. **Thay thế Vật phẩm · Block Replacement** — khối đào ra có thể rơi vật phẩm khác (VD: kim cương rơi ra than)
-2. **Gãy Cúp · Tool Breaking** — cúp có tỉ lệ bị gãy khi đào
-3. **Phát Nổ · Explosions** — khối có thể phát nổ, gây sát thương và cháy
-
-Mỗi cơ chế được cấu hình **theo từng khối** và **theo từng loại cúp**, với tỉ lệ và thông báo tùy chỉnh.
+## 📋 MỤC LỤC
+1. [Giới Thiệu](#-giới-thiệu)
+2. [Hệ Thống Màu Sắc - ColorUtils](#-hệ-thống-màu-sắc---colorutils)
+3. [Hệ Thống Tu Luyện (Cultivation)](#-hệ-thống-tu-luyện-cultivation)
+4. [Lôi Kiếp (Tribulation)](#-lôi-kiếp-tribulation)
+5. [Linh Lực (Mana System)](#-linh-lực-mana-system)
+6. [Hệ Thống Công Pháp & Kỹ Năng](#-hệ-thống-công-pháp--kỹ-năng)
+7. [Hệ Thống Luyện Đan (Alchemy)](#-hệ-thống-luyện-đan-alchemy)
+8. [Hệ Thống Pháp Bảo (Artifacts)](#-hệ-thống-pháp-bảo-artifacts)
+9. [Hệ Thống Linh Thảo & Linh Điền](#-hệ-thống-linh-thảo--linh-điền)
+10. [Hệ Thống Quái Tinh Anh & Boss](#-hệ-thống-quái-tinh-anh--boss)
+11. [Menu Inventory Chính](#-menu-inventory-chính)
+12. [Danh Sách Lệnh](#-danh-sách-lệnh)
+13. [Công Thức Chế Tạo - Luyện Đan](#-công-thức-chế-tạo---luyện-đan)
+14. [Công Thức Luyện Chế Pháp Bảo](#-công-thức-luyện-chế-pháp-bảo)
+15. [Bảng Cảnh Giới](#-bảng-cảnh-giới)
+16. [Tính Năng Mở Rộng (Gợi Ý)](#-tính-năng-mở-rộng-gợi-ý)
 
 ---
 
-# Cài Đặt · Installation
+## 🎯 Giới Thiệu
 
-## Yêu Cầu · Requirements
+**VNMine** là plugin đa năng cho Minecraft Paper 1.21+, kết hợp phong cách **Tu Tiên Huyền Huyễn** (giống Võ Lâm Truyền Kỳ, Đấu Phá Thương Khung) vào thế giới Minecraft.
 
-| Thành phần · Dependency | Yêu cầu · Version |
-|---|---|
-| [Paper API](https://papermc.io/) | 1.21+ (26.1.2) |
-| [Java](https://jdk.java.net/) | 25+ |
-| [Maven](https://maven.apache.org/) | 3.x (để build · for building) |
-
-## Các Bước · Steps
-
-```bash
-# Tải file JAR mới nhất từ bản phát hành
-# Download the latest VNMine JAR from releases
-
-# Đặt vào thư mục plugins của máy chủ
-# Place it in your server's plugins folder
-cp VNMine-1.0.0.jar /path/to/server/plugins/
-
-# Khởi động lại hoặc reload máy chủ
-# Restart or reload your server
-```
-
-## Kiểm Tra · Verify
-
-Khi khởi động thành công, bạn sẽ thấy dòng log:
-When successfully started, you will see this log message:
-
-```log
-[VNMine] VNMine plugin da duoc bat!
-```
-
-Plugin sẽ tự động tạo file `config.yml` mặc định ở lần chạy đầu tiên.
+Plugin bao gồm các hệ thống chính:
+- ✅ **Hệ thống màu sắc** - Dùng `&` thay vì `§`, hỗ trợ tên màu (`&red`, `&blue`, `&gold`...)
+- ✅ **Hệ thống tu luyện** - Level, cảnh giới, exp, lôi kiếp
+- ✅ **Hệ thống linh lực** - Thanh mana hiển thị ActionBar
+- ✅ **Hệ thống công pháp/kỹ năng** - Học và thi triển kỹ năng tu tiên
+- ✅ **Hệ thống luyện đan** - Chế tạo đan dược từ linh thảo trong GUI
+- ✅ **Hệ thống pháp bảo** - Chế tạo và sử dụng pháp bảo
+- ✅ **Hệ thống linh thảo & linh điền** - Trồng trọt, thu hoạch linh thảo
+- ✅ **Hệ thống quái tinh anh & boss** - Elite mob với kỹ năng đặc biệt
+- ✅ **Menu GUI trực quan** - Quản lý tất cả chức năng trong inventory
 
 ---
 
-# Lệnh · Commands
+## 🎨 Hệ Thống Màu Sắc - ColorUtils
 
-## Lệnh Chính · Main Command
-
-| Lệnh · Command | Bí danh · Alias | Mô tả · Description | Quyền · Permission |
-|---|---|---|---|
-| `/vnmine` | `/vm` | Lệnh chính của plugin · Main plugin command | `vnmine.command.vnmine` |
-
-## Lệnh Phụ · Subcommands
-
-### ⏰ Thời Gian · Time (`/vnmine time`)
-
-| Lệnh phụ · Subcommand | Mô tả · Description | Quyền · Permission |
-|---|---|---|
-| `set day <phút>` | Đặt thời gian ban ngày · Set day duration | `vnmine.time.set` |
-| `set night <phút>` | Đặt thời gian ban đêm · Set night duration | `vnmine.time.set` |
-| `on` | Bật chu kỳ thời gian tùy chỉnh · Enable custom cycle | `vnmine.time.toggle` |
-| `off` | Tắt chu kỳ thời gian tùy chỉnh · Disable custom cycle | `vnmine.time.toggle` |
-| `status` | Xem trạng thái thời gian · View time status | `vnmine.time.status` |
-
-**Cách dùng · Usage:**
-```
-/vnmine time set day 15
-/vnmine time set night 10
-/vnmine time on
-/vnmine time status
-```
-
-### 🔐 Phân Quyền · Permission (`/vnmine perm`)
-
-#### Quản lý Nhóm · Group Management
-
-| Lệnh phụ · Subcommand | Mô tả · Description |
-|---|---|
-| `group list` | Danh sách nhóm · List all groups |
-| `group info <nhóm>` | Thông tin nhóm · Show group details |
-| `group create <nhóm>` | Tạo nhóm mới · Create a new group |
-| `group delete <nhóm>` | Xóa nhóm · Delete a group |
-| `group setweight <nhóm> <weight>` | Đặt weight · Set group weight |
-| `group setprefix <nhóm> <tiền-tố>` | Đặt prefix · Set group prefix |
-| `group setsuffix <nhóm> <hậu-tố>` | Đặt suffix · Set group suffix |
-| `group addperm <nhóm> <quyền>` | Thêm quyền · Add permission to group |
-| `group removeperm <nhóm> <quyền>` | Xóa quyền · Remove permission from group |
-| `group addparent <nhóm> <nhóm-cha>` | Thêm nhóm cha · Set parent group |
-| `group removeparent <nhóm>` | Xóa nhóm cha · Remove parent group |
-| `group setdefault <nhóm>` | Đặt làm mặc định · Set as default group |
-
-#### Quản lý Người Chơi · Player Management
-
-| Lệnh phụ · Subcommand | Mô tả · Description |
-|---|---|
-| `player info <người-chơi>` | Xem thông tin người chơi · Show player details |
-| `player setgroup <người-chơi> <nhóm>` | Gán nhóm · Set player's primary group |
-| `player addperm <người-chơi> <quyền>` | Thêm quyền riêng · Add per-player permission |
-| `player removeperm <người-chơi> <quyền>` | Xóa quyền riêng · Remove per-player permission |
-
-#### Tiện Ích · Utility
-
-| Lệnh phụ · Subcommand | Mô tả · Description |
-|---|---|
-| `check <người-chơi> <quyền>` | Kiểm tra quyền · Check player permission |
-| `reload` | Tải lại cấu hình phân quyền · Reload permission config |
-
-### 🌍 Thế Giới · World (`/vnmine world`)
-
-| Lệnh phụ · Subcommand | Mô tả · Description | Quyền · Permission |
-|---|---|---|
-| `gen <thế-giới>` | Tạo thế giới mới · Generate a new world | `vnmine.world.gen` |
-| `toggle` | Bật/tắt tự động tạo thế giới · Toggle auto generation | `vnmine.world.toggle` |
-
-### ⛏️ Rơi Khối · Block Drop (`/vnmine drop`)
-
-| Lệnh phụ · Subcommand | Mô tả · Description | Quyền · Permission |
-|---|---|---|
-| `toggle` | Bật/tắt hệ thống · Enable/disable system | `vnmine.drop.toggle` |
-| `status` | Xem trạng thái · View system status | `vnmine.drop.status` |
-| `replace toggle` | Bật/tắt thay thế khối · Toggle block replacement | `vnmine.drop.toggle` |
-| `break toggle` | Bật/tắt gãy cúp · Toggle tool breaking | `vnmine.drop.toggle` |
-| `explode toggle` | Bật/tắt phát nổ · Toggle explosions | `vnmine.drop.toggle` |
-
-### ⚙️ Lệnh Tiện Ích · Utility Commands
-
-| Lệnh · Command | Mô tả · Description | Quyền · Permission |
-|---|---|---|
-| `/vnmine reload` | Tải lại toàn bộ cấu hình · Reload all configs | `vnmine.command.reload` |
-| `/tps` | Xem TPS máy chủ · View server TPS | `vnmine.command.tps` |
-| `/save-all` (`/save`) | Lưu toàn bộ thế giới · Save all worlds | `vnmine.command.saveall` |
-
----
-
-# Quyền Hạn · Permissions
-
-## Quyền Wildcard · Wildcard Permissions
-
-| Quyền · Permission | Mô tả · Description | Mặc định · Default |
-|---|---|---|
-| `vnmine.*` | Tất cả quyền VNMine · All VNMine permissions | OP |
-| `vnmine.command.*` | Tất cả quyền lệnh · All command permissions | OP |
-| `vnmine.time.*` | Tất cả quyền thời gian · All time permissions | OP |
-| `vnmine.perm.*` | Tất cả quyền quản lý phân quyền · All perm management | OP |
-| `vnmine.world.*` | Tất cả quyền thế giới · All world permissions | OP |
-| `vnmine.drop.*` | Tất cả quyền rơi khối · All block drop permissions | OP |
-
-## Chi Tiết Quyền · Detailed Permission Nodes
-
-### Quyền Lệnh · Command Permissions
-
-| Quyền · Permission | Mô tả · Description | Mặc định · Default |
-|---|---|---|
-| `vnmine.command.vnmine` | Dùng lệnh `/vnmine` · Use `/vnmine` | **Mọi người · Everyone** |
-| `vnmine.command.tps` | Xem TPS · View server TPS | OP |
-| `vnmine.command.saveall` | Lưu thế giới · Save all worlds | OP |
-| `vnmine.command.reload` | Tải lại cấu hình · Reload config | OP |
-
-### Quyền Thời Gian · Time Permissions
-
-| Quyền · Permission | Mô tả · Description | Mặc định · Default |
-|---|---|---|
-| `vnmine.time.set` | Đặt thời gian ngày/đêm · Set day/night | OP |
-| `vnmine.time.toggle` | Bật/tắt chu kỳ tùy chỉnh · Toggle custom cycle | OP |
-| `vnmine.time.status` | Xem trạng thái thời gian · View time status | **Mọi người · Everyone** |
-
-### Quyền Quản Lý Phân Quyền · Permission Management
-
-| Quyền · Permission | Mô tả · Description | Mặc định · Default |
-|---|---|---|
-| `vnmine.perm.admin` | Toàn quyền quản lý phân quyền · Full permission control | OP |
-
-### Quyền Thế Giới · World Permissions
-
-| Quyền · Permission | Mô tả · Description | Mặc định · Default |
-|---|---|---|
-| `vnmine.world.gen` | Tạo thế giới mới · Generate new worlds | OP |
-| `vnmine.world.toggle` | Bật/tắt tạo thế giới · Toggle world generation | OP |
-
-### Quyền Rơi Khối · Block Drop Permissions
-
-| Quyền · Permission | Mô tả · Description | Mặc định · Default |
-|---|---|---|
-| `vnmine.drop.toggle` | Bật/tắt tính năng rơi khối · Toggle drop features | OP |
-| `vnmine.drop.status` | Xem trạng thái · View drop system status | OP |
-
----
-
-# Cấu Hình · Configuration
-
-Plugin tự động tạo file `config.yml` đầy đủ ở lần khởi động đầu tiên. Dưới đây là các phần cấu hình chính.
-
-The plugin generates a comprehensive `config.yml` on first startup. Below are the key configuration sections.
-
-## I. Cài Đặt Thời Gian · Time Settings
+### Cách sử dụng
+Thay vì dùng `§` (Section Sign), bạn có thể dùng `&` trong mọi config:
 
 ```yaml
-# Thời lượng ban ngày và ban đêm (phút)
-# Duration of day and night in minutes
-day-minutes: 10
-night-minutes: 10
+# Trong config.yml
+prefix: "&c[Admin]"
+name: "&b&l◆ Kiếm Phi Hành ◆"
+lore:
+  - "&7Phẩm cấp: &aTiên Thiên"
+  - "&c&l✦ Pháp bảo thượng phẩm ✦"
 ```
 
-## II. Hệ Thống Phân Quyền · Permission System
+### Mã màu hỗ trợ
+
+| Mã | Kết quả | Mã tên | Kết quả |
+|----|---------|--------|---------|
+| `&0` | §0 Đen | `&black` | §0 Đen |
+| `&1` | §1 Xanh đậm | `&dark_blue` | §1 Xanh đậm |
+| `&2` | §2 Xanh lá | `&dark_green` | §2 Xanh lá |
+| `&3` | §3 Xanh aqua | `&dark_aqua` | §3 Xanh aqua |
+| `&4` | §4 Đỏ đậm | `&dark_red` | §4 Đỏ đậm |
+| `&5` | §5 Tím | `&dark_purple` | §5 Tím |
+| `&6` | §6 Vàng | `&gold` | §6 Vàng |
+| `&7` | §7 Xám | `&gray` | §7 Xám |
+| `&8` | §8 Xám đậm | `&dark_gray` | §8 Xám đậm |
+| `&9` | §9 Xanh dương | `&blue` | §9 Xanh dương |
+| `&a` | §a Xanh lá | `&green` | §a Xanh lá |
+| `&b` | §b Xanh aqua | `&aqua` | §b Xanh aqua |
+| `&c` | §c Đỏ | `&red` | §c Đỏ |
+| `&d` | §d Hồng | `&light_purple` | §d Hồng |
+| `&e` | §e Vàng | `&yellow` | §e Vàng |
+| `&f` | §f Trắng | `&white` | §f Trắng |
+
+### Định dạng
+| Mã | Tên | Mã tên |
+|----|-----|--------|
+| `&l` | Bold (đậm) | `&bold` |
+| `&o` | Italic (nghiêng) | `&italic` |
+| `&n` | Underline (gạch chân) | `&underline` |
+| `&m` | Strikethrough (gạch ngang) | `&strikethrough` |
+| `&k` | Magic (random) | `&magic` |
+| `&r` | Reset | `&reset` |
+
+### Hex Color (nếu server hỗ trợ)
+```yaml
+name: "&{#FF0000}Chữ đỏ tươi&r"
+```
+
+---
+
+## 🧘 Hệ Thống Tu Luyện (Cultivation)
+
+### Cơ chế
+- Mỗi người chơi có **cấp độ (level)** từ 1 đến 100
+- Cứ 10 cấp là 1 **đại cảnh giới**
+- Trong 10 cấp đó: cấp 1-9 là **nhất trọng → cửu trọng**, cấp 10 là **Đại Viên Mãn**
+- Prefix tự động hiển thị: `[Luyện Khí ngũ trọng] PlayerName`
+
+### Cách tăng EXP
+
+| Hành động | EXP nhận được |
+|-----------|---------------|
+| Giết quái thường | 10 EXP |
+| Giết quái Tinh Anh | 50 EXP |
+| Giết Boss | 200 EXP |
+| Đào quặng | 5 EXP |
+| Câu cá | 15 EXP |
+| Luyện đan thành công | 20-240 EXP |
+| Chế tạo pháp bảo | 60-360 EXP |
+
+### Công thức EXP
+```
+EXP cần cho level tiếp theo = Level hiện tại × 100
+```
+Ví dụ: Level 1 → 2 cần 100 EXP, Level 50 → 51 cần 5000 EXP
+
+### Lệnh
+- `/vnmine cultivate info` - Xem thông tin tu vi
+- `/vnmine cultivate toggle` - Bật/tắt hệ thống
+
+---
+
+## ⚡ Lôi Kiếp (Tribulation)
+
+### Cơ chế
+Khi đạt **cấp chẵn (10, 20, 30...)**, người chơi sẽ bị sét đánh:
+- **Cấp 10:** 1 tia sét nhẹ (5 sát thương)
+- **Cấp 20:** 2 tia sét mạnh hơn (7.5 + 11.25 sát thương)
+- **Cấp 30:** 3 tia sét (tăng dần)
+- ... cứ thế nhân lên
+
+### Kết quả
+- **Thành công:** Được thưởng EXP, broadcast toàn server, title hoành tráng
+- **Thất bại (chết):** Mất 50% EXP hiện tại, broadcast thất bại
+
+### Lệnh cấu hình (config.yml)
+```yaml
+tribulation:
+  enabled: true
+  damage:
+    base: 5.0
+    per-strike-multiplier: 1.5
+  countdown-seconds: 5
+  strike-interval-ticks: 20
+  immunity-duration-seconds: 60
+```
+
+---
+
+## 💎 Linh Lực (Mana System)
+
+### Giới thiệu
+Linh lực là năng lượng để thi triển kỹ năng và sử dụng pháp bảo.
+
+### Thông số
+- **Max linh lực:** 100 + (Cấp × 10)
+- **Hồi phục:** +2 linh lực mỗi 2 giây (khi không combat)
+- **Hiển thị:** ActionBar (`❤ Linh Lực ████████░░ 150/200`)
+
+### Cách hồi linh lực
+1. Tự động hồi (2/giây, cần 5 giây không combat)
+2. Dùng **Hồi Linh Đan** (+30 ngay lập tức)
+3. Dùng **Đại Hồi Linh Đan** (+100 + 20% hồi phục 30s)
+4. Lên cấp (hồi đầy + tăng max)
+
+---
+
+## 📚 Hệ Thống Công Pháp & Kỹ Năng
+
+### Danh sách kỹ năng
+
+| Kỹ năng | Yêu cầu | Linh lực | EXP học | Mô tả |
+|---------|---------|----------|---------|-------|
+| 🌿 **Trúc Cơ Liệu Thương** | Cấp 5 | 15 | 50 | Hồi 10 HP |
+| 🛡️ **Linh Khí Hộ Thể** | Cấp 10 | 30 | 100 | Khiên 20 sát thương |
+| 🔥 **Hỏa Cầu Thuật** | Cấp 15 | 25 | 200 | Bắn cầu lửa |
+| 🌪️ **Phong Nhẫn** | Cấp 20 | 20 | 300 | Lưỡi gió xuyên thấu |
+| ⚡ **Thiên Lôi Dẫn** | Cấp 25 | 40 | 500 | Gọi sét đánh |
+| 💨 **Phi Vân Bộ** | Cấp 8 | 10 | 80 | Tăng 40% tốc độ 15s |
+| 🌌 **Thuấn Di** | Cấp 35 | 35 | 1500 | Dịch chuyển tức thời |
+| ☄️ **Tinh Thần Bạo** | Cấp 50 | 120 | 5000 | Mưa sao băng hủy diệt |
+
+### Cách học
+1. Mở menu kỹ năng: `/vnskill` hoặc click "Công Pháp" trong menu chính
+2. Click vào skill để học (tiêu hao EXP)
+3. Click skill đã học để thi triển (ACTIVE)
+4. Shift+Click để bật/tắt skill thụ động (PASSIVE)
+
+### Lệnh
+- `/vnskill` - Mở menu kỹ năng
+- `/vnskill my` - Xem skill đã học
+- `/vnskill toggle` - Bật/tắt hệ thống
+- `/vnskill reload` - Reload config
+
+---
+
+## 🔬 Hệ Thống Luyện Đan (Alchemy)
+
+### Giới thiệu
+Mở GUI luyện đan, đặt nguyên liệu vào ô, bấm nút để luyện.  
+Yêu cầu: **Kỹ năng Khống Hỏa Thuật** (cấp 3+)
+
+### Cách luyện đan
+1. Mở menu luyện đan: `/vnalchemy` hoặc click "Luyện Đan" trong menu chính
+2. Đặt nguyên liệu đúng công thức vào 6 ô bên trái
+3. Bấm nút **🔥 Luyện Đan**
+4. Chờ thời gian luyện (10-120 giây tùy loại đan)
+5. Lấy thành phẩm ở ô kết quả
+
+### Công thức luyện đan
+
+| Đan dược | Nguyên liệu | Yêu cầu | Thời gian | Tỉ lệ | Tác dụng |
+|----------|-------------|---------|-----------|-------|----------|
+| 🌿 **Hồi Linh Đan** | 3 Linh Thảo + 1 Nước | Cấp 3 | 10s | 80% | Hồi 30 linh lực |
+| 💎 **Đại Hồi Linh Đan** | 2 Hồi Linh Đan + 2 Huyết LT + 5 LT | Cấp 10 | 30s | 60% | Hồi 100 linh lực + 20% hồi phục 30s |
+| 💪 **Cương Thể Đan** | 3 Huyết LT + 5 LT + 1 Blaze | Cấp 15 | 20s | 55% | +20% sát thương 60s |
+| 🧪 **Thanh Tâm Đan** | 5 LT + 1 Nước | Cấp 5 | 15s | 85% | Giải trừ trạng thái xấu |
+| 🏃 **Tốc Thánh Đan** | 3 LT + 2 Đường + 1 Lông | Cấp 8 | 15s | 70% | +50% tốc độ 30s |
+| ⭐ **Tu Luyện Đan** | 10 LT + 5 Huyết LT + 2 Long Huyết + 1 Vàng | Cấp 20 | 45s | 40% | +50 EXP |
+| 👑 **Phi Thăng Đan** | 3 Tu Luyện Đan + 10 Long Huyết + 1 Hơi Rồng + 2 Netherite | Cấp 50 | 120s | 15% | +500 EXP (1 lần/đại cảnh giới) |
+
+> **Lưu ý:** Linh Thảo (Green Dye), Huyết Linh Thảo (Red Dye), Long Huyết Thảo (Orange Dye)
+
+### Kết quả luyện đan
+- **Thành công:** Nhận đan dược + EXP luyện đan
+- **Thất bại nhẹ (60%):** Thu được "Phế Liệu" (có thể làm phân bón)
+- **Thất bại nặng (30%):** Mất hết nguyên liệu
+- **Thảm họa (10%):** Nổ lò, mất nguyên liệu + sát thương
+
+---
+
+## ⚔️ Hệ Thống Pháp Bảo (Artifacts)
+
+### Giới thiệu
+Mở GUI luyện chế pháp bảo, đặt vật liệu vào ô, bấm nút để chế tạo.  
+Yêu cầu: **Kỹ năng Luyện Khí Thuật** (cấp 2+)
+
+### Công thức chế tạo
+
+| Pháp bảo | Nguyên liệu | Yêu cầu | Thời gian | Tỉ lệ | Tác dụng |
+|----------|-------------|---------|-----------|-------|----------|
+| 🗡️ **Kiếm Phi Hành** | 1 Kiếm DC + 8 DC + 4 Lông | Cấp 15 | 30s | 50% | Click phải: Bay trên kiếm, tốn 5 mana/giây |
+| 🔔 **Linh Chung** | 1 Chuông + 4 Vàng + 2 DC | Cấp 10 | 20s | 60% | Click phải: Choáng quái AOE |
+| 🪞 **Bát Quái Kính** | 1 Khiên + 4 Obsidian + 4 Ngọc | Cấp 20 | 40s | 45% | Cầm tay: Giảm 30% sát thương |
+| 💚 **Hồn Ngọc** | 1 Ngọc + 4 Vàng + 2 Mắt End | Cấp 25 | 45s | 40% | Tự động: Hồi 50% máu khi HP<20%, CD 5 phút |
+| 🛡️ **Thiên Linh Thuẫn** | 1 Ngực Netherite + 8 Mắt End | Cấp 40 | 60s | 25% | Kích hoạt: Bất tử 5 giây, CD 3 phút |
+| ⚡ **Lôi Ấn** | 1 Đinh ba + 4 DC + 2 Nước Rồng | Cấp 30 | 35s | 35% | Click quái: Gọi sét, tốn mana |
+| 🐦 **Phượng Hoàng Lệnh** | 1 Lông + 8 Vàng Khối + 4 Netherite + 1 Trứng Rồng | Cấp 60 | 120s | 10% | Tự động: Hồi sinh 1 lần, CD 1 ngày |
+
+> DC = Diamond (Kim Cương)
+
+---
+
+## 🌱 Hệ Thống Linh Thảo & Linh Điền
+
+### Cách lấy Linh Thảo
+Khi phá các khối thực vật (cỏ, hoa, lá, đất...), có tỉ lệ rơi:
+
+| Loại thực vật | Linh Thảo | Tỉ lệ | Hạt giống |
+|--------------|-----------|-------|-----------|
+| 🌿 Cỏ, dương xỉ | Linh Thảo | 15% | 5% |
+| 🌸 Hoa | Linh Thảo | 25% | 10% |
+| 🌳 Lá cây | Linh Thảo | 10% | 8% |
+| 🩸 Quái Zombie/Skeleton | Huyết Linh Thảo | 15% | - |
+| ❄️ Tuyết/Băng | Hàn Băng Thảo | 20% | - |
+| 🐉 Đá sâu (Deepslate) | Long Huyết Thảo | 0.5% | - |
+
+### Hệ thống Linh Điền
+
+**Linh Điền** là đất trồng đặc biệt chỉ dùng để trồng linh thảo.
+
+**Cách tạo Linh Điền:**
+1. Chế tạo **"Linh Khí Ngọc Phù"** (công thức: 2 DC + 3 Vàng + 1 Mắt End)
+2. Click phải lên **Farmland** (đất trồng trọt) với phù chú trong tay
+3. Vùng 7x7 xung quanh biến thành Linh Điền (hiệu ứng hạt xanh)
+
+**Cách trồng:**
+1. Farm linh thảo → nhận hạt giống
+2. Click phải hạt giống lên Linh Điền
+3. Linh thảo phát triển theo thời gian thực
+
+**Phẩm chất linh thảo theo thời gian:**
+
+| Thời gian | Phẩm chất | Sức mạnh luyện đan |
+|-----------|-----------|-------------------|
+| 0-29 phút | Hạ phẩm | 1 |
+| 30-59 phút | Trung phẩm | 2 |
+| 1-2 giờ | Thượng phẩm | 3 |
+| 2-4 giờ | Cực phẩm | 5 |
+| 4+ giờ | Tiên phẩm | 10 |
+
+> **Mẹo:** Linh thảo phẩm chất càng cao, luyện đan tỉ lệ thành công càng cao và tác dụng đan dược càng mạnh!
+
+---
+
+## 👹 Hệ Thống Quái Tinh Anh & Boss
+
+### Cơ chế
+Khi người chơi giết đủ số lượng quái trong một khu vực:
+1. **Tích lũy số kills** cho từng loại quái
+2. Khi đạt ngưỡng → sinh ra **quái Tinh Anh** cùng loại
+3. **10%** tinh anh hóa thành **Boss**
+
+### Đặc điểm Tinh Anh
+- ❤️ HP × 5, ⚔️ DMG × 3, 🛡️ Giáp × 2
+- 📏 Kích thước × 1.5, phát sáng (màu xanh)
+- 💠 Có kỹ năng đặc biệt: Độc, choáng, triệu hồi, hút máu
+- 💎 Rơi item và EXP gấp nhiều lần
+
+### Đặc điểm Boss
+- ❤️ HP × 20, ⚔️ DMG × 8, 🛡️ Giáp × 5
+- 📏 Kích thước × 2.5, phát sáng đỏ
+- 💠 Nhiều kỹ năng: Động đất, mưa sao băng, hồi máu, dịch chuyển
+- 👑 Rơi pháp bảo, linh thạch quý, item siêu hiếm
+
+### Thanh máu BossBar
+- Tinh anh: Thanh VÀNG, hiển thị tên + HP
+- Boss: Thanh ĐỎ, hiển thị tên + HP lớn
+
+### Thông báo toàn server
+- **Tinh Anh xuất hiện:** `⚠ Player đã kích hoạt Thi Khôi Tinh Anh tại (x, y, z)!`
+- **Boss xuất hiện:** `♛ THÔNG BÁO THIÊN HẠ ♛ - Thi Khôi Vương đã xuất hiện!`
+- **Boss bị hạ:** `✦ Player đã hạ sát Thi Khôi Vương! Danh chấn tu tiên giới!`
+
+---
+
+## 🖥️ Menu Inventory Chính
+
+Mở bằng lệnh `/vn` hoặc `/vnmine menu`
+
+```
+┌──────────────────────────────────────────────┐
+│          ✦ VNMine - Tu Tiên Giới ✦           │
+├──────┬──────┬──────┬──────┬──────┬──────┬─────┤
+│  TP  │ Công │Luyện │ Pháp │      │      │     │
+│  Vi  │ Pháp │ Đan  │ Bảo  │      │      │     │
+├──────┼──────┼──────┼──────┼──────┼──────┼─────┤
+│Linh  │ Linh │ Đan  │Hướng │      │      │     │
+│Điền  │ Thảo │ Dược │ Dẫn  │      │      │     │
+└──────┴──────┴──────┴──────┴──────┴──────┴─────┘
+```
+
+### Các nút chức năng
+- **👤 Tu Vi Của Bạn** - Xem thông tin tu luyện chi tiết
+- **📖 Công Pháp & Kỹ Năng** - Mở menu học và thi triển kỹ năng
+- **⚗️ Luyện Đan** - Mở lò luyện đan
+- **🔨 Luyện Chế Pháp Bảo** - Mở lò luyện chế pháp bảo
+- **🌾 Linh Điền** - Quản lý linh điền (đang phát triển)
+- **🌿 Linh Thảo** - Xem kho linh thảo (đang phát triển)
+- **🧪 Đan Dược** - Xem đan dược đã luyện (đang phát triển)
+- **📜 Hướng Dẫn Tu Tiên** - Hướng dẫn chi tiết cách chơi
+
+---
+
+## ⌨️ Danh Sách Lệnh
+
+### Lệnh chính
+| Lệnh | Mô tả | Quyền |
+|------|-------|-------|
+| `/vn` | Mở menu chính | `vnmine.command.vnmine` |
+| `/vnmine menu` | Mở menu chính | `vnmine.command.vnmine` |
+| `/vnmine reload` | Reload toàn bộ config | `vnmine.command.reload` |
+
+### Hệ thống thời gian
+| Lệnh | Mô tả |
+|------|-------|
+| `/vnmine time on` | Bật custom time cycle |
+| `/vnmine time off` | Tắt custom time cycle |
+| `/vnmine time set day <phút>` | Set thời gian ban ngày |
+| `/vnmine time set night <phút>` | Set thời gian ban đêm |
+| `/vnmine time status` | Xem trạng thái |
+
+### Hệ thống tu luyện
+| Lệnh | Mô tả |
+|------|-------|
+| `/vnmine cultivate info` | Xem thông tin tu vi |
+| `/vnmine cultivate toggle` | Bật/tắt hệ thống |
+
+### Hệ thống quái tinh anh
+| Lệnh | Mô tả |
+|------|-------|
+| `/vnmine elite toggle` | Bật/tắt elite mob |
+| `/vnmine elite info` | Xem trạng thái |
+
+### Hệ thống công pháp
+| Lệnh | Mô tả |
+|------|-------|
+| `/vnskill` | Mở menu kỹ năng |
+| `/vnskill my` | Xem skill đã học |
+| `/vnskill toggle` | Bật/tắt hệ thống |
+| `/vnskill reload` | Reload config |
+
+### Hệ thống luyện đan & pháp bảo
+| Lệnh | Mô tả |
+|------|-------|
+| `/vnalchemy` | Mở lò luyện đan |
+| `/vnitem toggle` | Bật/tắt hệ thống item |
+| `/vnitem reload` | Reload config |
+| `/vnitem list` | Xem danh sách item |
+
+### Hệ thống cũ
+| Lệnh | Mô tả |
+|------|-------|
+| `/tps` | Xem TPS server |
+| `/save-all` | Lưu toàn bộ dữ liệu |
+| `/vnmine perm ...` | Quản lý phân quyền |
+| `/vnmine world ...` | Quản lý world |
+| `/vnmine drop ...` | Quản lý block drop |
+
+---
+
+## 📦 Công Thức Chế Tạo - Luyện Đan
+
+| Đan dược | Công thức | Tác dụng |
+|----------|-----------|----------|
+| **Hồi Linh Đan** | 🟢 3 Linh Thảo + 💧 1 Nước | Hồi 30 linh lực |
+| **Đại Hồi Linh Đan** | ✨ 2 Hồi Linh Đan + 🔴 2 Huyết LT + 🟢 5 LT | Hồi 100 linh lực + buff hồi phục |
+| **Cương Thể Đan** | 🔴 3 Huyết LT + 🟢 5 LT + 🔥 1 Blaze | +20% DMG 60s |
+| **Thanh Tâm Đan** | 🟢 5 LT + 💧 1 Nước | Giải trừ mọi trạng thái xấu |
+| **Tốc Thánh Đan** | 🟢 3 LT + 🍚 2 Đường + 🪶 1 Lông | +50% Speed 30s |
+| **Tu Luyện Đan** | 🟢 10 LT + 🔴 5 Huyết LT + 🟠 2 Long Huyết + 🥇 1 Vàng | +50 EXP |
+| **Phi Thăng Đan** | ⭐ 3 Tu Luyện Đan + 🟠 10 Long Huyết + 🐉 1 Hơi Rồng + 🪙 2 Netherite | +500 EXP |
+
+**Chú thích:** LT = Linh Thảo (Green Dye) | Huyết LT = Huyết Linh Thảo (Red Dye) | Long Huyết = Long Huyết Thảo (Orange Dye)
+
+---
+
+## 🔧 Công Thức Luyện Chế Pháp Bảo
+
+| Pháp bảo | Công thức | Tác dụng |
+|----------|-----------|----------|
+| 🗡️ **Kiếm Phi Hành** | 1 🗡️ Kiếm DC + 8 💎 DC + 4 🪶 Lông | Bay trên kiếm |
+| 🔔 **Linh Chung** | 1 🔔 Chuông + 4 🥇 Vàng + 2 💎 DC | Choáng quái AOE |
+| 🪞 **Bát Quái Kính** | 1 🛡️ Khiên + 4 🪨 Obsidian + 4 💚 Ngọc | Giảm 30% sát thương |
+| 💚 **Hồn Ngọc** | 1 💚 Ngọc + 4 🥇 Vàng + 2 👁️ Mắt End | Hồi máu tự động |
+| 🛡️ **Thiên Linh Thuẫn** | 1 👕 Giáp Netherite + 8 👁️ Mắt End | Bất tử 5s |
+| ⚡ **Lôi Ấn** | 1 🔱 Đinh ba + 4 💎 DC + 2 🐉 Nước Rồng | Gọi sét |
+| 🐦 **Phượng Hoàng Lệnh** | 1 🪶 Lông + 8 🧱 Vàng Khối + 4 🪙 Netherite + 1 🥚 Trứng Rồng | Hồi sinh 1 lần |
+
+---
+
+## 📊 Bảng Cảnh Giới
+
+| Cấp độ | Cảnh giới | Tiểu cảnh giới | Màu |
+|--------|-----------|---------------|------|
+| 1-9 | **Khí Động** | nhất trọng → cửu trọng | `&7` Xám |
+| 10 | Khí Động | Đại Viên Mãn | `&7` Xám |
+| 11-19 | **Luyện Khí** | nhất trọng → cửu trọng | `&a` Xanh lá |
+| 20 | Luyện Khí | Đại Viên Mãn | `&a` Xanh lá |
+| 21-29 | **Trúc Cơ** | nhất trọng → cửu trọng | `&b` Xanh aqua |
+| 30 | Trúc Cơ | Đại Viên Mãn | `&b` Xanh aqua |
+| 31-39 | **Kim Đan** | nhất trọng → cửu trọng | `&e` Vàng |
+| 40 | Kim Đan | Đại Viên Mãn | `&e` Vàng |
+| 41-49 | **Nguyên Anh** | nhất trọng → cửu trọng | `&6` Vàng đậm |
+| 50 | Nguyên Anh | Đại Viên Mãn | `&6` Vàng đậm |
+| 51-59 | **Hóa Thần** | nhất trọng → cửu trọng | `&c` Đỏ |
+| 60 | Hóa Thần | Đại Viên Mãn | `&c` Đỏ |
+| 61-69 | **Hợp Thể** | nhất trọng → cửu trọng | `&5` Tím |
+| 70 | Hợp Thể | Đại Viên Mãn | `&5` Tím |
+| 71-79 | **Độ Kiếp** | nhất trọng → cửu trọng | `&4` Đỏ đậm |
+| 80 | Độ Kiếp | Đại Viên Mãn | `&4` Đỏ đậm |
+| 81-89 | **Đại Thừa** | nhất trọng → cửu trọng | `&d` Hồng |
+| 90 | Đại Thừa | Đại Viên Mãn | `&d` Hồng |
+| 91-99 | **Phi Thăng** | nhất trọng → cửu trọng | `&6&l` Vàng Bold |
+| 100 | Phi Thăng | Đại Viên Mãn | `&6&l` Vàng Bold |
+
+---
+
+## 💡 Tính Năng Mở Rộng (Gợi Ý)
+
+### Ý tưởng 1: Linh Thạch - Tiền tệ tu tiên
+- Custom item "Linh Thạch" rơi từ quái elite+, quặng đặc biệt
+- Dùng để cường hóa trang bị, mua vật phẩm từ NPC
+
+### Ý tưởng 2: Tọa Kỵ Phi Hành
+- Đạt level 30+ (Trúc Cơ) có thể cưỡi rồng/phượng bay
+- Lệnh `/mount` triệu hồi tọa kỵ
+
+### Ý tưởng 3: Bí Cảnh (Dungeon/Trials)
+- Khu vực đặc biệt trên map, chỉ vào được khi đủ level
+- Trong bí cảnh có sóng quái elite tăng dần
+- Phần thưởng cuối: skill đặc biệt hoặc item truyền thuyết
+
+### Ý tưởng 4: Cường Hóa Trang Bị
+```
+/cunghoa <slot>   # Mở giao diện cường hóa
+Cấp 1→5: 80% tỉ lệ   # +1, +2, +3, +4, +5
+Cấp 6→10: 50% tỉ lệ  # +6, +7, +8, +9, +10
+Cấp 11+: 20% tỉ lệ   # Vỡ item nếu thất bại!
+```
+
+### Ý tưởng 5: Ngũ Hành Tương Sinh
+- Mỗi người chơi chọn 1 trong 5 nguyên tố: Kim, Mộc, Thủy, Hỏa, Thổ
+- Tương sinh: +20% sát thương
+- Tương khắc: -20% sát thương
+
+### Ý tưởng 6: Tông Môn (Clan/Guild)
+- Người chơi có thể lập tông môn từ level 30
+- Xây dựng căn cứ tông môn
+- Boss tông môn hàng tuần
+- Chiến tranh tông môn
+
+---
+
+## ⚙️ Cấu Hình (config.yml)
+
+Tất cả các hệ thống đều có thể cấu hình trong `config.yml`:
 
 ```yaml
-permission-system:
+# Bật/tắt từng hệ thống
+cultivation:
   enabled: true
 
-  # Danh sách các nhóm · Groups list
-  groups:
-    default:
-      weight: 0
-      prefix: "&7"
-      suffix: ""
-      default: true           # Nhóm mặc định · Default group
-      parents: []             # Nhóm cha · Parent groups
-      permissions:
-        - vnmine.time.status
-        - vnmine.command.vnmine
-        - minecraft.command.me
-        - minecraft.command.tell
-        - minecraft.command.help
-        - minecraft.command.list
-
-    member:
-      weight: 10
-      prefix: "&7[Member]"
-      default: false
-      parents: [default]
-      permissions:
-        - vnmine.command.tps
-
-    vip:
-      weight: 20
-      prefix: "&6[VIP]"
-      default: false
-      parents: [member]
-      permissions:
-        - essentials.fly
-        - essentials.feed
-        - essentials.heal
-        - minecraft.command.fly
-
-    admin:
-      weight: 100
-      prefix: "&c[Admin]"
-      default: false
-      parents: [member]
-      permissions:
-        - vnmine.*
-        - minecraft.command.op
-        - minecraft.command.gamemode
-        - minecraft.command.ban
-        - minecraft.command.kick
-
-  # Ghi đè theo người chơi · Per-player overrides
-  players:
-    # Steve:
-    #   group: admin
-    #   permissions:
-    #     - vnmine.time.set: false
-    #   prefix: "&4[Owner]"
-    #   suffix: ""
-```
-
-### Luồng Kế Thừa · Inheritance Flow
-
-```
-default  (weight: 0)
-  └── member  (weight: 10)
-        ├── vip  (weight: 20)
-        └── admin  (weight: 100)
-```
-
-## III. Tạo Thế Giới · World Generation
-
-```yaml
-world-settings:
+skills:
   enabled: true
 
-  worlds:
-    vnmine_world:
-      generate-if-not-exists: true   # Tự động tạo nếu chưa tồn tại
-      seed: ""                        # Seed (để trống = random)
-      type: NORMAL                    # NORMAL, FLAT, LARGE_BIOMES, AMPLIFIED
-      environment: NORMAL             # NORMAL, NETHER, THE_END
-
-      # Hệ số quặng · Ore spawn rates (multiplier vs default)
-      ore-rates:
-        coal_ore: 1.0
-        iron_ore: 0.8
-        gold_ore: 0.6
-        diamond_ore: 0.5
-        emerald_ore: 0.3
-        redstone_ore: 0.7
-        lapis_ore: 0.7
-        copper_ore: 0.9
-        ancient_debris: 0.4
-
-      # Hệ số công trình · Structure spawn rates
-      structure-rates:
-        ancient_city: 0.3
-        stronghold: 0.5
-        mineshaft: 0.6
-        fortress: 0.4
-        bastion_remnant: 0.5
-        monument: 0.4
-        mansion: 0.3
-        village: 0.8
-        trial_chambers: 0.5
-        ruined_portal: 0.7
-        shipwreck: 0.6
-        desert_pyramid: 0.5
-        jungle_pyramid: 0.5
-        igloo: 0.6
-        swamp_hut: 0.6
-
-      # Hệ số mob · Mob spawn rates
-      mob-rates:
-        hostiles: 2.0     # Mob thù địch · Hostile
-        passive: 0.5      # Mob hiền lành · Passive
-        ambient: 1.0      # Mob môi trường · Ambient
-        water: 0.8        # Mob dưới nước · Water
-```
-
-## IV. Cấu Hình Rơi Khối · Block Drop Rules
-
-```yaml
-block-drop-settings:
+elite-mob-settings:
   enabled: true
-  replace-enabled: true    # Cho phép thay thế · Allow replacement
-  break-enabled: true      # Cho phép gãy cúp · Allow tool break
-  explode-enabled: true    # Cho phép nổ · Allow explosions
 
-  rules:
-    # Mỗi rule nhắm vào một khối cụ thể
-    # Each rule targets a specific block
-    - block: diamond_ore
-      # Cấu hình theo từng loại cúp · Per-tool configuration
-      iron_pickaxe:
-        drop-replace:
-          enabled: true
-          replace-block: coal      # Thay thế bằng than · Replace with coal
-          chance: 30               # 30% tỉ lệ · 30% chance
-        tool-break:
-          enabled: true
-          chance: 5
-          message: "&cCúp sắt của bạn đã bị gãy khi đào kim cương!"
-        explode:
-          enabled: true
-          power: 3.0
-          break-blocks: true
-          set-fire: false
-          damage-player: true
-          chance: 10
-          message: "&cBùm! Khối kim cương phát nổ khi bạn đào nó!"
+items:
+  enabled: true
 
-      diamond_pickaxe:
-        drop-replace:
-          enabled: true
-          replace-block: coal
-          chance: 10
-        tool-break:
-          enabled: true
-          chance: 1
-          message: "&cCúp kim cương của bạn bị nứt!"
-        explode:
-          enabled: true
-          power: 3.0
-          chance: 5
-          message: "&cKhối kim cương phát nổ!"
+spirit-farming:
+  enabled: true
 ```
-
-### Bảng Tỉ Lệ Rủi Ro · High-Risk Block Examples
-
-| Khối · Block | Rủi ro · Risk | Thông báo · Warning Message |
-|---|---|---|
-| `ancient_debris` | 💥 **Nổ 5.0 + lửa** (20%), 3% gãy cúp, 25% thay thế | `&4Ancient Debris phát nổ! Lửa nether lan ra xung quanh!` |
-| `deepslate_diamond_ore` | 💥 Nổ 3.5 (15% cúp sắt, 8% kim cương), 8% gãy cúp sắt | `&cKhối deepslate kim cương phát nổ dữ dội!` |
-| `diamond_ore` | 💥 Nổ 3.0 (10% sắt, 5% kim cương), 5% gãy cúp, 30% thay thế | `&cBùm! Khối kim cương phát nổ khi bạn đào nó!` |
-| `emerald_ore` | 💥 Nổ 2.5 (8%), 20% thay thế | `&aKhối ngọc lục bảo phát nổ!` |
-| `gold_ore` | 💥 Nổ 2.0 (3-5%) | `&eVàng phát nổ!` |
 
 ---
 
-# Bắt Đầu Nhanh · Quick Start
+## 🔄 Reload
 
-## 1. Thiết Lập Nhóm Quyền · Set Up a Permission Group
-
-```bash
-# Tiếng Việt:
-# Tạo nhóm mới
-/vnmine perm group create builder
-
-# Đặt thuộc tính
-/vnmine perm group setprefix builder "&a[Builder]"
-/vnmine perm group setsuffix builder " &7✦"
-/vnmine perm group setweight builder 30
-
-# Thêm quyền
-/vnmine perm group addperm builder vnmine.time.status
-/vnmine perm group addperm builder vnmine.command.tps
-
-# Thêm nhóm cha (kế thừa)
-/vnmine perm group addparent builder member
-
-# Gán người chơi
-/vnmine perm player setgroup Steve builder
-
-# --- English ---
-# Create a new group
-/vnmine perm group create builder
-# Set properties, add permissions, assign player (same commands)
+Sau khi thay đổi config, dùng lệnh:
 ```
-
-## 2. Tạo Thế Giới Mới · Create a Challenging World
-
-```bash
-# Cấu hình trong config.yml (xem phần Tạo Thế Giới)
-# Configure in config.yml (see World Generation section)
-# Sau đó tạo · Then generate:
-/vnmine world gen hard_world
-```
-
-## 3. Tùy Chỉnh Rơi Khối · Customize Block Drops
-
-Chỉnh sửa `config.yml` tại mục `block-drop-settings.rules` để thêm rule tùy chỉnh cho từng khối và từng loại cúp, sau đó reload:
-
-Edit `config.yml` under `block-drop-settings.rules`, then reload:
-
-```bash
 /vnmine reload
 ```
 
----
-
-# Build Từ Mã Nguồn · Building from Source
-
-```bash
-git clone https://github.com/VNMine/plugin.git
-cd vnmine-plugin
-mvn clean package
+Hoặc reload từng hệ thống:
+```
+/vnskill reload    # Reload công pháp
+/vnitem reload     # Reload item/pháp bảo
 ```
 
-File JAR đã biên dịch sẽ nằm trong thư mục `target/VNMine-1.0.0.jar`.
-
-The compiled JAR will be in `target/VNMine-1.0.0.jar`.
-
 ---
 
-# Đóng Góp · Contributing
+## 📝 License
 
-Mọi đóng góp đều được chào đón! Hãy gửi Pull Request.
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork repository
-2. Tạo nhánh tính năng · Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit thay đổi · Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push lên nhánh · Push to branch (`git push origin feature/amazing-feature`)
-5. Mở Pull Request · Open a Pull Request
-
----
-
-# Giấy Phép · License
-
-Dự án này được cấp phép theo giấy phép MIT. Xem file [LICENSE](LICENSE) để biết thêm chi tiết.
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
----
-
-<p align="center">
-  Được tạo với ❤️ bởi đội ngũ VNMine · Made with ❤️ by the VNMine Team
-  <br/>
-  <sub>Dành cho Paper 1.21+ | Java 25 · Built for Paper 1.21+ | Java 25</sub>
-</p>
+Plugin VNMine - All Rights Reserved  
+Phát triển bởi VNMine Team  
+Version 2.0.0 - Big Update Tu Tiên 🏔️✨

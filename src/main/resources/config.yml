@@ -5,16 +5,14 @@
 # ██   ██ ██  ██  ██ ██ ██  ██ ██ ██
 # ██   ██ ██      ██ ██ ██   ████ ███████
 # =============================================
-# Plugin đa năng - VNMine
-# Cấu hình đầy đủ
+# Plugin đa năng - VNMine Tu Tiên
+# Cấu hình đầy đủ với hệ thống tu luyện, skill, pháp bảo
+# =============================================
 
 # =============================================
 # I. THỜI GIAN NGÀY/ĐÊM
 # =============================================
-# Thời gian ban ngày (phút)
 day-minutes: 10
-
-# Thời gian ban đêm (phút)
 night-minutes: 10
 
 # =============================================
@@ -22,8 +20,6 @@ night-minutes: 10
 # =============================================
 permission-system:
   enabled: true
-
-  # Danh sách các nhóm (groups)
   groups:
     default:
       weight: 0
@@ -38,37 +34,31 @@ permission-system:
         - minecraft.command.tell
         - minecraft.command.help
         - minecraft.command.list
-
     member:
       weight: 10
       prefix: "&7[Member]"
       suffix: ""
       default: false
-      parents:
-        - default
+      parents: [default]
       permissions:
         - vnmine.command.tps
-
     vip:
       weight: 20
       prefix: "&6[VIP]"
       suffix: ""
       default: false
-      parents:
-        - member
+      parents: [member]
       permissions:
         - essentials.fly
         - essentials.feed
         - essentials.heal
         - minecraft.command.fly
-
     admin:
       weight: 100
       prefix: "&c[Admin]"
       suffix: ""
       default: false
-      parents:
-        - member
+      parents: [member]
       permissions:
         - vnmine.*
         - vnmine.time.*
@@ -81,37 +71,19 @@ permission-system:
         - minecraft.command.gamemode
         - minecraft.command.ban
         - minecraft.command.kick
-
-  # Gán group cho từng player (UUID hoặc tên)
-  # Nếu không có trong danh sách, player sẽ thuộc group "default"
-  players:
-    # Ví dụ:
-    # Steve:
-    #   group: admin
-    #   permissions:
-    #     - vnmine.time.set: false
-    #   prefix: "&4[Owner]"
-    #   suffix: ""
+  players: {}
 
 # =============================================
-# III. WORLD GENERATION (Tạo world khó hơn)
+# III. WORLD GENERATION
 # =============================================
 world-settings:
   enabled: true
-
-  # Danh sách các world sẽ được tạo/tùy chỉnh
   worlds:
-    # Tên world
     vnmine_world:
-      # Tạo world nếu chưa tồn tại
       generate-if-not-exists: true
-      # Seed cho world (để trống để random)
       seed: ""
-      # Loại world: NORMAL, FLAT, LARGE_BIOMES, AMPLIFIED
       type: NORMAL
-      # Cấu trúc môi trường
       environment: NORMAL
-      # ===== TỈ LỆ KHOÁNG SẢN (multiplier so với mặc định) =====
       ore-rates:
         coal_ore: 1.0
         iron_ore: 0.8
@@ -122,7 +94,6 @@ world-settings:
         lapis_ore: 0.7
         copper_ore: 0.9
         ancient_debris: 0.4
-      # ===== TỈ LỆ CÔNG TRÌNH/STRUCTURE =====
       structure-rates:
         ancient_city: 0.3
         stronghold: 0.5
@@ -139,7 +110,6 @@ world-settings:
         jungle_pyramid: 0.5
         igloo: 0.6
         swamp_hut: 0.6
-      # ===== TỈ LỆ MOB =====
       mob-rates:
         hostiles: 2.0
         passive: 0.5
@@ -154,152 +124,277 @@ block-drop-settings:
   replace-enabled: true
   break-enabled: true
   explode-enabled: true
-
-  # Danh sách các rule cho từng block
   rules:
-    # ===== DIAMOND ORE =====
     - block: diamond_ore
       iron_pickaxe:
-        drop-replace:
-          enabled: true
-          replace-block: coal
-          chance: 30
-        tool-break:
-          enabled: true
-          chance: 5
-          message: "&cCúp sắt của bạn đã bị gãy khi đào kim cương!"
-        explode:
-          enabled: true
-          power: 3.0
-          break-blocks: true
-          set-fire: false
-          damage-player: true
-          chance: 10
-          message: "&cBùm! Khối kim cương phát nổ khi bạn đào nó!"
+        drop-replace: { enabled: true, replace-block: coal, chance: 30 }
+        tool-break: { enabled: true, chance: 5, message: "&cCúp sắt của bạn đã bị gãy!" }
+        explode: { enabled: true, power: 3.0, break-blocks: true, set-fire: false, damage-player: true, chance: 10, message: "&cKhối kim cương phát nổ!" }
       diamond_pickaxe:
-        drop-replace:
-          enabled: true
-          replace-block: coal
-          chance: 10
-        tool-break:
-          enabled: true
-          chance: 1
-          message: "&cCúp kim cương của bạn bị nứt!"
-        explode:
-          enabled: true
-          power: 3.0
-          break-blocks: true
-          set-fire: false
-          damage-player: true
-          chance: 5
-          message: "&cKhối kim cương phát nổ!"
-
-    # ===== DEEPSLATE DIAMOND ORE =====
+        drop-replace: { enabled: true, replace-block: coal, chance: 10 }
+        tool-break: { enabled: true, chance: 1, message: "&cCúp kim cương của bạn bị nứt!" }
+        explode: { enabled: true, power: 3.0, break-blocks: true, set-fire: false, damage-player: true, chance: 5, message: "&cKhối kim cương phát nổ!" }
     - block: deepslate_diamond_ore
       iron_pickaxe:
-        drop-replace:
-          enabled: true
-          replace-block: cobblestone
-          chance: 50
-        tool-break:
-          enabled: true
-          chance: 8
-          message: "&cCúp sắt của bạn vỡ tan!"
-        explode:
-          enabled: true
-          power: 3.5
-          break-blocks: true
-          set-fire: false
-          damage-player: true
-          chance: 15
-          message: "&cKhối deepslate kim cương phát nổ dữ dội!"
+        drop-replace: { enabled: true, replace-block: cobblestone, chance: 50 }
+        tool-break: { enabled: true, chance: 8, message: "&cCúp sắt của bạn vỡ tan!" }
+        explode: { enabled: true, power: 3.5, break-blocks: true, set-fire: false, damage-player: true, chance: 15, message: "&cDeepslate kim cương phát nổ!" }
       diamond_pickaxe:
-        drop-replace:
-          enabled: true
-          replace-block: coal
-          chance: 15
-        tool-break:
-          enabled: true
-          chance: 2
-          message: "&cCúp kim cương của bạn bị hư hại!"
-        explode:
-          enabled: true
-          power: 3.5
-          break-blocks: true
-          set-fire: false
-          damage-player: true
-          chance: 8
-          message: "&cKhối deepslate kim cương phát nổ!"
-
-    # ===== ANCIENT DEBRIS =====
+        drop-replace: { enabled: true, replace-block: coal, chance: 15 }
+        tool-break: { enabled: true, chance: 2, message: "&cCúp kim cương của bạn bị hư hại!" }
+        explode: { enabled: true, power: 3.5, break-blocks: true, set-fire: false, damage-player: true, chance: 8, message: "&cDeepslate kim cương phát nổ!" }
     - block: ancient_debris
       diamond_pickaxe:
-        drop-replace:
-          enabled: true
-          replace-block: netherrack
-          chance: 25
-        tool-break:
-          enabled: true
-          chance: 3
-          message: "&cCúp kim cương của bạn nứt vỡ dưới sức nóng!"
-        explode:
-          enabled: true
-          power: 5.0
-          break-blocks: true
-          set-fire: true
-          damage-player: true
-          chance: 20
-          message: "&4Ancient Debris phát nổ! Lửa nether lan ra xung quanh!"
-
-    # ===== GOLD ORE =====
+        drop-replace: { enabled: true, replace-block: netherrack, chance: 25 }
+        tool-break: { enabled: true, chance: 3, message: "&cCúp kim cương của bạn nứt vỡ!" }
+        explode: { enabled: true, power: 5.0, break-blocks: true, set-fire: true, damage-player: true, chance: 20, message: "&4Ancient Debris phát nổ!" }
     - block: gold_ore
       stone_pickaxe:
-        explode:
-          enabled: true
-          power: 2.0
-          break-blocks: true
-          set-fire: false
-          damage-player: true
-          chance: 5
-          message: "&eVàng phát nổ!"
+        explode: { enabled: true, power: 2.0, break-blocks: true, set-fire: false, damage-player: true, chance: 5, message: "&eVàng phát nổ!" }
       iron_pickaxe:
-        explode:
-          enabled: true
-          power: 2.0
-          break-blocks: true
-          set-fire: false
-          damage-player: true
-          chance: 3
-          message: "&eVàng phát nổ!"
-
-    # ===== EMERALD ORE =====
+        explode: { enabled: true, power: 2.0, break-blocks: true, set-fire: false, damage-player: true, chance: 3, message: "&eVàng phát nổ!" }
     - block: emerald_ore
       iron_pickaxe:
-        drop-replace:
-          enabled: true
-          replace-block: emerald
-          chance: 20
-        explode:
-          enabled: true
-          power: 2.5
-          break-blocks: true
-          set-fire: false
-          damage-player: true
-          chance: 8
-          message: "&aKhối ngọc lục bảo phát nổ!"
-
-    # ===== NETHER GOLD ORE =====
+        drop-replace: { enabled: true, replace-block: emerald, chance: 20 }
+        explode: { enabled: true, power: 2.5, break-blocks: true, set-fire: false, damage-player: true, chance: 8, message: "&aKhối ngọc lục bảo phát nổ!" }
     - block: nether_gold_ore
       stone_pickaxe:
-        drop-replace:
-          enabled: true
-          replace-block: netherrack
-          chance: 40
-        explode:
-          enabled: true
-          power: 2.0
-          break-blocks: true
-          set-fire: true
-          damage-player: true
-          chance: 12
-          message: "&6Vàng nether phát nổ và bốc cháy!"
+        drop-replace: { enabled: true, replace-block: netherrack, chance: 40 }
+        explode: { enabled: true, power: 2.0, break-blocks: true, set-fire: true, damage-player: true, chance: 12, message: "&6Vàng nether phát nổ!" }
+
+# =============================================
+# V. HỆ THỐNG TU LUYỆN (CULTIVATION)
+# =============================================
+cultivation:
+  enabled: true
+  exp-per-level-multiplier: 100
+  
+  # Cảnh giới (cứ 10 level = 1 đại cảnh giới)
+  realms:
+    1:
+      name: "Khí Động"
+      prefix: "&7[Khí Động"
+    11:
+      name: "Luyện Khí"
+      prefix: "&a[Luyện Khí"
+    21:
+      name: "Trúc Cơ"
+      prefix: "&b[Trúc Cơ"
+    31:
+      name: "Kim Đan"
+      prefix: "&e[Kim Đan"
+    41:
+      name: "Nguyên Anh"
+      prefix: "&6[Nguyên Anh"
+    51:
+      name: "Hóa Thần"
+      prefix: "&c[Hóa Thần"
+    61:
+      name: "Hợp Thể"
+      prefix: "&5[Hợp Thể"
+    71:
+      name: "Độ Kiếp"
+      prefix: "&4[Độ Kiếp"
+    81:
+      name: "Đại Thừa"
+      prefix: "&d[Đại Thừa"
+    91:
+      name: "Phi Thăng"
+      prefix: "&6&l[Phi Thăng"
+  
+  # Nguồn EXP
+  exp-sources:
+    kill-mob: { enabled: true, amount: 10 }
+    kill-elite: { enabled: true, amount: 50 }
+    kill-boss: { enabled: true, amount: 200 }
+    break-ore: { enabled: true, amount: 5 }
+    fishing: { enabled: true, amount: 15 }
+  
+  # Linh lực (Mana)
+  mana:
+    base-max-mana: 100
+    mana-per-level: 10
+    regen:
+      base-amount: 2
+      regen-interval-ticks: 40
+      combat-delay-ticks: 100
+    display:
+      bossbar-enabled: true
+  
+  # Lôi kiếp (Tribulation)
+  tribulation:
+    enabled: true
+    damage:
+      base: 5.0
+      per-strike-multiplier: 1.5
+    countdown-seconds: 5
+    strike-interval-ticks: 20
+    immunity-duration-seconds: 60
+    broadcast:
+      - "&6⚡ &l{player} &r&6đang độ {strikes} lần lôi kiếp!"
+      - "&eCửu thiên thần lôi giáng lâm!"
+    success:
+      message:
+        - "&d&l✦ THIÊN ĐẠO CHỨNG NHẬN ✦"
+        - "&d&l{player} &r&dđã độ kiếp thành công!"
+        - "&dBước vào &e&l{realm} &r&d!"
+    fail:
+      message: "&4☠ &l{player} &r&4đã độ kiếp thất bại! Tu vi giảm sút!"
+
+# =============================================
+# VI. HỆ THỐNG CÔNG PHÁP (SKILLS)
+# =============================================
+skills:
+  enabled: true
+  skills:
+    BASIC_HEAL:
+      enabled: true
+      name: "&aTrúc Cơ Liệu Thương"
+      description:
+        - "&7Vận linh khí chữa thương"
+        - "&7Hồi &a10 HP &7cho bản thân"
+      type: "ACTIVE"
+      required-level: 5
+      exp-cost: 50
+      mana-cost: 15
+      cooldown-seconds: 10
+      icon: "GOLDEN_APPLE"
+      executor: "BASIC_HEAL"
+      executor-config:
+        heal-amount: 10
+    QI_SHIELD:
+      enabled: true
+      name: "&bLinh Khí Hộ Thể"
+      description:
+        - "&7Tạo lá chắn linh khí"
+        - "&7Hấp thụ &b20 sát thương"
+        - "&7Thời gian: 10 giây"
+      type: "ACTIVE"
+      required-level: 10
+      exp-cost: 100
+      mana-cost: 30
+      cooldown-seconds: 30
+      icon: "SHIELD"
+      executor: "QI_SHIELD"
+      executor-config:
+        shield-amount: 20
+        duration-seconds: 10
+    FIRE_BALL:
+      enabled: true
+      name: "&cHỏa Cầu Thuật"
+      description:
+        - "&7Ngưng tụ hỏa linh khí"
+        - "&7Gây &c15 sát thương"
+      type: "ACTIVE"
+      required-level: 15
+      exp-cost: 200
+      mana-cost: 25
+      cooldown-seconds: 5
+      icon: "FIRE_CHARGE"
+      executor: "FIRE_BALL"
+      executor-config:
+        damage: 15
+    LIGHTNING_STRIKE:
+      enabled: true
+      name: "&eThiên Lôi Dẫn"
+      description:
+        - "&7Dẫn thiên lôi từ thượng giới"
+        - "&7Gây &e25 sát thương"
+      type: "ACTIVE"
+      required-level: 25
+      exp-cost: 500
+      mana-cost: 40
+      cooldown-seconds: 10
+      icon: "TRIDENT"
+      executor: "LIGHTNING_STRIKE"
+      executor-config:
+        damage: 25
+    SPEED_STEP:
+      enabled: true
+      name: "&bPhi Vân Bộ"
+      description:
+        - "&7Thân pháp phiêu hốt như mây"
+        - "&7Tăng &b40% &7tốc độ 15 giây"
+      type: "ACTIVE"
+      required-level: 8
+      exp-cost: 80
+      mana-cost: 10
+      cooldown-seconds: 45
+      icon: "FEATHER"
+      executor: "SPEED_STEP"
+      executor-config:
+        speed-multiplier: 1.4
+        duration-seconds: 15
+    TELEPORT:
+      enabled: true
+      name: "&dThuấn Di"
+      description:
+        - "&7Đột phá không gian"
+        - "&7Di chuyển đến nơi nhìn thấy"
+      type: "ACTIVE"
+      required-level: 35
+      exp-cost: 1500
+      mana-cost: 35
+      cooldown-seconds: 15
+      icon: "ENDER_PEARL"
+      executor: "TELEPORT"
+      executor-config:
+        max-distance: 50
+    WIND_BLADE:
+      enabled: true
+      name: "&fPhong Nhẫn"
+      description:
+        - "&7Phóng lưỡi gió sắc bén"
+        - "&7Gây &f12 sát thương xuyên thấu"
+      type: "ACTIVE"
+      required-level: 20
+      exp-cost: 300
+      mana-cost: 20
+      cooldown-seconds: 3
+      icon: "SHEARS"
+      executor: "WIND_BLADE"
+      executor-config:
+        damage: 12
+    METEOR_STORM:
+      enabled: true
+      name: "&6Tinh Thần Bạo"
+      description:
+        - "&7Triệu hồi mưa sao băng"
+        - "&7Gây &635 sát thương"
+        - "&7Cần cấp 50+ để sử dụng"
+      type: "ACTIVE"
+      required-level: 50
+      exp-cost: 5000
+      mana-cost: 120
+      cooldown-seconds: 120
+      icon: "FIREWORK_ROCKET"
+      executor: "METEOR_STORM"
+      executor-config:
+        damage: 35
+        meteor-count: 20
+        radius: 12.0
+
+# =============================================
+# VII. HỆ THỐNG QUÁI TINH ANH (ELITE MOB)
+# =============================================
+elite-mob-settings:
+  enabled: true
+  general:
+    boss-chance: 10.0
+    elite-spawn-radius: 15.0
+    max-elite-per-chunk: 3
+    max-boss-per-world: 5
+    despawn-after-seconds: 300
+    boss-despawn-seconds: 600
+
+# =============================================
+# VIII. HỆ THỐNG ITEM & PHÁP BẢO
+# =============================================
+items:
+  enabled: true
+
+# =============================================
+# IX. HỆ THỐNG LINH THẢO & LINH ĐIỀN
+# =============================================
+spirit-farming:
+  enabled: true
