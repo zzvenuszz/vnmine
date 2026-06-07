@@ -60,8 +60,14 @@ commands:
     description: Chuyển linh thạch cho người chơi khác
     usage: /vnpay <player> <amount>
     permission: vnmine.command.vnmine
+  vnadmin:
+    description: Menu admin lấy item test (yêu cầu quyền admin)
+    usage: /vnadmin
 
 permissions:
+  vnmine.command.admin:
+    description: Cho phép mở menu admin lấy item
+    default: op
   vnmine.*:
     description: Toàn bộ quyền của plugin
     default: op
@@ -82,6 +88,7 @@ permissions:
       vnmine.command.npc: true
       vnmine.command.give: true
       vnmine.command.mount: true
+      vnmine.command.admin: true
   vnmine.command.vnmine:
     description: Cho phép dùng lệnh /vnmine và /vn
     default: true

@@ -10,7 +10,7 @@
 1. [Giới Thiệu](#-giới-thiệu)
 2. [Hệ Thống Màu Sắc - ColorUtils](#-hệ-thống-màu-sắc---colorutils)
 3. [Hệ Thống Tu Luyện (Cultivation)](#-hệ-thống-tu-luyện-cultivation)
-4. [Lôi Kiếp (Tribulation)](#-lôi-kiếp-tribulation)
+4. [Hướng Dẫn Độ Kiếp (Tribulation)](#-hướng-dẫn-độ-kiếp-tribulation)
 5. [Linh Lực (Mana System)](#-linh-lực-mana-system)
 6. [Hệ Thống Công Pháp & Kỹ Năng](#-hệ-thống-công-pháp--kỹ-năng)
 7. [Hệ Thống Luyện Đan (Alchemy)](#-hệ-thống-luyện-đan-alchemy)
@@ -21,13 +21,15 @@
 12. [Hệ Thống NPC](#-hệ-thống-npc)
 13. [Hệ Thống Linh Thạch (Currency)](#-hệ-thống-linh-thạch-currency)
 14. [Hệ Thống Tọa Kỵ (Mount)](#-hệ-thống-tọa-kỵ-mount)
-15. [Danh Sách Lệnh & Ví Dụ](#-danh-sách-lệnh--ví-dụ)
-16. [Danh Sách Item ID (Give Command)](#-danh-sách-item-id-give-command)
-17. [Permissions (Quyền Hạn)](#-permissions-quyền-hạn)
+15. [Hệ Thống Phân Quyền (Permission System)](#-hệ-thống-phân-quyền-permission-system)
+16. [Danh Sách Lệnh & Ví Dụ](#-danh-sách-lệnh--ví-dụ)
+17. [Danh Sách Item ID (Give Command)](#-danh-sách-item-id-give-command)
 18. [Công Thức Chế Tạo - Luyện Đan](#-công-thức-chế-tạo---luyện-đan)
 19. [Công Thức Luyện Chế Pháp Bảo](#-công-thức-luyện-chế-pháp-bảo)
 20. [Bảng Cảnh Giới](#-bảng-cảnh-giới)
-21. [Tính Năng Mở Rộng (Gợi Ý)](#-tính-năng-mở-rộng-gợi-ý)
+21. [Permissions (Quyền Hạn)](#-permissions-quyền-hạn)
+22. [Admin Menu - /vnadmin](#-admin-menu---vnadmin)
+23. [Tính Năng Mở Rộng (Gợi Ý)](#-tính-năng-mở-rộng-gợi-ý)
 
 ---
 
@@ -48,6 +50,8 @@ Plugin bao gồm các hệ thống chính:
 - ✅ **Hệ thống NPC** - NPC shop với giao diện mua bán
 - ✅ **Hệ thống Linh Thạch** - Tiền tệ tu tiên
 - ✅ **Hệ thống Tọa Kỵ** - Cưỡi rồng, phượng hoàng, bạch hổ bay
+- ✅ **Hệ thống Phân Quyền** - LuckPerms-like với group hierarchy, inheritance, file permissions.yml riêng
+- ✅ **Admin Menu** - GUI lấy item test dành cho Admin/OP
 
 ---
 
@@ -135,29 +139,74 @@ Ví dụ: Level 1 → 2 cần 100 EXP, Level 50 → 51 cần 5000 EXP
 
 ---
 
-## ⚡ Lôi Kiếp (Tribulation)
+## ⚡ Hướng Dẫn Độ Kiếp (Tribulation)
 
-### Cơ chế
-Khi đạt **cấp chẵn (10, 20, 30...)**, người chơi sẽ bị sét đánh:
-- **Cấp 10:** 1 tia sét nhẹ (5 sát thương)
-- **Cấp 20:** 2 tia sét mạnh hơn (7.5 + 11.25 sát thương)
-- **Cấp 30:** 3 tia sét (tăng dần)
-- ... cứ thế nhân lên
+Độ kiếp là thử thách định kỳ mà người chơi phải vượt qua để có thể tiếp tục tu luyện lên các cảnh giới cao hơn.
+
+### Khi nào cần độ kiếp?
+
+Mỗi khi đạt đến **cấp chẵn (10, 20, 30, 40, 50, 60, 70, 80, 90)** , hệ thống sẽ chặn không cho lên cấp tiếp theo cho đến khi bạn vượt qua lôi kiếp.
+
+Các cấp yêu cầu độ kiếp:
+- **Cấp 10** → 1 tia sét (sát thương cơ bản × 1)
+- **Cấp 20** → 2 tia sét (sát thương × 1.5 mỗi tia)
+- **Cấp 30** → 3 tia sét (sát thương tăng dần)
+- **Cấp 40** → 4 tia sét
+- ... cứ thế nhân lên, cấp càng cao càng nguy hiểm
+
+### Cách bắt đầu độ kiếp
+
+```bash
+Bước 1: Mở thông tin tu vi
+/vnmine cultivate info
+# Hoặc mở menu chính /vn → click vào "Tu Vi Của Bạn"
+
+Bước 2: Kiểm tra xem có nút "ĐỘ KIẾP" không
+Nếu đang ở cấp chẵn và chưa độ kiếp, sẽ có nút màu đỏ phát sáng
+
+Bước 3: Đến nơi có bầu trời
+- Lôi kiếp cần không gian mở (có thể thấy bầu trời)
+- Tránh ở trong nhà, hang động hoặc dưới nước
+
+Bước 4: Click vào nút "ĐỘ KIẾP"
+- Sẽ có đếm ngược 5 giây (countdown)
+- Sau đó sét bắt đầu đánh xuống vị trí của bạn
+- Mỗi tia sét cách nhau 1 giây (20 ticks)
+
+Bước 5: Sống sót qua các đòn lôi kiếp
+- Dùng kỹ năng hồi máu, khiên, hoặc chạy tránh
+- Càng về sau sát thương càng mạnh
+- Nếu chết → độ kiếp thất bại, mất EXP và tụt level
+- Nếu sống sót → độ kiếp thành công, nhận thưởng lớn!
+```
+
+### Mẹo độ kiếp thành công
+
+| Cấp | Mẹo |
+|-----|------|
+| 10 | Đứng xa các khối dễ cháy, mặc giáp tốt |
+| 20 | Chuẩn bị Hồi Linh Đan hoặc Đại Hồi Linh Đan |
+| 30 | Dùng kỹ năng Linh Khí Hộ Thể (khiên) |
+| 40 | Dùng Bát Quái Kính để giảm 30% sát thương |
+| 50+ | Chuẩn bị đầy đủ đan dược, pháp bảo, kỹ năng hồi máu |
 
 ### Kết quả
-- **Thành công:** Được thưởng EXP, broadcast toàn server, title hoành tráng
-- **Thất bại (chết):** Mất 50% EXP hiện tại, broadcast thất bại
+
+- **Thành công:** Được thưởng EXP + title hoành tráng + broadcast toàn server
+- **Thất bại (chết):** Mất EXP và tụt 1-2 level, broadcast thất bại
 
 ### Lệnh cấu hình (config.yml)
 ```yaml
 tribulation:
   enabled: true
   damage:
-    base: 5.0
-    per-strike-multiplier: 1.5
-  countdown-seconds: 5
-  strike-interval-ticks: 20
-  immunity-duration-seconds: 60
+    base: 5.0                       # Sát thương cơ bản mỗi tia
+    per-strike-multiplier: 1.5       # Hệ số nhân sát thương
+  countdown-seconds: 5               # Thời gian đếm ngược trước khi độ kiếp
+  strike-interval-ticks: 20          # Khoảng cách giữa các tia sét (1 giây)
+  immunity-duration-seconds: 60      # Thời gian miễn dịch sau độ kiếp
+  radius-per-level: 1.5             # Bán kính ảnh hưởng
+  level-drop-on-fail: 1             # Số level tụt khi thất bại
 ```
 
 ---
@@ -356,7 +405,7 @@ Mở bằng lệnh `/vn` hoặc `/vnmine menu`
 ```
 
 ### Các nút chức năng
-- **👤 Tu Vi Của Bạn** - Xem thông tin tu luyện chi tiết
+- **👤 Tu Vi Của Bạn** - Xem thông tin tu luyện chi tiết (bao gồm nút Độ Kiếp)
 - **📖 Công Pháp & Kỹ Năng** - Mở menu học và thi triển kỹ năng
 - **⚗️ Luyện Đan** - Mở lò luyện đan
 - **🔨 Luyện Chế Pháp Bảo** - Mở lò luyện chế pháp bảo
@@ -484,6 +533,141 @@ Tọa Kỵ cho phép người chơi cưỡi các sinh vật thần thoại bay l
 
 ---
 
+## 🔐 Hệ Thống Phân Quyền (Permission System)
+
+### Giới thiệu
+VNMine tích hợp sẵn hệ thống phân quyền giống **LuckPerms**, lưu trong file `permissions.yml` riêng, không phụ thuộc vào plugin bên ngoài.
+
+Tính năng:
+- ✅ Group hierarchy (kế thừa permissions giữa các nhóm)
+- ✅ Wildcard permissions (`vnmine.*`, `*`)
+- ✅ Per-player permissions
+- ✅ Prefix/Suffix theo nhóm
+- ✅ Weight system (độ ưu tiên)
+- ✅ Persistent (lưu vào file riêng)
+
+### File cấu hình: `permissions.yml`
+
+```yaml
+# Bật/tắt hệ thống permission
+enabled: true
+
+# Định nghĩa các nhóm
+groups:
+  default:         # Nhóm mặc định - ai cũng có
+    weight: 0
+    prefix: "&7"
+    default: true
+    parents: []
+    permissions:
+      - vnmine.time.status
+      - vnmine.command.vnmine
+
+  member:          # Kế thừa default
+    weight: 10
+    prefix: "&7[Member]"
+    parents: [default]
+    permissions:
+      - vnmine.command.tps
+
+  admin:           # Kế thừa member
+    weight: 100
+    prefix: "&c[Admin]"
+    parents: [member]
+    permissions:
+      - vnmine.*            # Toàn bộ quyền VNMine
+      - vnmine.command.admin # Quyền admin menu
+
+  owner:           # Cao nhất - kế thừa admin
+    weight: 200
+    prefix: "&4&l[Owner]"
+    parents: [admin]
+    permissions:
+      - "*"                 # Toàn bộ quyền Minecraft
+```
+
+### Cách quản lý Permission
+
+Plugin có sẵn lệnh `/vnmine perm ...` để quản lý permissions ngay trong game:
+
+#### Quản lý Group
+
+```bash
+# Danh sách groups
+/vnmine perm group list
+
+# Thông tin group
+/vnmine perm group info admin
+
+# Tạo group mới
+/vnmine perm group create mod
+
+# Xóa group
+/vnmine perm group delete mod
+
+# Thêm permission cho group
+/vnmine perm group addperm admin vnmine.command.reload
+
+# Xóa permission khỏi group
+/vnmine perm group removeperm admin vnmine.command.reload
+
+# Thêm parent (kế thừa)
+/vnmine perm group addparent admin member
+
+# Set group làm default
+/vnmine perm group setdefault default
+
+# Set weight (độ ưu tiên)
+/vnmine perm group setweight admin 100
+
+# Set prefix
+/vnmine perm group setprefix admin "&c[Admin]"
+```
+
+#### Quản lý Player
+
+```bash
+# Thông tin player
+/vnmine perm player info Steve
+
+# Gán group cho player
+/vnmine perm player setgroup Steve admin
+
+# Thêm permission riêng cho player
+/vnmine perm player addperm Steve vnmine.command.reload
+
+# Xóa permission riêng
+/vnmine perm player removeperm Steve vnmine.command.reload
+
+# Kiểm tra permission
+/vnmine perm check Steve vnmine.command.admin
+
+# Reload permission config
+/vnmine perm reload
+```
+
+### Ví dụ thực tế
+
+```bash
+# 1. Tạo group "vip" kế thừa "member"
+/vnmine perm group create vip
+/vnmine perm group addparent vip member
+/vnmine perm group addperm vip essentials.fly
+/vnmine perm group setprefix vip "&6[VIP]"
+
+# 2. Gán player Steve vào group vip
+/vnmine perm player setgroup Steve vip
+
+# 3. Kiểm tra
+/vnmine perm player info Steve
+# Output:
+# • Primary Group: vip
+# • All Groups: vip, member, default
+# • Prefix: &6[VIP]
+```
+
+---
+
 ## ⌨️ Danh Sách Lệnh & Ví Dụ
 
 ### Lệnh chính
@@ -565,11 +749,12 @@ Tọa Kỵ cho phép người chơi cưỡi các sinh vật thần thoại bay l
 |------|-------|-------|-------|
 | `/tps` | Xem TPS server | `vnmine.command.tps` | `/tps` |
 | `/save-all` | Lưu toàn bộ dữ liệu | `vnmine.command.saveall` | `/save-all` |
-| `/vnmine perm ...` | Quản lý phân quyền | `vnmine.perm.admin` | `/vnmine perm group add admin` |
+| `/vnmine perm ...` | Quản lý phân quyền | `vnmine.perm.admin` | `/vnmine perm group list` |
 | `/vnmine world gen <name>` | Tạo world mới | `vnmine.world.gen` | `/vnmine world gen tu_tien` |
 | `/vnmine world toggle` | Bật/tắt world gen | `vnmine.world.toggle` | `/vnmine world toggle` |
 | `/vnmine drop toggle` | Bật/tắt block drop | `vnmine.drop.toggle` | `/vnmine drop toggle` |
 | `/vnmine drop status` | Xem trạng thái drop | `vnmine.drop.status` | `/vnmine drop status` |
+| `/vnadmin` | Mở menu admin lấy item test | `vnmine.command.admin` | `/vnadmin` |
 
 ---
 
@@ -646,48 +831,7 @@ Tọa Kỵ cho phép người chơi cưỡi các sinh vật thần thoại bay l
 
 ---
 
-## 🔐 Permissions (Quyền Hạn)
-
-### Permission Nodes
-
-| Permission | Mô tả | Mặc định |
-|------------|-------|----------|
-| `vnmine.*` | Tất cả quyền của plugin | OP |
-| `vnmine.command.*` | Tất cả quyền command | OP |
-| `vnmine.command.vnmine` | Dùng `/vnmine`, `/vn` và hầu hết lệnh | ✅ **TRUE** (mọi người) |
-| `vnmine.command.tps` | Xem TPS server | OP |
-| `vnmine.command.saveall` | Lưu toàn bộ world | OP |
-| `vnmine.command.reload` | Reload config plugin | OP |
-| `vnmine.command.npc` | Quản lý NPC (create/remove/list/tp/reload) | OP |
-| `vnmine.command.give` | Give item/skill/pill cho người chơi | OP |
-| `vnmine.command.mount` | Sử dụng tọa kỵ (summon/dismiss/list) | ✅ **TRUE** (mọi người) |
-| `vnmine.time.*` | Tất cả quyền time command | OP |
-| `vnmine.time.set` | Set thời gian ngày/đêm | OP |
-| `vnmine.time.toggle` | Bật/tắt custom time cycle | OP |
-| `vnmine.time.status` | Xem trạng thái thời gian | ✅ **TRUE** (mọi người) |
-| `vnmine.perm.*` | Tất cả quyền quản lý permission | OP |
-| `vnmine.perm.admin` | Quản lý permission groups và players | OP |
-| `vnmine.world.*` | Tất cả quyền world generation | OP |
-| `vnmine.world.gen` | Tạo world mới | OP |
-| `vnmine.world.toggle` | Bật/tắt world generation | OP |
-| `vnmine.drop.*` | Tất cả quyền quản lý block drop | OP |
-| `vnmine.drop.toggle` | Bật/tắt block drop features | OP |
-| `vnmine.drop.status` | Xem trạng thái block drop | OP |
-
-### Cách cấp quyền
-
-```bash
-# Cấp toàn bộ quyền (OP)
-/op <player>
-
-# Hoặc dùng permission plugin (LuckPerms, PermissionsEx...)
-/lp user <player> permission set vnmine.command.mount true
-/lp user <player> permission set vnmine.command.vnmine true
-```
-
----
-
-## 📦 Công Thức Chế Tạo - Luyện Đan
+## 🔧 Công Thức Chế Tạo - Luyện Đan
 
 | Đan dược | Công thức | Tác dụng |
 |----------|-----------|----------|
@@ -741,6 +885,102 @@ Tọa Kỵ cho phép người chơi cưỡi các sinh vật thần thoại bay l
 | 90 | Đại Thừa | Đại Viên Mãn | `&d` Hồng |
 | 91-99 | **Phi Thăng** | nhất trọng → cửu trọng | `&6&l` Vàng Bold |
 | 100 | Phi Thăng | Đại Viên Mãn | `&6&l` Vàng Bold |
+
+---
+
+## 🔐 Permissions (Quyền Hạn)
+
+### Permission Nodes
+
+| Permission | Mô tả | Mặc định |
+|------------|-------|----------|
+| `vnmine.*` | Tất cả quyền của plugin | OP |
+| `vnmine.command.*` | Tất cả quyền command | OP |
+| `vnmine.command.vnmine` | Dùng `/vnmine`, `/vn` và hầu hết lệnh | ✅ **TRUE** (mọi người) |
+| `vnmine.command.tps` | Xem TPS server | OP |
+| `vnmine.command.saveall` | Lưu toàn bộ world | OP |
+| `vnmine.command.reload` | Reload config plugin | OP |
+| `vnmine.command.npc` | Quản lý NPC (create/remove/list/tp/reload) | OP |
+| `vnmine.command.give` | Give item/skill/pill cho người chơi | OP |
+| `vnmine.command.mount` | Sử dụng tọa kỵ (summon/dismiss/list) | ✅ **TRUE** (mọi người) |
+| `vnmine.command.admin` | Mở menu admin lấy item test | OP |
+| `vnmine.time.*` | Tất cả quyền time command | OP |
+| `vnmine.time.set` | Set thời gian ngày/đêm | OP |
+| `vnmine.time.toggle` | Bật/tắt custom time cycle | OP |
+| `vnmine.time.status` | Xem trạng thái thời gian | ✅ **TRUE** (mọi người) |
+| `vnmine.perm.*` | Tất cả quyền quản lý permission | OP |
+| `vnmine.perm.admin` | Quản lý permission groups và players | OP |
+| `vnmine.world.*` | Tất cả quyền world generation | OP |
+| `vnmine.world.gen` | Tạo world mới | OP |
+| `vnmine.world.toggle` | Bật/tắt world generation | OP |
+| `vnmine.drop.*` | Tất cả quyền quản lý block drop | OP |
+| `vnmine.drop.toggle` | Bật/tắt block drop features | OP |
+| `vnmine.drop.status` | Xem trạng thái block drop | OP |
+
+### Cách cấp quyền
+
+Sử dụng hệ thống permission có sẵn của VNMine:
+
+```bash
+# Tạo group admin và cấp toàn bộ quyền VNMine
+/vnmine perm group create admin
+/vnmine perm group addparent admin member
+/vnmine perm group addperm admin vnmine.*
+/vnmine perm group addperm admin vnmine.command.admin
+
+# Gán player vào group admin
+/vnmine perm player setgroup Steve admin
+
+# Hoặc cấp permission riêng cho player
+/vnmine perm player addperm Steve vnmine.command.admin
+```
+
+Hoặc dùng OP mặc định của Minecraft:
+```bash
+/op <player>
+```
+
+---
+
+## 🛠️ Admin Menu - /vnadmin
+
+### Giới thiệu
+Menu admin GUI dành cho người có quyền `vnmine.command.admin` (mặc định: OP và group admin).
+
+Cho phép lấy bất kỳ item nào chỉ bằng 1 click:
+- **Đan dược** → tự động nhận 64 cái
+- **Pháp bảo** → tự động nhận 1 cái
+- **Nguyên liệu** → tự động nhận 64 cái
+
+### Cách dùng
+
+```bash
+/vnadmin
+```
+
+### Menu gồm 3 khu vực
+
+| Khu vực | Items | Số lượng khi click |
+|---------|-------|-------------------|
+| 🔵 **Đan Dược** (hàng 1) | Hồi Linh Đan, Đại Hồi Linh Đan, Cương Thể Đan, Thanh Tâm Đan, Tốc Thánh Đan, Tu Luyện Đan, Phi Thăng Đan | **x64** |
+| 🟠 **Pháp Bảo** (hàng 2) | Kiếm Phi Hành, Linh Chung, Bát Quái Kính, Hồn Ngọc, Thiên Linh Thuẫn, Lôi Ấn, Phượng Hoàng Lệnh | **x1** |
+| 🟡 **Nguyên Liệu** (hàng 3-5) | Linh Thảo, Huyết Linh Thảo, Long Huyết Thảo, Nước, Bột Blaze, Vàng, Kim Cương, Ngọc Lục Bảo, Obsidian, Mắt End, Netherite, Hơi Rồng, Vàng Khối, Pha Lê, Mắt End (Ác), Lông Vũ | **x64** |
+
+### Tính năng
+- ✅ Click 1 lần → item vào thẳng kho đồ
+- ✅ Nếu inventory đầy → tự động drop ra đất
+- ✅ Có sound effect, message thông báo
+- ✅ Không cần ghi nhớ ID, không cần gõ lệnh phức tạp
+
+### Ví dụ
+```bash
+# Mở menu admin
+/vnadmin
+
+# Click vào "Hồi Linh Đan" → nhận 64 cái
+# Click vào "Kiếm Phi Hành" → nhận 1 cái
+# Click vào "Kim Cương" → nhận 64 cái
+```
 
 ---
 
@@ -802,6 +1042,8 @@ spirit-farming:
   enabled: true
 ```
 
+Hệ thống phân quyền được cấu hình riêng trong `permissions.yml`.
+
 ---
 
 ## 🔄 Reload
@@ -816,6 +1058,7 @@ Hoặc reload từng hệ thống:
 /vnskill reload    # Reload công pháp
 /vnitem reload     # Reload item/pháp bảo
 /vnnpc reload      # Reload NPC
+/vnmine perm reload # Reload permission system
 ```
 
 ---

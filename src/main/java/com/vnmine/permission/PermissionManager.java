@@ -3,17 +3,27 @@ package com.vnmine.permission;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * PermissionManager - Hệ thống phân quyền giống LuckPerms
+ * Load/Save từ file permissions.yml riêng
+ * Hỗ trợ group hierarchy, wildcard, inheritance
+ */
 public class PermissionManager {
     private final JavaPlugin plugin;
     private boolean enabled;
     private Map<String, Group> groups;
     private Map<String, PlayerData> playerDataMap;
+    private File permFile;
+    private FileConfiguration permConfig;
 
     public PermissionManager(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -25,18 +35,17 @@ public class PermissionManager {
         groups.clear();
         playerDataMap.clear();
 
-        FileConfiguration config = plugin.getConfig();
-
-        if (!config.contains("permission-system")) {
-            plugin.saveDefaultConfig();
-            plugin.reloadConfig();
-            config = plugin.getConfig();
+        // Load from permissions.yml instead of config.yml
+        permFile = new File(plugin.getDataFolder(), "permissions.yml");
+        if (!permFile.exists()) {
+            plugin.saveResource("permissions.yml", false);
         }
+        permConfig = YamlConfiguration.loadConfiguration(permFile);
 
-        enabled = config.getBoolean("permission-system.enabled", true);
+        enabled = permConfig.getBoolean("enabled", true);
 
         // Load groups
-        ConfigurationSection groupsSection = config.getConfigurationSection("permission-system.groups");
+        ConfigurationSection groupsSection = permConfig.getConfigurationSection("groups");
         if (groupsSection != null) {
             for (String groupName : groupsSection.getKeys(false)) {
                 ConfigurationSection groupSection = groupsSection.getConfigurationSection(groupName);
@@ -61,7 +70,7 @@ public class PermissionManager {
         }
 
         // Load player data
-        ConfigurationSection playersSection = config.getConfigurationSection("permission-system.players");
+        ConfigurationSection playersSection = permConfig.getConfigurationSection("players");
         if (playersSection != null) {
             for (String playerName : playersSection.getKeys(false)) {
                 ConfigurationSection playerSection = playersSection.getConfigurationSection(playerName);
@@ -76,13 +85,13 @@ public class PermissionManager {
             }
         }
 
-        plugin.getLogger().info("§aPermission system loaded: " + groups.size() + " groups, " + playerDataMap.size() + " players");
+        plugin.getLogger().info("§aPermission system loaded from permissions.yml: " + groups.size() + " groups, " + playerDataMap.size() + " players");
     }
 
     public boolean hasPermission(Player player, String node) {
         if (!enabled) {
             // Fallback to Bukkit permission
-            return player.hasPermission(node);
+            return player.hasPermission(node) || player.isOp();
         }
 
         // Check per-player permissions first (highest priority)
@@ -110,8 +119,13 @@ public class PermissionManager {
             return true;
         }
 
+        // Check if player has "*" (all permissions)
+        if (checkNodeInList(allPermissions, "*")) {
+            return true;
+        }
+
         // Fallback to Bukkit permission
-        return player.hasPermission(node);
+        return player.hasPermission(node) || player.isOp();
     }
 
     private boolean checkNodeInList(Collection<String> permissions, String node) {
@@ -179,6 +193,15 @@ public class PermissionManager {
         Set<String> visited = new HashSet<>();
         collectGroups(primaryGroupName, result, visited);
 
+        // Sort by weight descending
+        result.sort((a, b) -> {
+            Group ga = groups.get(a);
+            Group gb = groups.get(b);
+            int wa = (ga != null) ? ga.getWeight() : 0;
+            int wb = (gb != null) ? gb.getWeight() : 0;
+            return Integer.compare(wb, wa);
+        });
+
         return result;
     }
 
@@ -189,14 +212,14 @@ public class PermissionManager {
         Group group = groups.get(groupName);
         if (group == null) return;
 
-        // Add parent groups first (they have lower priority)
-        for (String parent : group.getParents()) {
-            collectGroups(parent, result, visited);
-        }
-
-        // Add current group
+        // Add current group first, then parents
         if (!result.contains(groupName)) {
             result.add(groupName);
+        }
+
+        // Add parent groups
+        for (String parent : group.getParents()) {
+            collectGroups(parent, result, visited);
         }
     }
 
@@ -239,30 +262,39 @@ public class PermissionManager {
     }
 
     public void saveToConfig() {
-        FileConfiguration config = plugin.getConfig();
-        config.set("permission-system.enabled", enabled);
+        if (permConfig == null) {
+            permFile = new File(plugin.getDataFolder(), "permissions.yml");
+            permConfig = YamlConfiguration.loadConfiguration(permFile);
+        }
 
-        // Save groups
+        permConfig.set("enabled", enabled);
+
+        // Clear and re-save groups
+        permConfig.set("groups", null);
         for (Group group : groups.values()) {
-            String path = "permission-system.groups." + group.getName();
-            config.set(path + ".weight", group.getWeight());
-            config.set(path + ".prefix", group.getPrefix());
-            config.set(path + ".suffix", group.getSuffix());
-            config.set(path + ".default", group.isDefault());
-            config.set(path + ".parents", group.getParents());
-            config.set(path + ".permissions", group.getPermissions());
+            String path = "groups." + group.getName();
+            permConfig.set(path + ".weight", group.getWeight());
+            permConfig.set(path + ".prefix", group.getPrefix());
+            permConfig.set(path + ".suffix", group.getSuffix());
+            permConfig.set(path + ".default", group.isDefault());
+            permConfig.set(path + ".parents", group.getParents());
+            permConfig.set(path + ".permissions", group.getPermissions());
         }
 
-        // Save player data
+        // Clear and re-save players
+        permConfig.set("players", null);
         for (PlayerData data : playerDataMap.values()) {
-            String path = "permission-system.players." + data.getPlayerName();
-            config.set(path + ".group", data.getPrimaryGroup());
-            config.set(path + ".permissions", data.getPermissions());
-            config.set(path + ".prefix", data.getPrefix());
-            config.set(path + ".suffix", data.getSuffix());
+            String path = "players." + data.getPlayerName();
+            permConfig.set(path + ".group", data.getPrimaryGroup());
+            permConfig.set(path + ".permissions", data.getPermissions());
+            permConfig.set(path + ".prefix", data.getPrefix());
+            permConfig.set(path + ".suffix", data.getSuffix());
         }
 
-        plugin.saveConfig();
-        plugin.reloadConfig();
+        try {
+            permConfig.save(permFile);
+        } catch (IOException e) {
+            plugin.getLogger().warning("Failed to save permissions.yml: " + e.getMessage());
+        }
     }
 }

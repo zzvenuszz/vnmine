@@ -225,6 +225,37 @@ public class MainMenuGUI implements Listener {
                 .setName("&e&l← Quay Lại")
                 .build());
 
+        // Nút Độ Kiếp - chỉ hiện khi cần (level 10,20,30...)
+        if (data.isWaitingForTribulation()) {
+            List<String> lore = new ArrayList<>();
+            lore.add("");
+            if (data.isTribulationInProgress()) {
+                lore.add(ColorUtils.colorize("&c⚡ ĐANG TRONG QUÁ TRÌNH ĐỘ KIẾP! ⚡"));
+                lore.add(ColorUtils.colorize("&7Không thể thao tác lúc này!"));
+            } else {
+                int strikes = data.getLevel() / 10;
+                lore.add(ColorUtils.colorize("&fSố đòn lôi kiếp: &e" + strikes + " đòn"));
+                lore.add(ColorUtils.colorize("&fSát thương: &ctăng dần"));
+                lore.add(ColorUtils.colorize("&fBán kính: &e" + String.format("%.1f", data.getLevel() * 1.5) + "m"));
+                lore.add(ColorUtils.colorize("&7Yêu cầu: Ở nơi có thể thấy bầu trời"));
+                lore.add("");
+                lore.add(ColorUtils.colorize("&eClick để bắt đầu độ kiếp!"));
+            }
+            gui.setItem(16, new ItemBuilder(Material.END_CRYSTAL)
+                    .setGlow(true)
+                    .setName("&c&l✦ ĐỘ KIẾP ✦")
+                    .setLore(lore.toArray(new String[0]))
+                    .build());
+        } else {
+            gui.setItem(16, new ItemBuilder(Material.BARRIER)
+                    .setName("&7&l✦ Độ Kiếp ✦")
+                    .setLore(
+                            "",
+                            "&7Chưa cần độ kiếp",
+                            "&7Sẽ yêu cầu ở các cấp: &e10, 20, 30, 40, 50, 60, 70, 80, 90"
+                    ).build());
+        }
+
         openMenus.put(player.getUniqueId(), "cultivation_info");
         player.openInventory(gui);
     }
@@ -350,7 +381,13 @@ public class MainMenuGUI implements Listener {
                     handleMainMenuClick(player, slot);
                     break;
                 case "cultivation_info":
-                    if (slot == 22) openMainMenu(player);
+                    if (slot == 22) {
+                        openMainMenu(player);
+                    } else if (slot == 16) {
+                        // Nút Độ Kiếp
+                        cultivationManager.startTribulation(player);
+                        player.closeInventory();
+                    }
                     break;
                 case "guide":
                     if (slot == 26) openMainMenu(player);

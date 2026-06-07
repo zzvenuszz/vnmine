@@ -6,10 +6,16 @@ import com.vnmine.util.MessageUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
+import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 
 import java.io.File;
 import java.io.IOException;
@@ -61,9 +67,15 @@ public class CultivationManager {
     private int tribulationCountdown;
     private int tribulationStrikeInterval;
     private int tribulationImmunityDuration;
+    private double tribulationRadiusPerLevel;
+    private double tribulationExpForOthers;
+    private int tribulationLevelDropOnFail;
     private List<String> tribulationSuccessMessage;
     private List<String> tribulationFailMessage;
     private List<String> tribulationBroadcast;
+
+    // Theo dõi các phiên độ kiếp đang diễn ra
+    private final Map<UUID, TribulationSession> activeTribulations = new ConcurrentHashMap<>();
 
     // File lưu trữ
     private File dataFile;
@@ -129,6 +141,9 @@ public class CultivationManager {
             tribulationCountdown = tribSection.getInt("countdown-seconds", 5);
             tribulationStrikeInterval = tribSection.getInt("strike-interval-ticks", 20);
             tribulationImmunityDuration = tribSection.getInt("immunity-duration-seconds", 60);
+            tribulationRadiusPerLevel = tribSection.getDouble("radius-per-level", 1.5);
+            tribulationExpForOthers = tribSection.getDouble("exp-for-others", 50.0);
+            tribulationLevelDropOnFail = tribSection.getInt("level-drop-on-fail", 1);
             tribulationSuccessMessage = tribSection.getStringList("success.message");
             tribulationFailMessage = tribSection.getStringList("fail.message");
             tribulationBroadcast = tribSection.getStringList("broadcast");
@@ -139,6 +154,9 @@ public class CultivationManager {
             tribulationCountdown = 5;
             tribulationStrikeInterval = 20;
             tribulationImmunityDuration = 60;
+            tribulationRadiusPerLevel = 1.5;
+            tribulationExpForOthers = 50.0;
+            tribulationLevelDropOnFail = 1;
         }
 
         // Load realms
@@ -197,6 +215,7 @@ public class CultivationManager {
                 data.setExperience(section.getDouble("exp", 0));
                 data.setMana(section.getInt("mana", baseMaxMana));
                 data.setMaxMana(section.getInt("max-mana", baseMaxMana));
+                data.setWaitingForTribulation(section.getBoolean("waiting-tribulation", false));
 
                 // Load skills
                 List<String> skills = section.getStringList("learned-skills");
@@ -235,6 +254,7 @@ public class CultivationManager {
             dataConfig.set(path + ".exp", data.getExperience());
             dataConfig.set(path + ".mana", data.getMana());
             dataConfig.set(path + ".max-mana", data.getMaxMana());
+            dataConfig.set(path + ".waiting-tribulation", data.isWaitingForTribulation());
 
             List<String> skills = new ArrayList<>(data.getLearnedSkills().keySet());
             dataConfig.set(path + ".learned-skills", skills);
@@ -355,8 +375,15 @@ public class CultivationManager {
         // Kiểm tra max level
         if (data.getLevel() >= 100) return;
 
+        // Kiểm tra nếu đang chờ độ kiếp thì không nhận exp
+        if (data.isWaitingForTribulation()) {
+            MessageUtils.sendActionBar(player,
+                    "&c⚡ Bạn đang bị chặn ở cảnh giới hiện tại! Hãy độ kiếp để tiếp tục tu luyện.");
+            return;
+        }
+
         if (data.addExperience(amount)) {
-            // Level up! Kiểm tra lôi kiếp
+            // Level up! Kiểm tra xem có cần độ kiếp không
             handleLevelUp(player, data);
         }
     }
@@ -379,20 +406,93 @@ public class CultivationManager {
                 Sound.ENTITY_PLAYER_LEVELUP
         );
 
-        // Kiểm tra lôi kiếp: level chẵn (10, 20, 30, ...)
-        if (tribulationEnabled && level % 10 == 0) {
-            int strikes = level / 10;
-            startTribulation(player, data, strikes);
+        // Kiểm tra lôi kiếp: level 10, 20, 30, ...
+        if (tribulationEnabled && PlayerCultivationData.isTribulationLevel(level)) {
+            // Chặn player ở threshold, không cho nhận thêm exp
+            data.setWaitingForTribulation(true);
+            data.setExperience(0); // Reset exp về 0
+
+            // Thông báo yêu cầu độ kiếp
+            MessageUtils.send(player, "&6⚡ &lBẠN CẦN ĐỘ KIẾP! ⚡");
+            MessageUtils.send(player, "&eCấp " + level + " là ngưỡng đột phá đại cảnh giới!");
+            MessageUtils.send(player, "&eHãy dùng &b/vn &emở menu, chọn &bThông Tin &evà bấm &cĐộ Kiếp&e!");
+            MessageUtils.send(player, "&cLưu ý: Phải ở nơi có thể thấy bầu trời mới độ kiếp được!");
         }
     }
 
+    // ==================== TRIBULATION SYSTEM ====================
+
     /**
-     * Bắt đầu lôi kiếp
+     * Kiểm tra player có thể độ kiếp không
      */
-    private void startTribulation(Player player, PlayerCultivationData data, int strikes) {
-        String realmName = data.getRealmName();
+    public String canStartTribulation(Player player) {
+        PlayerCultivationData data = getPlayerData(player.getUniqueId());
+        if (data == null) return "&cBạn chưa bắt đầu tu luyện! Dùng /vn start";
+
+        if (!tribulationEnabled) return "&cHệ thống độ kiếp đang tắt!";
+
+        if (!data.isWaitingForTribulation()) {
+            if (PlayerCultivationData.isTribulationLevel(data.getLevel())) {
+                // Phục hồi trạng thái nếu bị lỗi
+                data.setWaitingForTribulation(true);
+            } else {
+                return "&cBạn chưa cần độ kiếp!";
+            }
+        }
+
+        if (data.isTribulationInProgress()) {
+            return "&cBạn đang trong quá trình độ kiếp!";
+        }
+
+        // Kiểm tra có thể thấy bầu trời không
+        if (!canSeeSky(player)) {
+            return "&cBạn phải ở nơi có thể thấy bầu trời mới độ kiếp được!";
+        }
+
+        return null; // null = ok
+    }
+
+    /**
+     * Kiểm tra player có thể thấy bầu trời không
+     */
+    private boolean canSeeSky(Player player) {
+        Location loc = player.getLocation();
+        World world = loc.getWorld();
+        if (world == null) return false;
+
+        int x = loc.getBlockX();
+        int z = loc.getBlockZ();
+        int highestY = world.getHighestBlockYAt(x, z);
+        int playerY = loc.getBlockY();
+
+        // Player phải ở trên hoặc ngang mức block cao nhất (tức là thấy trời)
+        return playerY >= highestY;
+    }
+
+    /**
+     * Bắt đầu độ kiếp (gọi từ GUI hoặc lệnh)
+     */
+    public void startTribulation(Player player) {
+        String error = canStartTribulation(player);
+        if (error != null) {
+            MessageUtils.send(player, error);
+            return;
+        }
+
+        PlayerCultivationData data = getPlayerData(player.getUniqueId());
+        if (data == null) return;
+
+        int level = data.getLevel();
+        int strikes = level / 10; // level 10 → 1 strike, level 20 → 2 strikes, ...
+
+        data.setTribulationInProgress(true);
+
+        // Lưu session
+        TribulationSession session = new TribulationSession(player.getUniqueId(), level, strikes);
+        activeTribulations.put(player.getUniqueId(), session);
 
         // Broadcast thông báo
+        String realmName = data.getRealmName();
         for (String msg : tribulationBroadcast) {
             MessageUtils.broadcast(msg
                     .replace("{player}", player.getName())
@@ -400,65 +500,111 @@ public class CultivationManager {
                     .replace("{realm}", realmName));
         }
 
-        // Đếm ngược
+        MessageUtils.send(player, "&6⚡ Chuẩn bị độ kiếp! Bạn có " + tribulationCountdown + " giây để chuẩn bị!");
+
+        // Đếm ngược rồi bắt đầu đánh sét
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            if (!player.isOnline()) return;
-            
-            // Bắt đầu đánh sét
-            performTribulationStrikes(player, data, strikes, 0);
-            
+            if (!player.isOnline()) {
+                cancelTribulation(player);
+                return;
+            }
+            // Bắt đầu các đòn sét
+            performTribulationStrikes(player, session, 0);
         }, tribulationCountdown * 20L);
     }
 
     /**
-     * Thực hiện các đòn sét đánh
+     * Thực hiện một đòn lôi kiếp
      */
-    private void performTribulationStrikes(Player player, PlayerCultivationData data, 
-                                            int remaining, int currentStrike) {
-        if (!player.isOnline()) return;
+    private void performTribulationStrikes(Player player, TribulationSession session, int strikeIndex) {
+        if (!player.isOnline() || player.isDead()) {
+            failTribulation(player);
+            return;
+        }
 
-        Location loc = player.getLocation();
-        int strikeNum = currentStrike + 1;
+        // Kiểm tra session hợp lệ
+        if (!activeTribulations.containsKey(player.getUniqueId())) return;
+
+        int level = session.level;
+        int totalStrikes = session.totalStrikes;
+        int strikeNum = strikeIndex + 1;
+
+        // Tính bán kính mở rộng dần theo cấp độ
+        double radius = level * tribulationRadiusPerLevel;
+        Location center = player.getLocation();
 
         // Tính sát thương: base * multiplier^(strikeNum-1)
         double damage = tribulationBaseDamage * Math.pow(tribulationDamageMultiplier, strikeNum - 1);
 
-        // Hiệu ứng sét
-        loc.getWorld().strikeLightning(loc);
-        
-        // Sát thương
+        // Hiệu ứng sét trực tiếp vào người chơi
+        center.getWorld().strikeLightningEffect(center);
+
+        // Sát thương bản thân người chơi
         player.damage(damage);
 
-        // Hiệu ứng nổ
-        loc.getWorld().createExplosion(loc, 1.0f, false, false);
+        // Tìm các thực thể trong bán kính
+        List<Entity> nearbyEntities = player.getNearbyEntities(radius, radius, radius);
+        for (Entity entity : nearbyEntities) {
+            if (entity.equals(player)) continue;
+
+            if (entity instanceof Player) {
+                Player other = (Player) entity;
+                // Gây sát thương cho người chơi khác
+                other.damage(damage * 0.5, player);
+                // Người chơi khác nhận exp
+                double expReward = tribulationExpForOthers * strikeNum;
+                addExperience(other, expReward);
+                MessageUtils.send(other, "&e⚡ Bị lôi kiếp của &f" + player.getName() + " &eđánh trúng! Nhận &a+" + (int) expReward + " EXP");
+            } else if (entity instanceof Monster) {
+                // Gây sát thương cho quái vật
+                ((LivingEntity) entity).damage(damage * 1.5, player);
+            }
+        }
+
+        // Hiệu ứng nổ nhẹ (visual only)
+        center.getWorld().createExplosion(center, 1.0f, false, false);
 
         // Thông báo
-        MessageUtils.send(player, "&e⚡ Lôi kiếp &f" + strikeNum + "/" + (remaining + currentStrike) + 
-                " &e| Sát thương: &c" + String.format("%.1f", damage));
+        MessageUtils.send(player, "&e⚡ Lôi kiếp &f" + strikeNum + "/" + totalStrikes + 
+                " &e| Sát thương: &c" + String.format("%.1f", damage) +
+                " &e| Bán kính: &f" + String.format("%.1f", radius) + "m");
 
-        if (remaining > 1 && player.isOnline()) {
-            // Đòn tiếp theo
-            int nextStrike = currentStrike + 1;
-            int nextRemaining = remaining - 1;
+        // Đánh dấu đã thực hiện đòn này
+        session.strikesDone++;
+
+        if (strikeNum < totalStrikes) {
+            // Đòn tiếp theo sau interval
+            int nextIndex = strikeIndex + 1;
             Bukkit.getScheduler().runTaskLater(plugin, () -> 
-                performTribulationStrikes(player, data, nextRemaining, nextStrike),
+                performTribulationStrikes(player, session, nextIndex),
                 tribulationStrikeInterval
             );
         } else {
-            // Hoàn thành lôi kiếp
-            if (player.isOnline() && !player.isDead()) {
-                completeTribulation(player, data);
-            } else {
-                failTribulation(player, data);
-            }
+            // Đã thực hiện xong tất cả đòn, kiểm tra kết quả
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                if (!activeTribulations.containsKey(player.getUniqueId())) return;
+                if (player.isOnline() && !player.isDead()) {
+                    completeTribulation(player);
+                } else {
+                    failTribulation(player);
+                }
+            }, 5L);
         }
     }
 
     /**
      * Lôi kiếp thành công
      */
-    private void completeTribulation(Player player, PlayerCultivationData data) {
+    private void completeTribulation(Player player) {
+        PlayerCultivationData data = getPlayerData(player.getUniqueId());
+        if (data == null) return;
+
         String realmName = data.getRealmName();
+        activeTribulations.remove(player.getUniqueId());
+
+        // Gỡ trạng thái chờ
+        data.setWaitingForTribulation(false);
+        data.setTribulationInProgress(false);
 
         // Thông báo thành công
         for (String msg : tribulationSuccessMessage) {
@@ -469,7 +615,7 @@ public class CultivationManager {
 
         MessageUtils.sendTitle(player,
                 "&d&l✦ ĐỘ KIẾP THÀNH CÔNG ✦",
-                "&fBước vào " + data.getRealmPrefix() + "&r&f]",
+                "&fĐã vượt qua " + (data.getLevel() / 10) + " lần lôi kiếp!",
                 10, 80, 10);
 
         // Thiết lập miễn dịch
@@ -479,21 +625,82 @@ public class CultivationManager {
         addExperience(player, tribulationBaseDamage * 20);
 
         MessageUtils.playSound(player, Sound.BLOCK_BELL_USE);
+        MessageUtils.send(player, "&a✦ Bạn có thể tiếp tục tu luyện lên cấp tiếp theo!");
     }
 
     /**
-     * Lôi kiếp thất bại
+     * Lôi kiếp thất bại (public để CultivationListener gọi khi player chết)
      */
-    private void failTribulation(Player player, PlayerCultivationData data) {
+    public void failTribulation(Player player) {
+        PlayerCultivationData data = getPlayerData(player.getUniqueId());
+        if (data == null) return;
+
+        activeTribulations.remove(player.getUniqueId());
+        data.setTribulationInProgress(false);
+
+        // Trừ exp khiến tụt 1-2 level
+        int levelsToDrop = tribulationLevelDropOnFail + (Math.random() < 0.5 ? 0 : 1);
+        int oldLevel = data.getLevel();
+
+        // Tính exp hiện tại và trừ tương ứng levels
+        double expLost = 0;
+        for (int i = 0; i < levelsToDrop; i++) {
+            int lvl = data.getLevel() - i;
+            if (lvl <= 1) break;
+            expLost += lvl * expPerLevelMultiplier;
+        }
+
+        // Set exp về 0 và giảm level
+        data.setExperience(0);
+        int newLevel = Math.max(1, data.getLevel() - levelsToDrop);
+        data.setLevel(newLevel);
+        data.setMaxMana(calculateMaxMana(newLevel));
+
+        // Nếu tụt xuống dưới threshold thì gỡ waiting
+        data.setWaitingForTribulation(PlayerCultivationData.isTribulationLevel(newLevel));
+
+        String realmName = data.getRealmName();
+
+        // Thông báo thất bại
         for (String msg : tribulationFailMessage) {
             MessageUtils.broadcast(msg
                     .replace("{player}", player.getName())
-                    .replace("{realm}", data.getRealmName()));
+                    .replace("{realm}", realmName));
         }
 
-        // Mất 50% exp hiện tại
-        double currentExp = data.getExperience();
-        data.setExperience(currentExp * 0.5);
+        MessageUtils.sendTitle(player,
+                "&4&l✦ ĐỘ KIẾP THẤT BẠI ✦",
+                "&cTu vi giảm từ cấp " + oldLevel + " xuống cấp " + newLevel,
+                10, 80, 10);
+
+        // Hồi máu để không chết thêm lần nữa
+        player.setHealth(Math.min(player.getMaxHealth(), player.getHealth() + 10));
+    }
+
+    /**
+     * Hủy độ kiếp (khi player disconnect)
+     */
+    private void cancelTribulation(Player player) {
+        PlayerCultivationData data = getPlayerData(player.getUniqueId());
+        if (data != null) {
+            data.setTribulationInProgress(false);
+        }
+        activeTribulations.remove(player.getUniqueId());
+    }
+
+    /**
+     * Kiểm tra player có đang trong quá trình độ kiếp không
+     */
+    public boolean isInTribulation(Player player) {
+        PlayerCultivationData data = getPlayerData(player.getUniqueId());
+        return data != null && data.isTribulationInProgress();
+    }
+
+    /**
+     * Lấy tổng số đòn lôi kiếp cho level hiện tại
+     */
+    public int getTribulationStrikes(int level) {
+        return level / 10;
     }
 
     /**
@@ -584,7 +791,7 @@ public class CultivationManager {
     public double getExpKillElite() { return expKillElite; }
     public double getExpKillBoss() { return expKillBoss; }
 
-    // ==================== INNER CLASS ====================
+    // ==================== INNER CLASSES ====================
 
     private static class RealmConfig {
         final int startLevel;
@@ -595,6 +802,23 @@ public class CultivationManager {
             this.startLevel = startLevel;
             this.name = name;
             this.prefix = prefix;
+        }
+    }
+
+    /**
+     * Lưu trạng thái phiên độ kiếp
+     */
+    private static class TribulationSession {
+        final UUID playerId;
+        final int level;
+        final int totalStrikes;
+        int strikesDone;
+
+        TribulationSession(UUID playerId, int level, int totalStrikes) {
+            this.playerId = playerId;
+            this.level = level;
+            this.totalStrikes = totalStrikes;
+            this.strikesDone = 0;
         }
     }
 

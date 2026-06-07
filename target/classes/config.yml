@@ -230,16 +230,23 @@ cultivation:
     countdown-seconds: 5
     strike-interval-ticks: 20
     immunity-duration-seconds: 60
+    # Bán kính ảnh hưởng = level * radius-per-level (block)
+    radius-per-level: 1.5
+    # EXP cho người chơi khác bị lôi kiếp đánh trúng
+    exp-for-others: 50.0
+    # Số level tụt tối thiểu khi độ kiếp thất bại (có thể +1 random)
+    level-drop-on-fail: 1
     broadcast:
       - "&6⚡ &l{player} &r&6đang độ {strikes} lần lôi kiếp!"
-      - "&eCửu thiên thần lôi giáng lâm!"
+      - "&eCửu thiên thần lôi giáng lâm! Tránh xa khu vực nguy hiểm!"
     success:
       message:
         - "&d&l✦ THIÊN ĐẠO CHỨNG NHẬN ✦"
         - "&d&l{player} &r&dđã độ kiếp thành công!"
         - "&dBước vào &e&l{realm} &r&d!"
     fail:
-      message: "&4☠ &l{player} &r&4đã độ kiếp thất bại! Tu vi giảm sút!"
+      message:
+        - "&4☠ &l{player} &r&4đã độ kiếp thất bại! Tu vi giảm sút!"
 
 # =============================================
 # VI. HỆ THỐNG CÔNG PHÁP (SKILLS)

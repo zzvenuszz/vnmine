@@ -39,6 +39,10 @@ public class PlayerCultivationData {
     private long lastCombatTime;
     private long lastManaRegenTime;
 
+    // Trạng thái độ kiếp
+    private boolean waitingForTribulation; // Đang bị chặn ở threshold level
+    private boolean tribulationInProgress; // Đang trong quá trình độ kiếp
+
     public PlayerCultivationData(UUID playerUUID, String playerName) {
         this.playerUUID = playerUUID;
         this.playerName = playerName;
@@ -100,6 +104,21 @@ public class PlayerCultivationData {
 
     public long getLastManaRegenTime() { return lastManaRegenTime; }
     public void setLastManaRegenTime(long lastManaRegenTime) { this.lastManaRegenTime = lastManaRegenTime; }
+
+    // ==================== TRIBULATION ====================
+
+    public boolean isWaitingForTribulation() { return waitingForTribulation; }
+    public void setWaitingForTribulation(boolean waiting) { this.waitingForTribulation = waiting; }
+
+    public boolean isTribulationInProgress() { return tribulationInProgress; }
+    public void setTribulationInProgress(boolean inProgress) { this.tribulationInProgress = inProgress; }
+
+    /**
+     * Kiểm tra level có phải threshold cần độ kiếp không (10, 20, 30, ...)
+     */
+    public static boolean isTribulationLevel(int level) {
+        return level > 0 && level % 10 == 0;
+    }
 
     // ==================== HELPER METHODS ====================
 

@@ -9,9 +9,12 @@ import com.vnmine.currency.CurrencyListener;
 import com.vnmine.currency.CurrencyManager;
 import com.vnmine.drop.BlockDropListener;
 import com.vnmine.drop.DropManager;
+import com.vnmine.gui.AdminMenuGUI;
 import com.vnmine.gui.AlchemyCraftGUI;
 import com.vnmine.gui.ArtifactCraftGUI;
 import com.vnmine.gui.MainMenuGUI;
+import com.vnmine.item.PillUseListener;
+import com.vnmine.item.artifacts.abilities.ArtifactAbilityListener;
 import com.vnmine.mount.MountCommand;
 import com.vnmine.mount.MountManager;
 import com.vnmine.npc.NPCCommand;
@@ -23,6 +26,7 @@ import com.vnmine.permission.PermissionManager;
 import com.vnmine.skill.SkillManager;
 import com.vnmine.util.ColorUtils;
 import com.vnmine.util.MessageUtils;
+import com.vnmine.util.NameTagManager;
 import com.vnmine.world.WorldManager;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
@@ -54,10 +58,12 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
 
     private CultivationManager cultivationManager;
     private CultivationListener cultivationListener;
+    private NameTagManager nameTagManager;
     private SkillManager skillManager;
     private MainMenuGUI mainMenuGUI;
     private AlchemyCraftGUI alchemyCraftGUI;
     private ArtifactCraftGUI artifactCraftGUI;
+    private AdminMenuGUI adminMenuGUI;
 
     // === NEW SYSTEMS: NPC, CURRENCY, MOUNT ===
     private NPCManager npcManager;
@@ -95,11 +101,13 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         blockDropListener = new BlockDropListener(this, dropManager);
 
         cultivationManager = new CultivationManager(this);
-        cultivationListener = new CultivationListener(this, cultivationManager);
+        nameTagManager = new NameTagManager(cultivationManager);
+        cultivationListener = new CultivationListener(this, cultivationManager, nameTagManager);
         skillManager = new SkillManager(this);
         mainMenuGUI = new MainMenuGUI(this, cultivationManager, skillManager);
         alchemyCraftGUI = new AlchemyCraftGUI(this, mainMenuGUI);
         artifactCraftGUI = new ArtifactCraftGUI(this, mainMenuGUI);
+        adminMenuGUI = new AdminMenuGUI();
 
         // Initialize NEW systems
         currencyManager = new CurrencyManager(this);
@@ -121,8 +129,15 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         worldManager.load();
         dropManager.load();
 
+        // Register artifact ability listener (pháp bảo)
+        ArtifactAbilityListener artifactAbilityListener = new ArtifactAbilityListener(this);
+
+        // Register pill use listener (đan dược)
+        PillUseListener pillUseListener = new PillUseListener(this);
+
         // Register events
         getServer().getPluginManager().registerEvents(blockDropListener, this);
+        getServer().getPluginManager().registerEvents(artifactAbilityListener, this);
         getServer().getPluginManager().registerEvents(cultivationListener, this);
         getServer().getPluginManager().registerEvents(mainMenuGUI, this);
         getServer().getPluginManager().registerEvents(alchemyCraftGUI, this);
@@ -130,6 +145,8 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         getServer().getPluginManager().registerEvents(currencyListener, this);
         getServer().getPluginManager().registerEvents(npcListener, this);
         getServer().getPluginManager().registerEvents(npcShopGUI, this);
+        getServer().getPluginManager().registerEvents(pillUseListener, this);
+        getServer().getPluginManager().registerEvents(adminMenuGUI, this);
 
         // Register commands
         getCommand("vnmine").setExecutor(this);
@@ -149,6 +166,7 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         getCommand("mount").setExecutor(mountCommand);
         getCommand("vnbalance").setExecutor(currencyCommand);
         getCommand("vnpay").setExecutor(currencyCommand);
+        getCommand("vnadmin").setExecutor(this);
 
         getLogger().info(ColorUtils.colorize("&aVNMine v2.1.0 da duoc bat! &7Big Update Tu Tien"));
         getLogger().info(ColorUtils.colorize("&e✦ NPC, Linh Thach, Toa Ky da san sang! ✦"));
@@ -196,6 +214,25 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
                 return true;
             case "vnfarm":
                 sender.sendMessage("§6=== Linh Điền ===\n§eTính năng đang phát triển...");
+                return true;
+            case "vnadmin":
+                if (!(sender instanceof Player)) {
+                    sender.sendMessage("§cChỉ người chơi mới có thể dùng lệnh này!");
+                    return true;
+                }
+                Player adminPlayer = (Player) sender;
+                if (permissionManager != null && permissionManager.isEnabled()) {
+                    if (!permissionManager.hasPermission(adminPlayer, "vnmine.command.admin")) {
+                        sender.sendMessage("§cBạn không có quyền sử dụng lệnh này!");
+                        return true;
+                    }
+                } else if (!adminPlayer.isOp()) {
+                    sender.sendMessage("§cBạn không có quyền sử dụng lệnh này! (Yêu cầu OP)");
+                    return true;
+                }
+                if (adminMenuGUI != null) {
+                    adminMenuGUI.open(adminPlayer);
+                }
                 return true;
             default: return false;
         }
@@ -285,19 +322,39 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         UUID uuid = player.getUniqueId();
 
         // Kiểm tra đã có dữ liệu chưa
-        if (cultivationManager.getPlayerData(uuid) != null) {
-            MessageUtils.send(player, "&cBạn đã bắt đầu tu tiên rồi! Dùng &e/vn &cđể mở menu.");
+        PlayerCultivationData data = cultivationManager.getPlayerData(uuid);
+        if (data != null) {
+            // Đã có dữ liệu => đồng bộ level game và cập nhật prefix
+            int mcLevel = player.getLevel();
+            data.setLevel(mcLevel);
+            data.setMaxMana(cultivationManager.calculateMaxMana(mcLevel));
+            if (data.getMana() > data.getMaxMana()) {
+                data.setMana(data.getMaxMana());
+            }
+            // Cập nhật name tag
+            nameTagManager.updateNameTag(player);
+            MessageUtils.send(player, "&a✦ Đã cập nhật prefix tu tiên theo cấp độ hiện tại!");
+            MessageUtils.send(player, "&a✦ Cảnh giới: " + data.getRealmPrefix() + "&r&a] &7(Cấp " + mcLevel + ")");
             return true;
         }
 
-        // Tạo dữ liệu mới
-        PlayerCultivationData data = cultivationManager.getOrCreatePlayerData(uuid, player.getName());
+        // Chưa có dữ liệu => tạo mới
+        data = cultivationManager.getOrCreatePlayerData(uuid, player.getName());
+
+        // Đồng bộ level game ngay lập tức
+        int mcLevel = player.getLevel();
+        data.setLevel(mcLevel);
+        data.setMaxMana(cultivationManager.calculateMaxMana(mcLevel));
+        data.setMana(data.getMaxMana());
+
+        // Cập nhật name tag
+        nameTagManager.updateNameTag(player);
 
         // Thông báo
         MessageUtils.sendTitle(player, "&6&l✦ BẮT ĐẦU TU TIÊN ✦",
                 "&fChào mừng đến với &eTu Tiên Giới&f!", 10, 60, 10);
         MessageUtils.send(player, "&a✦ Bạn đã bắt đầu hành trình tu tiên!");
-        MessageUtils.send(player, "&a✦ Hiện tại: " + data.getRealmPrefix() + "&r&a]");
+        MessageUtils.send(player, "&a✦ Cảnh giới: " + data.getRealmPrefix() + "&r&a] &7(Cấp " + mcLevel + ")");
         MessageUtils.send(player, "&a✦ Dùng &e/vn &ađể mở menu chính.");
         MessageUtils.send(player, "&a✦ Dùng &e/vnskill &ađể xem công pháp.");
         MessageUtils.send(player, "&a✦ Dùng &e/vnalchemy &ađể luyện đan.");

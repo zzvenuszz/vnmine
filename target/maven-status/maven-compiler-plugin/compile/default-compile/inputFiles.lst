@@ -8,10 +8,14 @@
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/currency/CurrencyManager.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/drop/BlockDropListener.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/drop/DropManager.java
+/home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/gui/AdminMenuGUI.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/gui/AlchemyCraftGUI.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/gui/ArtifactCraftGUI.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/gui/MainMenuGUI.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/item/ItemBuilder.java
+/home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/item/PillUseListener.java
+/home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/item/artifacts/abilities/ArtifactAbilityListener.java
+/home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/item/artifacts/abilities/FlyingSwordSession.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/mount/MountCommand.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/mount/MountManager.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/npc/NPCCommand.java
@@ -26,5 +30,6 @@
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/skill/SkillManager.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/util/ColorUtils.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/util/MessageUtils.java
+/home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/util/NameTagManager.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/world/WorldConfig.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/world/WorldManager.java
