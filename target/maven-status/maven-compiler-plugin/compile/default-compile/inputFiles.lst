@@ -28,7 +28,15 @@
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/permission/PermissionCommand.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/permission/PermissionManager.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/permission/PlayerData.java
+/home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/skill/PlayerSkillData.java
+/home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/skill/QuickbarGUI.java
+/home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/skill/SkillBookListener.java
+/home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/skill/SkillCastListener.java
+/home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/skill/SkillEffects.java
+/home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/skill/SkillGrade.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/skill/SkillManager.java
+/home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/skill/SkillMastery.java
+/home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/skill/SkillQuality.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/util/ColorUtils.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/util/MessageUtils.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/util/NameTagManager.java

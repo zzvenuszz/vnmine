@@ -1,0 +1,126 @@
+# =============================================
+# VNMine - NPC Shop Config
+# =============================================
+enabled: true
+npcs:
+  skill_master:
+    enabled: true
+    name: "&b&l◆ Đại Sư Công Pháp ◆"
+    type: "VILLAGER"
+    profession: "NITWIT"
+    trades:
+      SKILL_BASIC_HEAL:
+        type: "SKILL"
+        skill-id: "BASIC_HEAL"
+        display-name: "&aTrúc Cơ Liệu Thương"
+        material: "GOLDEN_APPLE"
+        amount: 1
+        lore: ["&7Học công pháp hồi máu cơ bản"]
+        price:
+          material: "EMERALD"
+          amount: 5
+        stock: -1
+      SKILL_FIRE_BALL:
+        type: "SKILL"
+        skill-id: "FIRE_BALL"
+        display-name: "&cHỏa Cầu Thuật"
+        material: "FIRE_CHARGE"
+        amount: 1
+        lore: ["&7Học công pháp hỏa cầu"]
+        price:
+          material: "DIAMOND"
+          amount: 3
+        stock: -1
+      SKILL_TELEPORT:
+        type: "SKILL"
+        skill-id: "TELEPORT"
+        display-name: "&dThuấn Di"
+        material: "ENDER_PEARL"
+        amount: 1
+        lore: ["&7Học công pháp dịch chuyển"]
+        price:
+          material: "DIAMOND"
+          amount: 10
+        stock: -1
+  artifact_master:
+    enabled: true
+    name: "&6&l◆ Luyện Khí Đại Sư ◆"
+    type: "VILLAGER"
+    profession: "ARMORER"
+    trades:
+      FLYING_SWORD:
+        type: "ARTIFACT"
+        item-id: "FLYING_SWORD"
+        display-name: "&b&l◆ Kiếm Phi Hành ◆"
+        material: "DIAMOND_SWORD"
+        amount: 1
+        lore: ["&7Click phải để bay trên kiếm"]
+        price:
+          material: "DIAMOND"
+          amount: 20
+        stock: 3
+        cooldown-seconds: 3600
+      SOUL_JADE:
+        type: "ARTIFACT"
+        item-id: "SOUL_JADE"
+        display-name: "&a&l◆ Hồn Ngọc ◆"
+        material: "EMERALD"
+        amount: 1
+        lore: ["&7Hồi 50% máu khi HP<20%"]
+        price:
+          material: "DIAMOND"
+          amount: 15
+        stock: 5
+  pill_master:
+    enabled: true
+    name: "&a&l◆ Luyện Đan Sư ◆"
+    type: "VILLAGER"
+    profession: "CLERIC"
+    trades:
+      HOI_LINH_DAN:
+        type: "PILL"
+        display-name: "&aHồi Linh Đan"
+        material: "GLOWSTONE_DUST"
+        amount: 3
+        lore: ["&7Hồi phục &b30 &7linh lực"]
+        price:
+          material: "EMERALD"
+          amount: 2
+        stock: 10
+        cooldown-seconds: 60
+      TU_LUYEN_DAN:
+        type: "PILL"
+        display-name: "&5Tu Luyện Đan"
+        material: "PURPLE_DYE"
+        amount: 1
+        lore: ["&7+50 EXP tu luyện"]
+        price:
+          material: "EMERALD"
+          amount: 8
+        stock: 5
+  currency_master:
+    enabled: true
+    name: "&e&l◆ Linh Thạch Thương ◆"
+    type: "VILLAGER"
+    profession: "WEAPON_SMITH"
+    trades:
+      BUY_LINH_THACH:
+        type: "CURRENCY_BUY"
+        display-name: "&bBán Linh Thạch"
+        material: "EMERALD"
+        amount: 1
+        lore: ["&7Bán 1 Ngọc nhận 10 Linh Thạch"]
+        price:
+          material: "PRISMARINE_SHARD"
+          amount: 10
+        stock: -1
+      SELL_LINH_THACH:
+        type: "CURRENCY_SELL"
+        display-name: "&bMua Bằng Linh Thạch"
+        material: "GLOWSTONE_DUST"
+        amount: 3
+        lore: ["&7Mua 3 Hồi Linh Đan bằng Linh Thạch"]
+        price:
+          material: "PRISMARINE_SHARD"
+          amount: 10
+        stock: -1

@@ -1,0 +1,27 @@
+# =============================================
+# VNMine - Currency (Linh Thạch)
+# =============================================
+enabled: true
+item:
+  material: "PRISMARINE_SHARD"
+  name: "&bLinh Thạch"
+  lore:
+    - "&7Tiền tệ tu tiên"
+    - "&7Dùng để mua vật phẩm từ NPC"
+drops:
+  kill-mob:
+    enabled: true
+    chance: 10.0
+    amount: "1-3"
+  kill-elite:
+    enabled: true
+    chance: 100.0
+    amount: "5-10"
+  kill-boss:
+    enabled: true
+    chance: 100.0
+    amount: "20-50"
+  break-ore:
+    enabled: true
+    chance: 5.0
+    amount: 1

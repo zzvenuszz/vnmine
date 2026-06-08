@@ -1,0 +1,11 @@
+# =============================================
+# VNMine - Elite Mob Settings
+# =============================================
+enabled: true
+general:
+  boss-chance: 10.0
+  elite-spawn-radius: 15.0
+  max-elite-per-chunk: 3
+  max-boss-per-world: 5
+  despawn-after-seconds: 300
+  boss-despawn-seconds: 600
