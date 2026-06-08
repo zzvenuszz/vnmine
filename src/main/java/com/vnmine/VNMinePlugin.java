@@ -25,7 +25,7 @@ import com.vnmine.npc.NPCManager;
 import com.vnmine.npc.NPCShopGUI;
 import com.vnmine.permission.PermissionCommand;
 import com.vnmine.permission.PermissionManager;
-import com.vnmine.skill.*;
+import com.vnmine.skill.SkillManager;
 import com.vnmine.util.ColorUtils;
 import com.vnmine.util.MessageUtils;
 import com.vnmine.util.NameTagManager;
@@ -37,12 +37,10 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.UUID;
 import java.util.Arrays;
@@ -64,9 +62,6 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
     private CultivationListener cultivationListener;
     private NameTagManager nameTagManager;
     private SkillManager skillManager;
-    private SkillBookListener skillBookListener;
-    private QuickbarGUI quickbarGUI;
-    private SkillCastListener skillCastListener;
     private MainMenuGUI mainMenuGUI;
     private AlchemyCraftGUI alchemyCraftGUI;
     private ArtifactCraftGUI artifactCraftGUI;
@@ -111,13 +106,7 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         cultivationManager = new CultivationManager(this, nameTagManager);
         nameTagManager.setCultivationManager(cultivationManager);
         cultivationListener = new CultivationListener(this, cultivationManager, nameTagManager);
-        
-        // Initialize SKILL system (loads from skills.yml)
         skillManager = new SkillManager(this);
-        skillBookListener = new SkillBookListener(this, skillManager);
-        quickbarGUI = new QuickbarGUI(this, skillManager);
-        skillCastListener = new SkillCastListener(this, skillManager);
-        
         mainMenuGUI = new MainMenuGUI(this, cultivationManager, skillManager);
         alchemyCraftGUI = new AlchemyCraftGUI(this, mainMenuGUI);
         artifactCraftGUI = new ArtifactCraftGUI(this, mainMenuGUI);
@@ -168,12 +157,7 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         getServer().getPluginManager().registerEvents(pillUseListener, this);
         getServer().getPluginManager().registerEvents(adminMenuGUI, this);
         getServer().getPluginManager().registerEvents(blockPlaceListener, this);
-        
-        // Register SKILL events
         getServer().getPluginManager().registerEvents(skillManager, this);
-        getServer().getPluginManager().registerEvents(skillBookListener, this);
-        getServer().getPluginManager().registerEvents(quickbarGUI, this);
-        getServer().getPluginManager().registerEvents(skillCastListener, this);
 
         // Register commands
         getCommand("vnmine").setExecutor(this);
@@ -194,10 +178,9 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         getCommand("vnbalance").setExecutor(currencyCommand);
         getCommand("vnpay").setExecutor(currencyCommand);
         getCommand("vnadmin").setExecutor(this);
-        getCommand("skillbar").setExecutor(this);
 
         getLogger().info(ColorUtils.colorize("&aVNMine v2.1.0 da duoc bat! &7Big Update Tu Tien"));
-        getLogger().info(ColorUtils.colorize("&e✦ NPC, Linh Thach, Toa Ky, Ky Nang da san sang! ✦"));
+        getLogger().info(ColorUtils.colorize("&e✦ NPC, Linh Thach, Toa Ky da san sang! ✦"));
     }
 
     @Override
@@ -228,17 +211,6 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         String cmdName = command.getName().toLowerCase();
 
         switch (cmdName) {
-            case "skillbar":
-                if (sender instanceof Player) {
-                    if (quickbarGUI != null) {
-                        quickbarGUI.openAssignMenu((Player) sender);
-                    } else {
-                        sender.sendMessage("§cHệ thống skill chưa sẵn sàng!");
-                    }
-                } else {
-                    sender.sendMessage("§cChỉ người chơi mới có thể dùng lệnh này!");
-                }
-                return true;
             case "tps": return handleTps(sender);
             case "save-all": return handleSaveAll(sender);
             case "vnmine":
@@ -347,11 +319,6 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
                 return handleCultivationCommand(sender, args);
             case "elite": return handleEliteCommand(sender, args);
             case "reload": return handleReload(sender);
-            case "skillbar":
-                if (sender instanceof Player && quickbarGUI != null) {
-                    quickbarGUI.openAssignMenu((Player) sender);
-                }
-                return true;
             default:
                 sendHelp(sender);
                 return true;
@@ -403,13 +370,10 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         MessageUtils.send(player, "&a✦ Dùng &e/vn &ađể mở menu chính.");
         MessageUtils.send(player, "&a✦ Dùng &e/vnskill &ađể xem công pháp.");
         MessageUtils.send(player, "&a✦ Dùng &e/vnalchemy &ađể luyện đan.");
-        MessageUtils.send(player, "&a✦ Dùng &e/skillbar &ađể gán kỹ năng!");
 
         // Give starter items
-        if (currencyManager != null) {
-            currencyManager.deposit(player, 10);
-            MessageUtils.send(player, "&b✦ Khởi đầu: +10 Linh Thạch!");
-        }
+        currencyManager.deposit(player, 10);
+        MessageUtils.send(player, "&b✦ Khởi đầu: +10 Linh Thạch!");
 
         return true;
     }
@@ -419,7 +383,6 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         sender.sendMessage("§e/vn §f- Mở menu chính");
         sender.sendMessage("§e/vn start §f- Bắt đầu tu tiên");
         sender.sendMessage("§e/vnskill §f- Công pháp/kỹ năng");
-        sender.sendMessage("§e/skillbar §f- Gán kỹ năng vào thanh nhanh");
         sender.sendMessage("§e/vnalchemy §f- Luyện đan");
         sender.sendMessage("§e/vnitem list §f- Danh sách pháp bảo");
         sender.sendMessage("§e/mount list §f- Tọa kỵ phi hành");
@@ -456,13 +419,8 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
                 if (cultivationManager != null) {
                     boolean newState = !cultivationManager.isEnabled();
                     cultivationManager.setEnabled(newState);
-                    // Lưu vào cultivation.yml
-                    File cultFile = new File(getDataFolder(), "cultivation.yml");
-                    if (cultFile.exists()) {
-                        FileConfiguration cultConfig = YamlConfiguration.loadConfiguration(cultFile);
-                        cultConfig.set("enabled", newState);
-                        try { cultConfig.save(cultFile); } catch (Exception ignored) {}
-                    }
+                    getConfig().set("cultivation.enabled", newState);
+                    saveConfig();
                     sender.sendMessage("§6[VNMine] §aĐã " + (newState ? "bật" : "tắt") + " hệ thống tu luyện!");
                 }
                 break;
@@ -483,22 +441,14 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         String action = args[1].toLowerCase();
         switch (action) {
             case "toggle":
-                File eliteFile = new File(getDataFolder(), "elite.yml");
-                if (eliteFile.exists()) {
-                    FileConfiguration eliteConfig = YamlConfiguration.loadConfiguration(eliteFile);
-                    boolean eliteEnabled = !eliteConfig.getBoolean("enabled", true);
-                    eliteConfig.set("enabled", eliteEnabled);
-                    try { eliteConfig.save(eliteFile); } catch (Exception ignored) {}
-                    sender.sendMessage("§6[VNMine] §aĐã " + (eliteEnabled ? "bật" : "tắt") + " elite mob system!");
-                }
+                boolean eliteEnabled = !getConfig().getBoolean("elite-mob-settings.enabled", true);
+                getConfig().set("elite-mob-settings.enabled", eliteEnabled);
+                saveConfig();
+                sender.sendMessage("§6[VNMine] §aĐã " + (eliteEnabled ? "bật" : "tắt") + " elite mob system!");
                 break;
             case "info":
                 sender.sendMessage("§6=== Elite Mob Status ===");
-                File eliteCheck = new File(getDataFolder(), "elite.yml");
-                if (eliteCheck.exists()) {
-                    FileConfiguration ec = YamlConfiguration.loadConfiguration(eliteCheck);
-                    sender.sendMessage("§fHệ thống: " + (ec.getBoolean("enabled", true) ? "§aBẬT" : "§cTẮT"));
-                }
+                sender.sendMessage("§fHệ thống: " + (getConfig().getBoolean("elite-mob-settings.enabled", true) ? "§aBẬT" : "§cTẮT"));
                 break;
             default:
                 sender.sendMessage("§cSử dụng: /vnmine elite <toggle|info>");
@@ -520,17 +470,13 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
             return true;
         }
         switch (args[0].toLowerCase()) {
-            case "toggle": {
-                File itemsFile = new File(getDataFolder(), "items.yml");
-                if (itemsFile.exists()) {
-                    FileConfiguration itemsConfig = YamlConfiguration.loadConfiguration(itemsFile);
-                    boolean itemEnabled = !itemsConfig.getBoolean("enabled", true);
-                    itemsConfig.set("enabled", itemEnabled);
-                    try { itemsConfig.save(itemsFile); } catch (Exception ignored) {}
-                    sender.sendMessage("§6[VNMine] §aĐã " + (itemEnabled ? "bật" : "tắt") + " hệ thống item!");
-                }
+            case "toggle":
+                boolean itemEnabled = !getConfig().getBoolean("items.enabled", true);
+                getConfig().set("items.enabled", itemEnabled);
+                saveConfig();
+                sender.sendMessage("§6[VNMine] §aĐã " + (itemEnabled ? "bật" : "tắt") + " hệ thống item!");
                 break;
-            }
+            case "reload": reloadConfig(); sender.sendMessage("§6[VNMine] §aĐã reload config!"); break;
             case "list":
                 sender.sendMessage("§6=== Danh Sách Item ===");
                 sender.sendMessage("§b- &b&l◆ Kiếm Phi Hành ◆");
@@ -541,7 +487,7 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
                 sender.sendMessage("§e- &e&l◆ Lôi Ấn ◆");
                 sender.sendMessage("§6- &6&l◆ Phượng Hoàng Lệnh ◆");
                 break;
-            default: sender.sendMessage("§cSử dụng: /vnitem <toggle|list>");
+            default: sender.sendMessage("§cSử dụng: /vnitem <toggle|reload|list>");
         }
         return true;
     }
@@ -556,12 +502,8 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
             case "toggle":
                 if (skillManager != null) {
                     skillManager.setEnabled(!skillManager.isEnabled());
-                    File skillFile = new File(getDataFolder(), "skills.yml");
-                    if (skillFile.exists()) {
-                        FileConfiguration sc = YamlConfiguration.loadConfiguration(skillFile);
-                        sc.set("enabled", skillManager.isEnabled());
-                        try { sc.save(skillFile); } catch (Exception ignored) {}
-                    }
+                    getConfig().set("skills.enabled", skillManager.isEnabled());
+                    saveConfig();
                     sender.sendMessage("§6[VNMine] §aĐã " + (skillManager.isEnabled() ? "bật" : "tắt") + " công pháp!");
                 }
                 break;
@@ -643,12 +585,8 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
                 if (!sender.hasPermission("vnmine.world.toggle")) { sender.sendMessage("§6[VNMine] §cBạn không có quyền!"); return true; }
                 boolean newState = !worldManager.isEnabled();
                 worldManager.setEnabled(newState);
-                File worldFile = new File(getDataFolder(), "world.yml");
-                if (worldFile.exists()) {
-                    FileConfiguration wc = YamlConfiguration.loadConfiguration(worldFile);
-                    wc.set("enabled", newState);
-                    try { wc.save(worldFile); } catch (Exception ignored) {}
-                }
+                getConfig().set("world-settings.enabled", newState);
+                saveConfig();
                 sender.sendMessage("§6[VNMine] §aĐã " + (newState ? "bật" : "tắt") + " world generation!");
                 break;
             default: sender.sendMessage("§6[VNMine] §cSử dụng: /vnmine world <gen <world>|toggle>");
@@ -658,19 +596,15 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
 
     // ==================== DROP ====================
     private boolean handleDrop(CommandSender sender, String[] args) {
-        if (args.length < 2) { sender.sendMessage("§6[VNMine] §cSử dụng: /vnmine drop <toggle|status>"); return true; }
+        if (args.length < 2) { sender.sendMessage("§6[VNMine] §cSử dụng: /vnmine drop <toggle|status|replace toggle|break toggle|explode toggle>"); return true; }
         String sub = args[1].toLowerCase();
         switch (sub) {
             case "toggle": {
                 if (!sender.hasPermission("vnmine.drop.toggle")) { sender.sendMessage("§6[VNMine] §cBạn không có quyền!"); return true; }
                 boolean newState = !dropManager.isEnabled();
                 dropManager.setEnabled(newState);
-                File dropFile = new File(getDataFolder(), "blockdrop.yml");
-                if (dropFile.exists()) {
-                    FileConfiguration dc = YamlConfiguration.loadConfiguration(dropFile);
-                    dc.set("enabled", newState);
-                    try { dc.save(dropFile); } catch (Exception ignored) {}
-                }
+                getConfig().set("block-drop-settings.enabled", newState);
+                saveConfig();
                 sender.sendMessage("§6[VNMine] §aĐã " + (newState ? "bật" : "tắt") + " block drop!");
                 break;
             }
@@ -678,9 +612,12 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
                 if (!sender.hasPermission("vnmine.drop.status")) { sender.sendMessage("§6[VNMine] §cBạn không có quyền!"); return true; }
                 sender.sendMessage("§6=== Block Drop Status ===");
                 sender.sendMessage("§fHệ thống: " + (dropManager.isEnabled() ? "§aBẬT" : "§cTẮT"));
+                sender.sendMessage("§fReplace: " + (dropManager.isReplaceEnabled() ? "§aBẬT" : "§cTẮT"));
+                sender.sendMessage("§fBreak: " + (dropManager.isBreakEnabled() ? "§aBẬT" : "§cTẮT"));
+                sender.sendMessage("§fExplode: " + (dropManager.isExplodeEnabled() ? "§aBẬT" : "§cTẮT"));
                 break;
             }
-            default: sender.sendMessage("§6[VNMine] §cSử dụng: /vnmine drop <toggle|status>");
+            default: sender.sendMessage("§6[VNMine] §cSử dụng: /vnmine drop <toggle|status|replace toggle|break toggle|explode toggle>");
         }
         return true;
     }
@@ -708,7 +645,7 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         String cmd = command.getName().toLowerCase();
         List<String> completions = new ArrayList<>();
         if (cmd.equals("vnmine") || cmd.equals("vn")) {
-            if (args.length == 1) completions.addAll(Arrays.asList("menu", "start", "time", "perm", "world", "drop", "cultivate", "elite", "reload", "skillbar"));
+            if (args.length == 1) completions.addAll(Arrays.asList("menu", "start", "time", "perm", "world", "drop", "cultivate", "elite", "reload"));
         }
         return completions;
     }

@@ -3,9 +3,6 @@ package com.vnmine.command;
 import com.vnmine.VNMinePlugin;
 import com.vnmine.cultivation.PlayerCultivationData;
 import com.vnmine.item.ItemBuilder;
-import com.vnmine.skill.SkillBookListener;
-import com.vnmine.skill.SkillGrade;
-import com.vnmine.skill.SkillQuality;
 import com.vnmine.util.MessageUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -52,15 +49,9 @@ public class GiveCommand implements CommandExecutor {
             try { amount = Integer.parseInt(args[3]); } catch (NumberFormatException ignored) {}
         }
 
-        // Optional: grade and quality for skillbook
-        String gradeStr = args.length >= 5 ? args[4].toUpperCase() : "HOANG";
-        String qualityStr = args.length >= 6 ? args[5].toUpperCase() : "HA";
-
         switch (type) {
             case "skill":
                 return giveSkill(sender, target, id);
-            case "skillbook":
-                return giveSkillBook(sender, target, id, gradeStr, qualityStr, amount);
             case "pill":
                 return givePill(sender, target, id, amount);
             case "artifact":
@@ -74,7 +65,7 @@ public class GiveCommand implements CommandExecutor {
             case "mount":
                 return giveMount(sender, target, id);
             default:
-                sender.sendMessage("§cLoại không hợp lệ! Các loại: skill, skillbook, pill, artifact, currency, exp, level, mount");
+                sender.sendMessage("§cLoại không hợp lệ! Các loại: skill, pill, artifact, currency, exp, level, mount");
                 return true;
         }
     }
@@ -82,7 +73,6 @@ public class GiveCommand implements CommandExecutor {
     private void sendHelp(CommandSender sender) {
         sender.sendMessage("§6=== VNGive Commands ===");
         sender.sendMessage("§e/vngive <player> skill <skill_id> §f- Học công pháp");
-        sender.sendMessage("§e/vngive <player> skillbook <skill_id> [amount] [grade] [quality] §f- Give sách");
         sender.sendMessage("§e/vngive <player> pill <pill_id> [amount] §f- Give đan dược");
         sender.sendMessage("§e/vngive <player> artifact <art_id> §f- Give pháp bảo");
         sender.sendMessage("§e/vngive <player> currency <amount> §f- Give linh thạch");
@@ -91,13 +81,7 @@ public class GiveCommand implements CommandExecutor {
         sender.sendMessage("§e/vngive <player> mount <mount_id> §f- Mở khóa tọa kỵ");
         sender.sendMessage("");
         sender.sendMessage("§6=== Danh sách Skill ID ===");
-        sender.sendMessage("§eXem trong skills.yml");
-        sender.sendMessage("");
-        sender.sendMessage("§6=== Danh sách Grade ===");
-        sender.sendMessage("§eHOANG, HUYEN, DIA, THIEN");
-        sender.sendMessage("");
-        sender.sendMessage("§6=== Danh sách Quality ===");
-        sender.sendMessage("§eHA (20%), TRUNG (60%), THUONG (90%)");
+        sender.sendMessage("§eBASIC_HEAL, QI_SHIELD, FIRE_BALL, WIND_BLADE, LIGHTNING_STRIKE, SPEED_STEP, TELEPORT, METEOR_STORM");
         sender.sendMessage("");
         sender.sendMessage("§6=== Danh sách Pill ID ===");
         sender.sendMessage("§eHOI_LINH_DAN, DAI_HOI_LINH_DAN, CUONG_THE_DAN, THANH_TAM_DAN, TOC_THANH_DAN, TU_LUYEN_DAN, PHI_THANG_DAN");
@@ -181,36 +165,6 @@ public class GiveCommand implements CommandExecutor {
         MessageUtils.send(target, "&6✦ Bạn đã mở khóa tọa kỵ: &e" + mountId);
         sender.sendMessage("§aĐã mở khóa tọa kỵ " + mountId + " cho " + target.getName());
         return true;
-    }
-
-    // ==================== SKILL BOOK ====================
-    
-    private boolean giveSkillBook(CommandSender sender, Player target, String skillId, String gradeStr, String qualityStr, int amount) {
-        try {
-            SkillGrade grade = SkillGrade.fromString(gradeStr);
-            SkillQuality quality = SkillQuality.fromString(qualityStr);
-            
-            SkillBookListener bookListener = plugin.getSkillManager().getBookListener();
-            if (bookListener == null) {
-                sender.sendMessage("§cHệ thống sách kỹ năng chưa sẵn sàng!");
-                return true;
-            }
-            
-            ItemStack book = bookListener.createSkillBook(skillId, grade, quality);
-            if (book == null) {
-                sender.sendMessage("§cSkill ID '" + skillId + "' không hợp lệ!");
-                return true;
-            }
-            book.setAmount(Math.max(1, Math.min(amount, 64)));
-            
-            target.getInventory().addItem(book);
-            MessageUtils.send(target, "&6✦ Bạn nhận được sách công pháp: &e" + skillId);
-            sender.sendMessage("§aĐã cho " + target.getName() + " " + amount + "x sách " + skillId + " (" + gradeStr + "/" + qualityStr + ")");
-            return true;
-        } catch (Exception e) {
-            sender.sendMessage("§cLỗi: " + e.getMessage());
-            return true;
-        }
     }
 
     // ==================== CREATE ITEMS ====================

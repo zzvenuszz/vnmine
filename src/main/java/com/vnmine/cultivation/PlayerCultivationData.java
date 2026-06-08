@@ -1,6 +1,5 @@
 package com.vnmine.cultivation;
 
-import com.vnmine.skill.PlayerSkillData;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -36,9 +35,6 @@ public class PlayerCultivationData {
     private int pillsCrafted;
     private int herbsHarvested;
 
-    // Kỹ năng mastery & quickbar
-    private PlayerSkillData skillData;
-
     // Trạng thái
     private long lastCombatTime;
     private long lastManaRegenTime;
@@ -57,7 +53,6 @@ public class PlayerCultivationData {
         this.maxMana = 100;
         this.learnedSkills = new HashMap<>();
         this.activePassiveSkills = new HashMap<>();
-        this.skillData = new PlayerSkillData();
         this.lastCombatTime = 0;
         this.lastManaRegenTime = System.currentTimeMillis();
     }
@@ -87,9 +82,6 @@ public class PlayerCultivationData {
 
     public Map<String, Boolean> getActivePassiveSkills() { return activePassiveSkills; }
     public void setActivePassiveSkills(Map<String, Boolean> activePassiveSkills) { this.activePassiveSkills = activePassiveSkills; }
-
-    public PlayerSkillData getSkillData() { return skillData; }
-    public void setSkillData(PlayerSkillData skillData) { this.skillData = skillData; }
 
     public int getMobsKilled() { return mobsKilled; }
     public void setMobsKilled(int mobsKilled) { this.mobsKilled = mobsKilled; }
