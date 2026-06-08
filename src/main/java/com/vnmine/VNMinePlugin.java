@@ -13,8 +13,10 @@ import com.vnmine.gui.AdminMenuGUI;
 import com.vnmine.gui.AlchemyCraftGUI;
 import com.vnmine.gui.ArtifactCraftGUI;
 import com.vnmine.gui.MainMenuGUI;
+import com.vnmine.item.ItemBuilder;
 import com.vnmine.item.PillUseListener;
 import com.vnmine.item.artifacts.abilities.ArtifactAbilityListener;
+import com.vnmine.item.block.BlockPlaceListener;
 import com.vnmine.mount.MountCommand;
 import com.vnmine.mount.MountManager;
 import com.vnmine.npc.NPCCommand;
@@ -100,8 +102,9 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         dropManager = new DropManager(this);
         blockDropListener = new BlockDropListener(this, dropManager);
 
-        cultivationManager = new CultivationManager(this);
-        nameTagManager = new NameTagManager(cultivationManager);
+        nameTagManager = new NameTagManager(null);
+        cultivationManager = new CultivationManager(this, nameTagManager);
+        nameTagManager.setCultivationManager(cultivationManager);
         cultivationListener = new CultivationListener(this, cultivationManager, nameTagManager);
         skillManager = new SkillManager(this);
         mainMenuGUI = new MainMenuGUI(this, cultivationManager, skillManager);
@@ -129,11 +132,17 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         worldManager.load();
         dropManager.load();
 
+        // Set plugin instance cho ItemBuilder (NBT keys)
+        ItemBuilder.setPlugin(this);
+
         // Register artifact ability listener (pháp bảo)
         ArtifactAbilityListener artifactAbilityListener = new ArtifactAbilityListener(this);
 
         // Register pill use listener (đan dược)
         PillUseListener pillUseListener = new PillUseListener(this);
+
+        // Register block place listener (chặn đặt item đặc biệt)
+        BlockPlaceListener blockPlaceListener = new BlockPlaceListener();
 
         // Register events
         getServer().getPluginManager().registerEvents(blockDropListener, this);
@@ -147,6 +156,8 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         getServer().getPluginManager().registerEvents(npcShopGUI, this);
         getServer().getPluginManager().registerEvents(pillUseListener, this);
         getServer().getPluginManager().registerEvents(adminMenuGUI, this);
+        getServer().getPluginManager().registerEvents(blockPlaceListener, this);
+        getServer().getPluginManager().registerEvents(skillManager, this);
 
         // Register commands
         getCommand("vnmine").setExecutor(this);
@@ -299,7 +310,8 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
                     sender.sendMessage("§6[VNMine] §cBạn không có quyền!");
                     return true;
                 }
-                return permissionCommand.onCommand(sender, command, label, args);
+                String[] permArgs = Arrays.copyOfRange(args, 1, args.length);
+                return permissionCommand.onCommand(sender, command, label, permArgs);
             case "world": return handleWorld(sender, args);
             case "drop": return handleDrop(sender, args);
             case "cultivate":

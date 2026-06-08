@@ -16,6 +16,7 @@
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/item/PillUseListener.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/item/artifacts/abilities/ArtifactAbilityListener.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/item/artifacts/abilities/FlyingSwordSession.java
+/home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/item/block/BlockPlaceListener.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/mount/MountCommand.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/mount/MountManager.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/npc/NPCCommand.java

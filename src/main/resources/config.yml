@@ -225,8 +225,15 @@ cultivation:
   tribulation:
     enabled: true
     damage:
-      base: 5.0
-      per-strike-multiplier: 1.5
+      base: 3.0
+      per-strike-multiplier: 1.2
+      # Sát thương mỗi level (tăng dần theo cấp)
+      damage-per-level: 0.8
+      # Giảm sát thương từ giáp (0.0-0.8) - 0.6 = 60% giảm cho full iron
+      # Công thức: sát thương = (base + level*damage-per-level + wave*3) * (1 - armor-reduction)
+      # Level 9 full iron: ~(3 + 7.2 + 0)*0.4 = ~4 dmg/giây → sống được
+      # Level 29 full diamond: ~(3 + 23.2 + 6)*0.35 = ~11.3 dmg/giây → cần thuốc hồi
+      armor-reduction: 0.6
     countdown-seconds: 5
     strike-interval-ticks: 20
     immunity-duration-seconds: 60

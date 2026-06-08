@@ -24,21 +24,30 @@ public class PermissionCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (args.length < 2) {
+        if (args.length < 1) {
             sendHelp(sender);
             return true;
         }
 
-        String action = args[0].toLowerCase();
-        String type = args[1].toLowerCase();
+        // args[0] is "perm", strip it
+        String[] permArgs = (args[0].equalsIgnoreCase("perm")) 
+                ? Arrays.copyOfRange(args, 1, args.length) 
+                : args;
+
+        if (permArgs.length < 1) {
+            sendHelp(sender);
+            return true;
+        }
+
+        String action = permArgs[0].toLowerCase();
 
         switch (action) {
             case "group":
-                return handleGroupCommand(sender, args);
+                return handleGroupCommand(sender, permArgs);
             case "player":
-                return handlePlayerCommand(sender, args);
+                return handlePlayerCommand(sender, permArgs);
             case "check":
-                return handleCheckCommand(sender, args);
+                return handleCheckCommand(sender, permArgs);
             case "reload":
                 return handleReloadCommand(sender);
             default:
@@ -70,12 +79,13 @@ public class PermissionCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean handleGroupCommand(CommandSender sender, String[] args) {
-        if (args.length < 3) {
+        // args: ["group", "list"] or ["group", "info", "admin"]
+        if (args.length < 2) {
             sender.sendMessage("§6[VNMine] §cSử dụng: /vnmine perm group <action> [args]");
             return true;
         }
 
-        String subAction = args[2].toLowerCase();
+        String subAction = args[1].toLowerCase();
 
         switch (subAction) {
             case "list":
@@ -119,11 +129,11 @@ public class PermissionCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean handleGroupInfo(CommandSender sender, String[] args) {
-        if (args.length < 4) {
+        if (args.length < 3) {
             sender.sendMessage("§6[VNMine] §cSử dụng: /vnmine perm group info <group>");
             return true;
         }
-        String groupName = args[3];
+        String groupName = args[2];
         Group group = permissionManager.getGroup(groupName);
         if (group == null) {
             sender.sendMessage("§6[VNMine] §cGroup '" + groupName + "' không tồn tại!");
@@ -143,11 +153,11 @@ public class PermissionCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean handleGroupCreate(CommandSender sender, String[] args) {
-        if (args.length < 4) {
+        if (args.length < 3) {
             sender.sendMessage("§6[VNMine] §cSử dụng: /vnmine perm group create <group>");
             return true;
         }
-        String groupName = args[3].toLowerCase();
+        String groupName = args[2].toLowerCase();
         if (permissionManager.getGroup(groupName) != null) {
             sender.sendMessage("§6[VNMine] §cGroup '" + groupName + "' đã tồn tại!");
             return true;
@@ -160,11 +170,11 @@ public class PermissionCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean handleGroupDelete(CommandSender sender, String[] args) {
-        if (args.length < 4) {
+        if (args.length < 3) {
             sender.sendMessage("§6[VNMine] §cSử dụng: /vnmine perm group delete <group>");
             return true;
         }
-        String groupName = args[3].toLowerCase();
+        String groupName = args[2].toLowerCase();
         Group group = permissionManager.getGroup(groupName);
         if (group == null) {
             sender.sendMessage("§6[VNMine] §cGroup '" + groupName + "' không tồn tại!");
@@ -181,18 +191,18 @@ public class PermissionCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean handleGroupSetWeight(CommandSender sender, String[] args) {
-        if (args.length < 5) {
+        if (args.length < 4) {
             sender.sendMessage("§6[VNMine] §cSử dụng: /vnmine perm group setweight <group> <weight>");
             return true;
         }
-        String groupName = args[3].toLowerCase();
+        String groupName = args[2].toLowerCase();
         Group group = permissionManager.getGroup(groupName);
         if (group == null) {
             sender.sendMessage("§6[VNMine] §cGroup '" + groupName + "' không tồn tại!");
             return true;
         }
         try {
-            int weight = Integer.parseInt(args[4]);
+            int weight = Integer.parseInt(args[3]);
             group.setWeight(weight);
             permissionManager.saveToConfig();
             sender.sendMessage("§6[VNMine] §aĐã set weight của group '" + groupName + "' thành " + weight);
@@ -203,20 +213,20 @@ public class PermissionCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean handleGroupSetPrefix(CommandSender sender, String[] args) {
-        if (args.length < 5) {
+        if (args.length < 4) {
             sender.sendMessage("§6[VNMine] §cSử dụng: /vnmine perm group setprefix <group> <prefix>");
             return true;
         }
-        String groupName = args[3].toLowerCase();
+        String groupName = args[2].toLowerCase();
         Group group = permissionManager.getGroup(groupName);
         if (group == null) {
             sender.sendMessage("§6[VNMine] §cGroup '" + groupName + "' không tồn tại!");
             return true;
         }
-        String prefix = args[4];
-        if (args.length > 5) {
+        String prefix = args[3];
+        if (args.length > 4) {
             StringBuilder sb = new StringBuilder(prefix);
-            for (int i = 5; i < args.length; i++) {
+            for (int i = 4; i < args.length; i++) {
                 sb.append(" ").append(args[i]);
             }
             prefix = sb.toString();
@@ -228,20 +238,20 @@ public class PermissionCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean handleGroupSetSuffix(CommandSender sender, String[] args) {
-        if (args.length < 5) {
+        if (args.length < 4) {
             sender.sendMessage("§6[VNMine] §cSử dụng: /vnmine perm group setsuffix <group> <suffix>");
             return true;
         }
-        String groupName = args[3].toLowerCase();
+        String groupName = args[2].toLowerCase();
         Group group = permissionManager.getGroup(groupName);
         if (group == null) {
             sender.sendMessage("§6[VNMine] §cGroup '" + groupName + "' không tồn tại!");
             return true;
         }
-        String suffix = args[4];
-        if (args.length > 5) {
+        String suffix = args[3];
+        if (args.length > 4) {
             StringBuilder sb = new StringBuilder(suffix);
-            for (int i = 5; i < args.length; i++) {
+            for (int i = 4; i < args.length; i++) {
                 sb.append(" ").append(args[i]);
             }
             suffix = sb.toString();
@@ -253,17 +263,17 @@ public class PermissionCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean handleGroupAddPerm(CommandSender sender, String[] args) {
-        if (args.length < 5) {
+        if (args.length < 4) {
             sender.sendMessage("§6[VNMine] §cSử dụng: /vnmine perm group addperm <group> <permission>");
             return true;
         }
-        String groupName = args[3].toLowerCase();
+        String groupName = args[2].toLowerCase();
         Group group = permissionManager.getGroup(groupName);
         if (group == null) {
             sender.sendMessage("§6[VNMine] §cGroup '" + groupName + "' không tồn tại!");
             return true;
         }
-        String perm = args[4];
+        String perm = args[3];
         group.addPermission(perm);
         permissionManager.saveToConfig();
         sender.sendMessage("§6[VNMine] §aĐã thêm permission '" + perm + "' vào group '" + groupName + "'");
@@ -271,17 +281,17 @@ public class PermissionCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean handleGroupRemovePerm(CommandSender sender, String[] args) {
-        if (args.length < 5) {
+        if (args.length < 4) {
             sender.sendMessage("§6[VNMine] §cSử dụng: /vnmine perm group removeperm <group> <permission>");
             return true;
         }
-        String groupName = args[3].toLowerCase();
+        String groupName = args[2].toLowerCase();
         Group group = permissionManager.getGroup(groupName);
         if (group == null) {
             sender.sendMessage("§6[VNMine] §cGroup '" + groupName + "' không tồn tại!");
             return true;
         }
-        String perm = args[4];
+        String perm = args[3];
         group.removePermission(perm);
         permissionManager.saveToConfig();
         sender.sendMessage("§6[VNMine] §aĐã xóa permission '" + perm + "' khỏi group '" + groupName + "'");
@@ -289,17 +299,17 @@ public class PermissionCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean handleGroupAddParent(CommandSender sender, String[] args) {
-        if (args.length < 5) {
+        if (args.length < 4) {
             sender.sendMessage("§6[VNMine] §cSử dụng: /vnmine perm group addparent <group> <parent>");
             return true;
         }
-        String groupName = args[3].toLowerCase();
+        String groupName = args[2].toLowerCase();
         Group group = permissionManager.getGroup(groupName);
         if (group == null) {
             sender.sendMessage("§6[VNMine] §cGroup '" + groupName + "' không tồn tại!");
             return true;
         }
-        String parent = args[4].toLowerCase();
+        String parent = args[3].toLowerCase();
         if (permissionManager.getGroup(parent) == null) {
             sender.sendMessage("§6[VNMine] §cGroup cha '" + parent + "' không tồn tại!");
             return true;
@@ -311,18 +321,18 @@ public class PermissionCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean handleGroupRemoveParent(CommandSender sender, String[] args) {
-        if (args.length < 4) {
+        if (args.length < 3) {
             sender.sendMessage("§6[VNMine] §cSử dụng: /vnmine perm group removeparent <group>");
             return true;
         }
-        String groupName = args[3].toLowerCase();
+        String groupName = args[2].toLowerCase();
         Group group = permissionManager.getGroup(groupName);
         if (group == null) {
             sender.sendMessage("§6[VNMine] §cGroup '" + groupName + "' không tồn tại!");
             return true;
         }
-        if (args.length >= 5) {
-            group.removeParent(args[4].toLowerCase());
+        if (args.length >= 4) {
+            group.removeParent(args[3].toLowerCase());
         } else {
             group.getParents().clear();
         }
@@ -332,11 +342,11 @@ public class PermissionCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean handleGroupSetDefault(CommandSender sender, String[] args) {
-        if (args.length < 4) {
+        if (args.length < 3) {
             sender.sendMessage("§6[VNMine] §cSử dụng: /vnmine perm group setdefault <group>");
             return true;
         }
-        String groupName = args[3].toLowerCase();
+        String groupName = args[2].toLowerCase();
         Group group = permissionManager.getGroup(groupName);
         if (group == null) {
             sender.sendMessage("§6[VNMine] §cGroup '" + groupName + "' không tồn tại!");
@@ -353,12 +363,12 @@ public class PermissionCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean handlePlayerCommand(CommandSender sender, String[] args) {
-        if (args.length < 3) {
+        if (args.length < 2) {
             sender.sendMessage("§6[VNMine] §cSử dụng: /vnmine perm player <action> [args]");
             return true;
         }
 
-        String subAction = args[2].toLowerCase();
+        String subAction = args[1].toLowerCase();
 
         switch (subAction) {
             case "info":
@@ -376,11 +386,11 @@ public class PermissionCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean handlePlayerInfo(CommandSender sender, String[] args) {
-        if (args.length < 4) {
+        if (args.length < 3) {
             sender.sendMessage("§6[VNMine] §cSử dụng: /vnmine perm player info <player>");
             return true;
         }
-        String playerName = args[3];
+        String playerName = args[2];
         PlayerData data = permissionManager.getPlayerData(playerName);
         if (data == null) {
             data = new PlayerData(playerName);
@@ -401,12 +411,12 @@ public class PermissionCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean handlePlayerSetGroup(CommandSender sender, String[] args) {
-        if (args.length < 5) {
+        if (args.length < 4) {
             sender.sendMessage("§6[VNMine] §cSử dụng: /vnmine perm player setgroup <player> <group>");
             return true;
         }
-        String playerName = args[3];
-        String groupName = args[4].toLowerCase();
+        String playerName = args[2];
+        String groupName = args[3].toLowerCase();
         if (permissionManager.getGroup(groupName) == null) {
             sender.sendMessage("§6[VNMine] §cGroup '" + groupName + "' không tồn tại!");
             return true;
@@ -420,12 +430,12 @@ public class PermissionCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean handlePlayerAddPerm(CommandSender sender, String[] args) {
-        if (args.length < 5) {
+        if (args.length < 4) {
             sender.sendMessage("§6[VNMine] §cSử dụng: /vnmine perm player addperm <player> <perm>");
             return true;
         }
-        String playerName = args[3];
-        String perm = args[4];
+        String playerName = args[2];
+        String perm = args[3];
         PlayerData data = permissionManager.getOrCreatePlayerData(playerName);
         data.addPermission(perm);
         permissionManager.saveToConfig();
@@ -434,12 +444,12 @@ public class PermissionCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean handlePlayerRemovePerm(CommandSender sender, String[] args) {
-        if (args.length < 5) {
+        if (args.length < 4) {
             sender.sendMessage("§6[VNMine] §cSử dụng: /vnmine perm player removeperm <player> <perm>");
             return true;
         }
-        String playerName = args[3];
-        String perm = args[4];
+        String playerName = args[2];
+        String perm = args[3];
         PlayerData data = permissionManager.getOrCreatePlayerData(playerName);
         data.removePermission(perm);
         permissionManager.saveToConfig();
@@ -448,12 +458,12 @@ public class PermissionCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean handleCheckCommand(CommandSender sender, String[] args) {
-        if (args.length < 4) {
+        if (args.length < 3) {
             sender.sendMessage("§6[VNMine] §cSử dụng: /vnmine perm check <player> <permission>");
             return true;
         }
-        String playerName = args[2];
-        String node = args[3];
+        String playerName = args[1];
+        String node = args[2];
         Player player = Bukkit.getPlayerExact(playerName);
         boolean hasPerm = false;
 

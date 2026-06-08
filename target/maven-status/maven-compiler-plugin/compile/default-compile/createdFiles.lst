@@ -15,6 +15,7 @@ com/vnmine/gui/ArtifactCraftGUI.class
 com/vnmine/mount/MountCommand.class
 com/vnmine/drop/DropManager.class
 com/vnmine/item/ItemBuilder.class
+com/vnmine/item/artifacts/abilities/FlyingSwordSession$6.class
 com/vnmine/world/WorldConfig.class
 com/vnmine/VNMinePlugin$TimeManager.class
 com/vnmine/gui/AlchemyCraftGUI$2.class
@@ -48,6 +49,7 @@ com/vnmine/item/artifacts/abilities/FlyingSwordSession$3.class
 com/vnmine/gui/AlchemyCraftGUI$3.class
 com/vnmine/mount/MountManager.class
 com/vnmine/cultivation/PlayerCultivationData.class
+com/vnmine/item/block/BlockPlaceListener.class
 com/vnmine/currency/CurrencyListener.class
 com/vnmine/drop/DropManager$DropRule.class
 com/vnmine/npc/NPCCommand.class

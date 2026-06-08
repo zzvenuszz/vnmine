@@ -114,9 +114,18 @@ public class PlayerCultivationData {
     public void setTribulationInProgress(boolean inProgress) { this.tribulationInProgress = inProgress; }
 
     /**
-     * Kiểm tra level có phải threshold cần độ kiếp không (10, 20, 30, ...)
+     * Kiểm tra level có phải threshold cần độ kiếp không (9, 19, 29, 39, ...)
+     * Đây là cấp cuối của đại cảnh giới (viên mãn), cần độ kiếp để đột phá
      */
     public static boolean isTribulationLevel(int level) {
+        return level > 0 && level % 10 == 9;
+    }
+
+    /**
+     * Kiểm tra xem level này có phải đã qua độ kiếp thành công không
+     * (tức là level 10, 20, 30... - cấp đầu tiên của đại cảnh giới tiếp theo)
+     */
+    public static boolean isPostTribulationLevel(int level) {
         return level > 0 && level % 10 == 0;
     }
 

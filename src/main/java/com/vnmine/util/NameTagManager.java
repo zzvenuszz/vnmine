@@ -17,9 +17,16 @@ import java.util.UUID;
  */
 public class NameTagManager {
 
-    private final CultivationManager cultivationManager;
+    private CultivationManager cultivationManager;
 
     public NameTagManager(CultivationManager cultivationManager) {
+        this.cultivationManager = cultivationManager;
+    }
+
+    /**
+     * Set cultivation manager (dùng để break circular dependency)
+     */
+    public void setCultivationManager(CultivationManager cultivationManager) {
         this.cultivationManager = cultivationManager;
     }
 

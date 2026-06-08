@@ -10,7 +10,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
@@ -19,10 +21,16 @@ import java.util.*;
  * AdminMenuGUI - Menu admin dành cho OP, click vào item để nhận
  * Đan dược (consumable) → 64 cái
  * Pháp bảo / nguyên liệu → 1 cái
+ * 
+ * FIX: Phân biệt rõ top inventory (GUI) và bottom inventory (player)
+ * FIX: Gắn NBT tag "vnmine_item" = "true" để chặn đặt block
  */
 public class AdminMenuGUI implements Listener {
 
     private final Map<UUID, String> openMenus = new HashMap<>();
+    
+    // Tên menu cố định để nhận diện
+    private static final String MENU_TITLE = "&8✦ VNMine Admin - Lấy Item ✦";
 
     // ==================== ĐỊNH NGHĨA ITEM ====================
 
@@ -103,7 +111,7 @@ public class AdminMenuGUI implements Listener {
      */
     public void open(Player player) {
         Inventory gui = Bukkit.createInventory(null, 54,
-                ColorUtils.colorize("&8✦ VNMine Admin - Lấy Item ✦"));
+                ColorUtils.colorize(MENU_TITLE));
 
         // === Hàng 0: Đan Dược (slot 0-8) ===
         gui.setItem(9, new ItemBuilder(Material.BLUE_STAINED_GLASS_PANE)
@@ -147,16 +155,18 @@ public class AdminMenuGUI implements Listener {
     }
 
     /**
-     * Tạo ItemStack cho một AdminItemDef
+     * Tạo ItemStack cho một AdminItemDef (cho GUI display)
      */
     private ItemStack createMenuItem(AdminItemDef def) {
+        String amountStr = def.stack64 ? "&8[x64]" : "&8[x1]";
         ItemBuilder builder = new ItemBuilder(def.material)
-                .setName(def.displayName + " &8[" + (def.stack64 ? "x64" : "x1") + "]")
+                .setName(def.displayName)
                 .setLore(
                         "",
                         def.lore,
                         "",
-                        "&eClick để thêm vào kho đồ!"
+                        "&eClick để thêm vào kho đồ!",
+                        amountStr
                 );
         if (def.stack64) {
             builder.setGlow(true);
@@ -172,6 +182,24 @@ public class AdminMenuGUI implements Listener {
         if (currentMenu == null) return;
 
         int slot = event.getRawSlot();
+
+        // === FIX: Chỉ xử lý click vào TOP inventory (GUI) ===
+        // Nếu click vào bottom inventory (player inventory) - chỉ cancel, không xử lý
+        // Nếu slot >= 54 (nằm ngoài GUI 54 slots) → đó là inventory của player
+        if (slot >= 54 || event.getClickedInventory() == null) {
+            event.setCancelled(true);
+            return;
+        }
+        
+        // Kiểm tra inventory được click có phải là top (GUI) không
+        InventoryView view = event.getView();
+        if (event.getClickedInventory() != view.getTopInventory()) {
+            // Click vào inventory của player → chỉ cancel, không xử lý
+            event.setCancelled(true);
+            return;
+        }
+
+        // Click vào GUI
         if (slot >= 0 && slot < 54) {
             event.setCancelled(true);
 
@@ -184,12 +212,19 @@ public class AdminMenuGUI implements Listener {
 
             // Thêm item vào inventory
             int amount = matched.stack64 ? 64 : 1;
-            ItemStack giveItem = new ItemBuilder(matched.material)
+            
+            // === FIX: Gắn NBT tag để chặn đặt block ===
+            // Chỉ gắn tag nếu item là block (có thể đặt được)
+            ItemBuilder giveBuilder = new ItemBuilder(matched.material)
                     .setName(matched.displayName)
                     .setLore("", matched.lore)
                     .setGlow(true)
-                    .setAmount(amount)
-                    .build();
+                    .setAmount(amount);
+            
+            // Gắn persistent data "vnmine_item" để BlockPlaceListener chặn đặt
+            giveBuilder.setPersistentData("vnmine_item", "true");
+            
+            ItemStack giveItem = giveBuilder.build();
 
             // Thêm vào kho, nếu đầy thì drop
             Map<Integer, ItemStack> leftover = player.getInventory().addItem(giveItem);
@@ -253,6 +288,12 @@ public class AdminMenuGUI implements Listener {
             this.lore = lore;
             this.stack64 = stack64;
         }
+    }
+
+    @EventHandler
+    public void onInventoryClose(InventoryCloseEvent event) {
+        if (!(event.getPlayer() instanceof Player)) return;
+        cleanupPlayer(event.getPlayer().getUniqueId());
     }
 
     public void cleanupPlayer(UUID uuid) {

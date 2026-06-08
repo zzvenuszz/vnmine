@@ -14,6 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -147,8 +148,8 @@ public class MainMenuGUI implements Listener {
                 .setName("&c&lĐóng")
                 .build());
 
-        openMenus.put(player.getUniqueId(), "main");
         player.openInventory(gui);
+        openMenus.put(player.getUniqueId(), "main");
         MessageUtils.playSound(player, Sound.BLOCK_ENDER_CHEST_OPEN);
     }
 
@@ -256,8 +257,8 @@ public class MainMenuGUI implements Listener {
                     ).build());
         }
 
-        openMenus.put(player.getUniqueId(), "cultivation_info");
         player.openInventory(gui);
+        openMenus.put(player.getUniqueId(), "cultivation_info");
     }
 
     /**
@@ -267,6 +268,8 @@ public class MainMenuGUI implements Listener {
         AlchemyCraftGUI gui = alchemyGUIs.computeIfAbsent(player.getUniqueId(), 
                 k -> new AlchemyCraftGUI(plugin, this));
         gui.open(player);
+        // Note: openMenus.put is inside gui.open()'s player.openInventory(),
+        // so we put it AFTER to avoid InventoryCloseEvent clearing it
         openMenus.put(player.getUniqueId(), "alchemy");
     }
 
@@ -274,6 +277,8 @@ public class MainMenuGUI implements Listener {
         ArtifactCraftGUI gui = artifactGUIs.computeIfAbsent(player.getUniqueId(),
                 k -> new ArtifactCraftGUI(plugin, this));
         gui.open(player);
+        // Note: openMenus.put is inside gui.open()'s player.openInventory(),
+        // so we put it AFTER to avoid InventoryCloseEvent clearing it
         openMenus.put(player.getUniqueId(), "artifact");
     }
 
@@ -356,8 +361,8 @@ public class MainMenuGUI implements Listener {
                 .setName("&e&l← Quay Lại")
                 .build());
 
-        openMenus.put(player.getUniqueId(), "guide");
         player.openInventory(gui);
+        openMenus.put(player.getUniqueId(), "guide");
     }
 
     @EventHandler
@@ -394,6 +399,12 @@ public class MainMenuGUI implements Listener {
                     break;
             }
         }
+    }
+
+    @EventHandler
+    public void onInventoryClose(InventoryCloseEvent event) {
+        if (!(event.getPlayer() instanceof Player)) return;
+        cleanupPlayer(event.getPlayer().getUniqueId());
     }
 
     public void cleanupPlayer(UUID uuid) {

@@ -2,6 +2,7 @@ package com.vnmine.skill;
 
 import com.vnmine.VNMinePlugin;
 import com.vnmine.cultivation.PlayerCultivationData;
+import com.vnmine.gui.MainMenuGUI;
 import com.vnmine.item.ItemBuilder;
 import com.vnmine.util.ColorUtils;
 import com.vnmine.util.MessageUtils;
@@ -12,6 +13,10 @@ import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.entity.Arrow;
@@ -22,7 +27,7 @@ import java.util.*;
 /**
  * SkillManager - Quản lý hệ thống công pháp / kỹ năng
  */
-public class SkillManager {
+public class SkillManager implements Listener {
 
     private final VNMinePlugin plugin;
     private boolean enabled;
@@ -293,6 +298,57 @@ public class SkillManager {
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
     public void reload() { loadConfig(); }
     public Collection<SkillConfig> getSkills() { return registeredSkills.values(); }
+
+    // ==================== GUI EVENT HANDLERS ====================
+
+    /**
+     * Xử lý click trong skill menu.
+     * Cancel tất cả slot 0-53 để ngăn người chơi lấy item ra khỏi GUI.
+     * Click slot 49 = quay lại menu chính (MainMenu).
+     * Click skill items = học/thi triển/bật tắt skill.
+     */
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent event) {
+        if (!(event.getWhoClicked() instanceof Player)) return;
+        Player player = (Player) event.getWhoClicked();
+
+        // Chỉ xử lý skill menu (kiểm tra bằng tên inventory)
+        String title = event.getView().getTitle();
+        if (!title.contains("Công Pháp & Kỹ Năng")) return;
+
+        int slot = event.getRawSlot();
+        if (slot >= 0 && slot < 54) {
+            event.setCancelled(true);
+
+            ItemStack clicked = event.getCurrentItem();
+            if (clicked == null || clicked.getType() == Material.AIR) return;
+
+            // Nút quay lại menu chính
+            if (slot == 49) {
+                MainMenuGUI mainMenu = plugin.getMainMenuGUI();
+                if (mainMenu != null) {
+                    mainMenu.openMainMenu(player);
+                } else {
+                    player.closeInventory();
+                }
+                return;
+            }
+
+            // Click vào skill item
+            boolean isShiftClick = event.isShiftClick();
+            handleSkillClick(player, slot, isShiftClick);
+        }
+    }
+
+    /**
+     * Dọn dẹp khi đóng skill menu (không cần thiết lắm vì không có session,
+     * nhưng thêm vào để đồng bộ với pattern các GUI khác)
+     */
+    @EventHandler
+    public void onInventoryClose(InventoryCloseEvent event) {
+        // Không cần cleanup gì đặc biệt cho skill menu
+        // Chỉ để đồng bộ pattern
+    }
 
     public static class SkillConfig {
         public final String id;

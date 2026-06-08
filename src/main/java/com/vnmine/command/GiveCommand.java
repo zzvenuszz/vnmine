@@ -169,36 +169,43 @@ public class GiveCommand implements CommandExecutor {
 
     // ==================== CREATE ITEMS ====================
 
+    /**
+     * Helper: thêm NBT tag "vnmine_item" để chặn đặt block
+     */
+    private ItemBuilder tagItem(ItemBuilder builder) {
+        return builder.setPersistentData("vnmine_item", "true");
+    }
+
     private ItemStack createPillItem(String pillId, int amount) {
         switch (pillId.toUpperCase()) {
             case "HOI_LINH_DAN":
-                return new ItemBuilder(Material.GLOWSTONE_DUST).setName("&aHồi Linh Đan")
+                return tagItem(new ItemBuilder(Material.GLOWSTONE_DUST).setName("&aHồi Linh Đan")
                         .setAmount(amount).setGlow(true)
-                        .setLore("", "&7Hồi phục &b30 &7linh lực ngay lập tức").build();
+                        .setLore("", "&7Hồi phục &b30 &7linh lực ngay lập tức")).build();
             case "DAI_HOI_LINH_DAN":
-                return new ItemBuilder(Material.GLOWSTONE).setName("&bĐại Hồi Linh Đan")
+                return tagItem(new ItemBuilder(Material.GLOWSTONE).setName("&bĐại Hồi Linh Đan")
                         .setAmount(amount).setGlow(true)
-                        .setLore("", "&7Hồi phục &b100 &7linh lực + 20% hồi phục 30s").build();
+                        .setLore("", "&7Hồi phục &b100 &7linh lực + 20% hồi phục 30s")).build();
             case "CUONG_THE_DAN":
-                return new ItemBuilder(Material.REDSTONE_BLOCK).setName("&cCương Thể Đan")
+                return tagItem(new ItemBuilder(Material.REDSTONE_BLOCK).setName("&cCương Thể Đan")
                         .setAmount(amount).setGlow(true)
-                        .setLore("", "&7Tăng &c20% sát thương &7trong 60 giây").build();
+                        .setLore("", "&7Tăng &c20% sát thương &7trong 60 giây")).build();
             case "THANH_TAM_DAN":
-                return new ItemBuilder(Material.SUGAR).setName("&aThanh Tâm Đan")
+                return tagItem(new ItemBuilder(Material.SUGAR).setName("&aThanh Tâm Đan")
                         .setAmount(amount).setGlow(true)
-                        .setLore("", "&7Giải trừ mọi trạng thái xấu").build();
+                        .setLore("", "&7Giải trừ mọi trạng thái xấu")).build();
             case "TOC_THANH_DAN":
-                return new ItemBuilder(Material.FEATHER).setName("&bTốc Thánh Đan")
+                return tagItem(new ItemBuilder(Material.FEATHER).setName("&bTốc Thánh Đan")
                         .setAmount(amount).setGlow(true)
-                        .setLore("", "&7Tăng &b50% tốc độ &7trong 30 giây").build();
+                        .setLore("", "&7Tăng &b50% tốc độ &7trong 30 giây")).build();
             case "TU_LUYEN_DAN":
-                return new ItemBuilder(Material.PURPLE_DYE).setName("&5Tu Luyện Đan")
+                return tagItem(new ItemBuilder(Material.PURPLE_DYE).setName("&5Tu Luyện Đan")
                         .setAmount(amount).setGlow(true)
-                        .setLore("", "&7Tăng &5+50 EXP &7khi sử dụng").build();
+                        .setLore("", "&7Tăng &5+50 EXP &7khi sử dụng")).build();
             case "PHI_THANG_DAN":
-                return new ItemBuilder(Material.NETHER_STAR).setName("&6&l◆ Phi Thăng Đan ◆")
+                return tagItem(new ItemBuilder(Material.NETHER_STAR).setName("&6&l◆ Phi Thăng Đan ◆")
                         .setAmount(amount).setGlow(true)
-                        .setLore("", "&7+500 EXP (1 lần/đại cảnh giới)").build();
+                        .setLore("", "&7+500 EXP (1 lần/đại cảnh giới)")).build();
             default:
                 return null;
         }
@@ -207,26 +214,26 @@ public class GiveCommand implements CommandExecutor {
     private ItemStack createArtifactItem(String artifactId) {
         switch (artifactId.toUpperCase()) {
             case "FLYING_SWORD":
-                return new ItemBuilder(Material.DIAMOND_SWORD).setName("&b&l◆ Kiếm Phi Hành ◆").setGlow(true)
-                        .setLore("", "&7Click phải để ngự kiếm phi hành", "", "&6&l✦ Pháp bảo thượng phẩm ✦").build();
+                return tagItem(new ItemBuilder(Material.DIAMOND_SWORD).setName("&b&l◆ Kiếm Phi Hành ◆").setGlow(true)
+                        .setLore("", "&7Click phải để ngự kiếm phi hành", "", "&6&l✦ Pháp bảo thượng phẩm ✦")).build();
             case "SPIRIT_BELL":
-                return new ItemBuilder(Material.BELL).setName("&6&l◆ Linh Chung ◆").setGlow(true)
-                        .setLore("", "&7Click phải: Làm choáng quái AOE", "", "&6&l✦ Pháp bảo thượng phẩm ✦").build();
+                return tagItem(new ItemBuilder(Material.BELL).setName("&6&l◆ Linh Chung ◆").setGlow(true)
+                        .setLore("", "&7Click phải: Làm choáng quái AOE", "", "&6&l✦ Pháp bảo thượng phẩm ✦")).build();
             case "BAGUA_MIRROR":
-                return new ItemBuilder(Material.SHIELD).setName("&5&l◆ Bát Quái Kính ◆").setGlow(true)
-                        .setLore("", "&7Cầm tay: Giảm 30% sát thương", "", "&6&l✦ Pháp bảo thượng phẩm ✦").build();
+                return tagItem(new ItemBuilder(Material.SHIELD).setName("&5&l◆ Bát Quái Kính ◆").setGlow(true)
+                        .setLore("", "&7Cầm tay: Giảm 30% sát thương", "", "&6&l✦ Pháp bảo thượng phẩm ✦")).build();
             case "SOUL_JADE":
-                return new ItemBuilder(Material.EMERALD).setName("&a&l◆ Hồn Ngọc ◆").setGlow(true)
-                        .setLore("", "&7Tự động hồi 50% máu khi HP<20%", "", "&6&l✦ Pháp bảo thượng phẩm ✦").build();
+                return tagItem(new ItemBuilder(Material.EMERALD).setName("&a&l◆ Hồn Ngọc ◆").setGlow(true)
+                        .setLore("", "&7Tự động hồi 50% máu khi HP<20%", "", "&6&l✦ Pháp bảo thượng phẩm ✦")).build();
             case "HEAVEN_SHIELD":
-                return new ItemBuilder(Material.NETHERITE_CHESTPLATE).setName("&4&l◆ Thiên Linh Thuẫn ◆").setGlow(true)
-                        .setLore("", "&7Kích hoạt: Bất tử 5 giây", "", "&6&l✦ Pháp bảo thượng phẩm ✦").build();
+                return tagItem(new ItemBuilder(Material.NETHERITE_CHESTPLATE).setName("&4&l◆ Thiên Linh Thuẫn ◆").setGlow(true)
+                        .setLore("", "&7Kích hoạt: Bất tử 5 giây", "", "&6&l✦ Pháp bảo thượng phẩm ✦")).build();
             case "THUNDER_SEAL":
-                return new ItemBuilder(Material.TRIDENT).setName("&e&l◆ Lôi Ấn ◆").setGlow(true)
-                        .setLore("", "&7Click quái: Gọi sét đánh", "", "&6&l✦ Pháp bảo thượng phẩm ✦").build();
+                return tagItem(new ItemBuilder(Material.TRIDENT).setName("&e&l◆ Lôi Ấn ◆").setGlow(true)
+                        .setLore("", "&7Click quái: Gọi sét đánh", "", "&6&l✦ Pháp bảo thượng phẩm ✦")).build();
             case "PHOENIX_REBIRTH":
-                return new ItemBuilder(Material.FEATHER).setName("&6&l◆ Phượng Hoàng Lệnh ◆").setGlow(true)
-                        .setLore("", "&7Tự động hồi sinh 1 lần", "", "&6&l✦ Pháp bảo thượng phẩm ✦").build();
+                return tagItem(new ItemBuilder(Material.FEATHER).setName("&6&l◆ Phượng Hoàng Lệnh ◆").setGlow(true)
+                        .setLore("", "&7Tự động hồi sinh 1 lần", "", "&6&l✦ Pháp bảo thượng phẩm ✦")).build();
             default:
                 return null;
         }

@@ -13,7 +13,6 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
-import org.bukkit.inventory.ItemStack;
 
 /**
  * CultivationListener - Lắng nghe sự kiện để thêm exp, quản lý linh lực
@@ -35,15 +34,6 @@ public class CultivationListener implements Listener {
         Player player = event.getPlayer();
         // Đảm bảo có dữ liệu tu luyện
         PlayerCultivationData data = cultivationManager.getOrCreatePlayerData(player.getUniqueId(), player.getName());
-        // Đồng bộ level tu tiên với level Minecraft vanilla
-        int mcLevel = player.getLevel();
-        if (data.getLevel() != mcLevel) {
-            data.setLevel(mcLevel);
-            data.setMaxMana(cultivationManager.calculateMaxMana(mcLevel));
-            if (data.getMana() > data.getMaxMana()) {
-                data.setMana(data.getMaxMana());
-            }
-        }
         // Cập nhật name tag với prefix tu tiên
         nameTagManager.updateNameTag(player);
     }
@@ -54,20 +44,15 @@ public class CultivationListener implements Listener {
         PlayerCultivationData data = cultivationManager.getPlayerData(player.getUniqueId());
         if (data == null) return;
 
-        int newLevel = player.getLevel();
-        data.setLevel(newLevel);
-        data.setMaxMana(cultivationManager.calculateMaxMana(newLevel));
-        if (data.getMana() > data.getMaxMana()) {
-            data.setMana(data.getMaxMana());
-        }
-
-        // Cập nhật name tag
+        // KHÔNG tự động set cultivation level = vanilla level nữa
+        // Vì cultivation tự quản lý level riêng
+        // Chỉ dùng event này để cập nhật name tag
         nameTagManager.updateNameTag(player);
 
         // Hiển thị action bar thông tin
         String realmPrefix = data.getRealmPrefix();
         MessageUtils.sendActionBar(player,
-                "&a✦ Cấp " + newLevel + " - " + realmPrefix + "&r&a] ✦");
+                "&a✦ Cấp " + data.getLevel() + " - " + realmPrefix + "&r&a] ✦");
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -93,9 +78,48 @@ public class CultivationListener implements Listener {
         Player player = event.getEntity();
         PlayerCultivationData data = cultivationManager.getPlayerData(player.getUniqueId());
         if (data != null && data.isTribulationInProgress()) {
-            // Player chết trong lúc độ kiếp → fail tribulation
+            // Chỉ gọi failTribulation nếu đang trong tribulation
+            // failTribulation đã có check activeTribulations để chống gọi 2 lần
             cultivationManager.failTribulation(player);
+            
+            // Thông báo cho player biết đã thất bại
+            MessageUtils.send(player, "&4☠ Bạn đã chết trong lôi kiếp! Độ kiếp thất bại.");
         }
+    }
+
+    /**
+     * Xử lý khi player respawn (hồi sinh)
+     * Fix bug: sau khi chết vì lôi kiếp và respawn, không điều khiển được nhân vật
+     */
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerRespawn(PlayerRespawnEvent event) {
+        Player player = event.getPlayer();
+        PlayerCultivationData data = cultivationManager.getPlayerData(player.getUniqueId());
+        if (data == null) return;
+
+        // Kiểm tra và dọn dẹp trạng thái tribulation còn sót
+        if (data.isTribulationInProgress()) {
+            data.setTribulationInProgress(false);
+            MessageUtils.send(player, "&c✦ Đã hủy trạng thái độ kiếp sau khi hồi sinh.");
+        }
+
+        // Xóa session tribulation nếu còn
+        if (data.getLevel() > 0 && PlayerCultivationData.isTribulationLevel(data.getLevel())) {
+            // Nếu đã thất bại, kiểm tra xem cần waiting hay không
+            if (data.getExperience() >= data.getMaxExperience()) {
+                data.setWaitingForTribulation(true);
+            }
+        }
+
+        // Reset các trạng thái player sau khi respawn
+        // Đảm bảo player có thể di chuyển và tương tác bình thường
+        player.setWalkSpeed(0.2f); // Reset speed mặc định
+        player.setFlySpeed(0.1f);  // Reset fly speed mặc định
+        player.setAllowFlight(false); // Tắt bay
+        player.setFlying(false);
+        
+        // Cập nhật name tag
+        nameTagManager.updateNameTag(player);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

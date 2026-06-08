@@ -12,6 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Transformation;
+import org.bukkit.util.Vector;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -19,15 +20,23 @@ import java.util.UUID;
 
 /**
  * FlyingSwordSession - Quản lý phiên ngự kiếm phi hành.
+ * ============================================================
+ * ⚠️ CẢNH BÁO: Class này ĐÃ HOẠT ĐỘNG ỔN ĐỊNH. KHÔNG SỬA ĐỔI
+ * nếu không có lệnh trực tiếp từ người dùng.
+ * ============================================================
  * 
  * Cơ chế bay:
  *   1. Kích hoạt: push player lên cao với velocity
- *   2. Sau 2 ticks (khi đã airborne), setAllowFlight(true) + setFlying(true) 
- *   3. Task duy trì flight mỗi tick (re-set flying nếu bị mất)
- *   4. Kiểm tra sneak + gần đất để kết thúc
- *   5. Miễn nhiễm sát thương rơi khi đang bay
+ *   2. Sau 2 ticks: setAllowFlight(true) + setFlying(true) 
+ *   3. Follow task mỗi tick: setAllowFlight(true) + reset fall distance
+ *      KHÔNG force setFlying mỗi tick (tránh lỗi inventory)
+ *   4. Periodic check mỗi 10 ticks: re-set flying nếu bị mất
+ *   5. Space = lên (vanilla flight), Shift = xuống
+ *   6. Ctrl (Sprint) = tăng tốc về phía trước
+ *   7. Sneak gần đất = hạ cánh
+ *   8. Reset fall distance mỗi tick để tránh sát thương rơi
  * 
- * Điều khiển: Space = lên, Ctrl/Sneak = xuống, Shift gần đất = hạ cánh
+ * Điều khiển: Space = lên, Shift/Sneak = xuống, Ctrl = tăng tốc
  * Tiêu hao: 10 linh lực/giây
  */
 public class FlyingSwordSession {
@@ -42,6 +51,7 @@ public class FlyingSwordSession {
     private BukkitRunnable manaDrainTask;
     private BukkitRunnable sneakCheckTask;
     private BukkitRunnable hoverTask;
+    private BukkitRunnable flightCheckTask;
 
     // Trạng thái
     private boolean ended = false;
@@ -54,11 +64,14 @@ public class FlyingSwordSession {
     private static final int MANA_COST_PER_SECOND = 10;
     private static final int SNEAK_CHECK_INTERVAL = 3;
     private static final double DISMOUNT_HEIGHT = 1.8;
+    private static final double AUTO_LAND_HEIGHT = 0.5;
     private static final int START_DELAY_TICKS = 40;      // 2 giây delay trước khi cho phép hạ cánh
     private static final float SWORD_SCALE = 2.5f;
     private static final int COOLDOWN_SECONDS = 30;
-    private static final double LAUNCH_VELOCITY = 2.0;    // Đẩy lên cao hơn
-    private static final int FLIGHT_ESTABLISH_DELAY = 2;  // Delay 2 ticks trước khi set flying
+    private static final double LAUNCH_VELOCITY = 0.6;    // Đẩy lên cao ~2 blocks
+    private static final int FLIGHT_ESTABLISH_DELAY = 4;  // Delay 4 ticks trước khi set flying (đảm bảo đã rời mặt đất)
+    private static final int FLIGHT_CHECK_INTERVAL = 10;  // Check flying mỗi 10 ticks (0.5s)
+    private static final double SPRINT_SPEED_BOOST = 0.4; // Tốc độ tăng thêm khi sprint
 
     public FlyingSwordSession(VNMinePlugin plugin, Player player) {
         this.plugin = plugin;
@@ -92,6 +105,7 @@ public class FlyingSwordSession {
         startManaDrainTask();
         startSneakCheckTask();
         startHoverTask();
+        startFlightCheckTask();
 
         // 6. Schedule set flying sau 2 ticks (khi đã rời mặt đất)
         new BukkitRunnable() {
@@ -105,7 +119,7 @@ public class FlyingSwordSession {
                 player.setAllowFlight(true);
                 player.setFlying(true);
                 flightEstablished = true;
-                MessageUtils.send(player, "&b✦ Ngự Kiếm Phi Hành! &7Space lên, Ctrl xuống, Shift gần đất để hạ cánh.");
+                MessageUtils.send(player, "&b✦ Ngự Kiếm Phi Hành! &7Space lên, Shift xuống, Ctrl tăng tốc.");
                 MessageUtils.playSound(player, org.bukkit.Sound.ENTITY_FIREWORK_ROCKET_LAUNCH);
             }
         }.runTaskLater(plugin, FLIGHT_ESTABLISH_DELAY);
@@ -123,6 +137,7 @@ public class FlyingSwordSession {
         if (manaDrainTask != null) manaDrainTask.cancel();
         if (sneakCheckTask != null) sneakCheckTask.cancel();
         if (hoverTask != null) hoverTask.cancel();
+        if (flightCheckTask != null) flightCheckTask.cancel();
 
         // Remove ItemDisplay
         if (swordDisplay != null) {
@@ -136,6 +151,13 @@ public class FlyingSwordSession {
                 player.setFlying(false);
                 player.setAllowFlight(false);
             }
+        }
+
+        flightEstablished = false;
+
+        // Reset fall distance để tránh sát thương rơi khi kết thúc
+        if (player.isOnline()) {
+            player.setFallDistance(0);
         }
 
         // Hiệu ứng
@@ -201,7 +223,8 @@ public class FlyingSwordSession {
 
     /**
      * Task cập nhật vị trí + hướng ItemDisplay theo player mỗi tick.
-     * Đồng thời duy trì trạng thái flying và reset fall distance.
+     * Chỉ setAllowFlight + reset fall distance. KHÔNG force setFlying mỗi tick
+     * (để tránh lỗi không kéo được items trong inventory).
      */
     private void startFollowTask() {
         followTask = new BukkitRunnable() {
@@ -213,17 +236,28 @@ public class FlyingSwordSession {
                     return;
                 }
 
-                // === Duy trì trạng thái flying ===
-                // Nếu flight đã established nhưng player bị mất flying, re-set ngay
+                // === Duy trì allow flight + reset fall distance ===
+                // KHÔNG force setFlying(true) ở đây để tránh lỗi inventory
                 if (flightEstablished) {
                     if (!player.getAllowFlight()) {
                         player.setAllowFlight(true);
                     }
-                    if (!player.isFlying()) {
-                        player.setFlying(true);
-                    }
                     // Reset fall distance để không bị sát thương rơi
                     player.setFallDistance(0);
+                }
+
+                // Xử lý sprint (Ctrl) - tăng tốc về phía trước
+                if (flightEstablished && player.isSprinting()) {
+                    // Lấy hướng nhìn của player, chỉ lấy horizontal direction
+                    Vector direction = player.getLocation().getDirection();
+                    direction.setY(0).normalize();
+                    // Boost vận tốc theo hướng nhìn
+                    Vector vel = player.getVelocity();
+                    double currentHorizontal = Math.sqrt(vel.getX() * vel.getX() + vel.getZ() * vel.getZ());
+                    if (currentHorizontal < SPRINT_SPEED_BOOST) {
+                        vel.add(direction.multiply(SPRINT_SPEED_BOOST - currentHorizontal));
+                        player.setVelocity(vel);
+                    }
                 }
 
                 // Cập nhật vị trí dưới chân player
@@ -238,6 +272,31 @@ public class FlyingSwordSession {
             }
         };
         followTask.runTaskTimer(plugin, 0L, 1L);
+    }
+
+    /**
+     * Task kiểm tra flight định kỳ - mỗi 10 ticks (0.5 giây).
+     * Chỉ re-set flying nếu bị mất, KHÔNG chạy mỗi tick để tránh lỗi inventory.
+     */
+    private void startFlightCheckTask() {
+        flightCheckTask = new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (ended || !player.isOnline()) {
+                    end();
+                    this.cancel();
+                    return;
+                }
+
+                if (flightEstablished) {
+                    // Chỉ re-set flying nếu thực sự bị mất
+                    if (!player.isFlying()) {
+                        player.setFlying(true);
+                    }
+                }
+            }
+        };
+        flightCheckTask.runTaskTimer(plugin, 20L, FLIGHT_CHECK_INTERVAL);
     }
 
     /**
@@ -264,12 +323,14 @@ public class FlyingSwordSession {
     }
 
     /**
-     * Task duy trì độ cao - nhẹ nhàng giữ player không bị rơi.
-     * Chỉ can thiệp khi player đang falling và flight chưa established.
-     * Khi flight đã established, player tự điều khiển bằng Space/Ctrl.
+     * Task duy trì độ cao - hỗ trợ trong giai đoạn flight chưa established.
+     * Giữ player ở độ cao ~2 blocks so với mặt đất để tránh rơi,
+     * cho đến khi setFlying(true) được gọi thành công.
      */
     private void startHoverTask() {
         hoverTask = new BukkitRunnable() {
+            private boolean hasPassedPeak = false;
+
             @Override
             public void run() {
                 if (ended || !player.isOnline()) {
@@ -278,12 +339,28 @@ public class FlyingSwordSession {
                     return;
                 }
 
-                // Trong 2 tick đầu, flight chưa established, giúp player không rơi
+                // Reset fall distance
+                player.setFallDistance(0);
+
                 if (!flightEstablished) {
-                    org.bukkit.util.Vector vel = player.getVelocity();
-                    if (vel.getY() < 0.2) {
-                        // Giảm tốc độ rơi để player có thời gian lên cao
-                        player.setVelocity(vel.setY(vel.getY() * 0.8 + 0.15));
+                    // Duy trì allowFlight trong lúc chờ
+                    player.setAllowFlight(true);
+
+                    Vector vel = player.getVelocity();
+
+                    // Phát hiện đã qua đỉnh (velocity Y chuyển từ dương sang âm)
+                    if (vel.getY() <= 0) {
+                        hasPassedPeak = true;
+                    }
+
+                    if (hasPassedPeak) {
+                        // Đang rơi - giữ player lơ lửng tại chỗ, không để rơi xuống đất
+                        player.setVelocity(new Vector(vel.getX() * 0.5, 0.1, vel.getZ() * 0.5));
+                    } else {
+                        // Đang đi lên - giữ nguyên quán tính
+                        if (vel.getY() < 0.3) {
+                            player.setVelocity(vel.setY(vel.getY() + 0.05));
+                        }
                     }
                 }
             }
@@ -294,8 +371,8 @@ public class FlyingSwordSession {
     /**
      * Task kiểm tra sneak để hạ cánh.
      * - 2 giây đầu: không check (tránh lỗi rơi ngay)
-     * - Sneak + gần đất: hạ cánh (chứ không auto-hạ cánh như cũ)
-     * - Sneak trên cao: bay xuống nhanh hơn
+     * - Sneak + gần đất: hạ cánh
+     * - Áp sát mặt đất: tự động hạ cánh
      */
     private void startSneakCheckTask() {
         sneakCheckTask = new BukkitRunnable() {
@@ -316,28 +393,20 @@ public class FlyingSwordSession {
                 Location loc = player.getLocation();
                 double distanceToGround = getDistanceToGround(loc);
 
-                // Chỉ hạ cánh khi player đang sneak VÀ gần mặt đất
-                if (player.isSneaking() && distanceToGround >= 0 && distanceToGround <= DISMOUNT_HEIGHT) {
+                // Tự động hạ cánh khi quá gần mặt đất (< 0.5 block)
+                if (distanceToGround >= 0 && distanceToGround <= AUTO_LAND_HEIGHT) {
                     MessageUtils.send(player, "&7Hạ cánh.");
-                    player.setVelocity(player.getVelocity().setY(0.2));
                     end();
                     this.cancel();
                     return;
                 }
 
-                // Trên cao + đang sneak → hạ nhanh hơn (override flight)
-                if (player.isSneaking() && distanceToGround > DISMOUNT_HEIGHT) {
-                    // Tạm thời tắt flying để rơi xuống
-                    if (flightEstablished) {
-                        player.setFlying(false);
-                    }
-                    org.bukkit.util.Vector vel = player.getVelocity();
-                    if (vel.getY() > -0.8) {
-                        player.setVelocity(vel.setY(vel.getY() - 0.15));
-                    }
-                } else if (flightEstablished && !player.isFlying()) {
-                    // Nếu không sneak mà flying bị tắt, bật lại
-                    player.setFlying(true);
+                // Sneak + gần mặt đất: hạ cánh
+                if (player.isSneaking() && distanceToGround >= 0 && distanceToGround <= DISMOUNT_HEIGHT) {
+                    MessageUtils.send(player, "&7Hạ cánh.");
+                    player.setVelocity(player.getVelocity().setY(0.2));
+                    end();
+                    this.cancel();
                 }
             }
 

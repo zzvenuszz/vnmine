@@ -3,12 +3,16 @@ package com.vnmine.item;
 import com.vnmine.util.ColorUtils;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -219,6 +223,51 @@ public class ItemBuilder {
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         }
         return this;
+    }
+
+    // ==================== PERSISTENT DATA (NBT) ====================
+
+    private static Plugin pluginInstance = null;
+
+    /**
+     * Set plugin instance để dùng NamespacedKey
+     */
+    public static void setPlugin(Plugin plugin) {
+        pluginInstance = plugin;
+    }
+
+    /**
+     * Set persistent data vào item (NBT tag)
+     */
+    public ItemBuilder setPersistentData(String key, String value) {
+        if (meta != null && pluginInstance != null) {
+            NamespacedKey namespacedKey = new NamespacedKey(pluginInstance, key);
+            PersistentDataContainer container = meta.getPersistentDataContainer();
+            container.set(namespacedKey, PersistentDataType.STRING, value);
+        }
+        return this;
+    }
+
+    /**
+     * Kiểm tra item có persistent data không (static)
+     */
+    public static boolean hasPersistentData(ItemStack item, String key) {
+        if (item == null || pluginInstance == null) return false;
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return false;
+        NamespacedKey namespacedKey = new NamespacedKey(pluginInstance, key);
+        return meta.getPersistentDataContainer().has(namespacedKey, PersistentDataType.STRING);
+    }
+
+    /**
+     * Lấy persistent data từ item (static)
+     */
+    public static String getPersistentData(ItemStack item, String key) {
+        if (item == null || pluginInstance == null) return null;
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return null;
+        NamespacedKey namespacedKey = new NamespacedKey(pluginInstance, key);
+        return meta.getPersistentDataContainer().get(namespacedKey, PersistentDataType.STRING);
     }
 
     // ==================== BUILD ====================
