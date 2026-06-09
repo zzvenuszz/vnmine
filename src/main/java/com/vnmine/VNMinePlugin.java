@@ -27,6 +27,9 @@ import com.vnmine.npc.NPCShopGUI;
 import com.vnmine.permission.PermissionCommand;
 import com.vnmine.permission.PermissionManager;
 import com.vnmine.skill.SkillManager;
+import com.vnmine.skill.SkillBarGUI;
+import com.vnmine.skill.SkillBookListener;
+import com.vnmine.skill.SkillBookManager;
 import com.vnmine.util.ColorUtils;
 import com.vnmine.util.MessageUtils;
 import com.vnmine.util.NameTagManager;
@@ -39,6 +42,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -63,6 +67,8 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
     private CultivationListener cultivationListener;
     private NameTagManager nameTagManager;
     private SkillManager skillManager;
+    private SkillBookManager skillBookManager;
+    private SkillBarGUI skillBarGUI;
     private MainMenuGUI mainMenuGUI;
     private AlchemyCraftGUI alchemyCraftGUI;
     private ArtifactCraftGUI artifactCraftGUI;
@@ -83,6 +89,8 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
     // === GETTERS ===
     public CultivationManager getCultivationManager() { return cultivationManager; }
     public SkillManager getSkillManager() { return skillManager; }
+    public SkillBookManager getSkillBookManager() { return skillBookManager; }
+    public SkillBarGUI getSkillBarGUI() { return skillBarGUI; }
     public MainMenuGUI getMainMenuGUI() { return mainMenuGUI; }
     public PermissionManager getPermissionManager() { return permissionManager; }
     public CurrencyManager getCurrencyManager() { return currencyManager; }
@@ -108,6 +116,8 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         nameTagManager.setCultivationManager(cultivationManager);
         cultivationListener = new CultivationListener(this, cultivationManager, nameTagManager);
         skillManager = new SkillManager(this);
+        skillBookManager = new SkillBookManager(this);
+        skillBarGUI = new SkillBarGUI(this);
         mainMenuGUI = new MainMenuGUI(this, cultivationManager, skillManager);
         alchemyCraftGUI = new AlchemyCraftGUI(this, mainMenuGUI);
         artifactCraftGUI = new ArtifactCraftGUI(this, mainMenuGUI);
@@ -159,6 +169,8 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         getServer().getPluginManager().registerEvents(adminMenuGUI, this);
         getServer().getPluginManager().registerEvents(blockPlaceListener, this);
         getServer().getPluginManager().registerEvents(skillManager, this);
+        getServer().getPluginManager().registerEvents(skillBarGUI, this);
+        getServer().getPluginManager().registerEvents(new SkillBookListener(this), this);
         getServer().getPluginManager().registerEvents(new QuickMenuListener(this), this);
 
         // Register commands
@@ -511,11 +523,40 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
                 break;
             case "reload":
                 if (skillManager != null) { skillManager.reload(); sender.sendMessage("§6[VNMine] §aĐã reload công pháp!"); }
+                if (skillBookManager != null) { skillBookManager.reload(); sender.sendMessage("§6[VNMine] §aĐã reload sách công pháp!"); }
                 break;
             case "my":
                 if (sender instanceof Player && skillManager != null) skillManager.openSkillMenu((Player) sender);
                 break;
-            default: sender.sendMessage("§cSử dụng: /vnskill <toggle|reload|my>");
+            case "bar":
+                if (sender instanceof Player && skillBarGUI != null) {
+                    skillBarGUI.openSkillManagement((Player) sender);
+                }
+                break;
+            case "book":
+                // Admin command: give a skill book
+                if (sender.hasPermission("vnmine.command.admin") && args.length >= 4) {
+                    String targetPlayer = args[1];
+                    String skillId = args[2];
+                    String grade = args[3].toUpperCase();
+                    String subGrade = args.length >= 5 ? args[4].toUpperCase() : "HA";
+                    Player target = Bukkit.getPlayer(targetPlayer);
+                    if (target != null && skillBookManager != null) {
+                        ItemStack book = skillBookManager.createSkillBook(skillId, grade, subGrade);
+                        if (book != null) {
+                            target.getInventory().addItem(book);
+                            sender.sendMessage("§6[VNMine] §aĐã give sách công pháp cho " + target.getName());
+                        } else {
+                            sender.sendMessage("§cKhông thể tạo sách công pháp!");
+                        }
+                    } else {
+                        sender.sendMessage("§cKhông tìm thấy người chơi!");
+                    }
+                } else {
+                    sender.sendMessage("§cSử dụng: /vnskill book <player> <skill_id> <THIEN|DIA|HUYEN|HOANG> [THUONG|TRUNG|HA]");
+                }
+                break;
+            default: sender.sendMessage("§cSử dụng: /vnskill <toggle|reload|my|bar|book>");
         }
         return true;
     }
@@ -634,6 +675,7 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         dropManager.load();
         if (cultivationManager != null) cultivationManager.reload();
         if (skillManager != null) skillManager.reload();
+        if (skillBookManager != null) skillBookManager.reload();
         if (currencyManager != null) currencyManager.loadConfig();
         if (npcManager != null) npcManager.reload();
         if (mountManager != null) mountManager.reload();

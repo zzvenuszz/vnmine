@@ -69,7 +69,7 @@ public class FlyingSwordSession {
     private static final float SWORD_SCALE = 2.5f;
     private static final int COOLDOWN_SECONDS = 30;
     private static final double LAUNCH_VELOCITY = 0.6;    // Đẩy lên cao ~2 blocks
-    private static final int FLIGHT_ESTABLISH_DELAY = 4;  // Delay 4 ticks trước khi set flying (đảm bảo đã rời mặt đất)
+    private static final int FLIGHT_ESTABLISH_DELAY = 15;  // Delay 15 ticks (~0.75s) trước khi set flying (đảm bảo đã lên cao ~2 blocks khỏi mặt đất)
     private static final int FLIGHT_CHECK_INTERVAL = 10;  // Check flying mỗi 10 ticks (0.5s)
     private static final double SPRINT_SPEED_BOOST = 0.4; // Tốc độ tăng thêm khi sprint
 
@@ -107,7 +107,7 @@ public class FlyingSwordSession {
         startHoverTask();
         startFlightCheckTask();
 
-        // 6. Schedule set flying sau 2 ticks (khi đã rời mặt đất)
+        // 6. Schedule set flying sau 15 ticks (khi đã lên cao ~2 blocks)
         new BukkitRunnable() {
             @Override
             public void run() {

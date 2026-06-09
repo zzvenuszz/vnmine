@@ -197,7 +197,17 @@ public class SkillManager implements Listener {
         }
     }
 
+    /**
+     * Cast skill gốc (từ skill menu, không có proficiency bonus)
+     */
     public void castSkill(Player player, SkillConfig skill, PlayerCultivationData data) {
+        castSkill(player, skill, data, 1.0);
+    }
+
+    /**
+     * Cast skill với proficiency multiplier
+     */
+    public void castSkill(Player player, SkillConfig skill, PlayerCultivationData data, double proficiencyMultiplier) {
         if (skill.manaCost > 0) {
             if (!plugin.getCultivationManager().consumeMana(player, skill.manaCost)) {
                 MessageUtils.send(player, "&cKhông đủ linh lực! (Cần &b" + skill.manaCost + " &clinh lực)");
@@ -208,28 +218,38 @@ public class SkillManager implements Listener {
         MessageUtils.send(player, "&d✦ Thi triển: &e" + skill.name);
         MessageUtils.playSound(player, Sound.ENTITY_BLAZE_SHOOT);
 
+        // Áp dụng proficiency multiplier vào các chỉ số skill
         switch (skill.id) {
             case "BASIC_HEAL": {
-                double healAmount = skill.getDouble("heal-amount", 10);
+                double healAmount = skill.getDouble("heal-amount", 10) * proficiencyMultiplier;
                 player.setHealth(Math.min(player.getMaxHealth(), player.getHealth() + healAmount));
                 MessageUtils.send(player, "&a✦ Hồi phục +" + (int)healAmount + " HP!");
                 break;
             }
             case "QI_SHIELD": {
-                double shieldAmount = skill.getDouble("shield-amount", 20);
+                double shieldAmount = skill.getDouble("shield-amount", 20) * proficiencyMultiplier;
+                int durationSeconds = skill.getInt("duration-seconds", 10);
+                double durationMult = 1.0; // duration multiplier from proficiency
                 player.setAbsorptionAmount(Math.max(player.getAbsorptionAmount(), shieldAmount));
+                // Set shield với thời gian hiệu lực dài hơn nếu proficiency cao
+                Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                    if (player.getAbsorptionAmount() > 0 && player.getAbsorptionAmount() <= shieldAmount) {
+                        player.setAbsorptionAmount(0);
+                    }
+                }, (long)(durationSeconds * 20L * durationMult));
                 MessageUtils.send(player, "&b✦ Khiên linh khí: Hấp thụ &b" + (int)shieldAmount + " &7sát thương!");
                 break;
             }
             case "FIRE_BALL": {
+                double damage = skill.getDouble("damage", 15) * proficiencyMultiplier;
                 Fireball fireball = player.launchProjectile(Fireball.class);
-                fireball.setYield(0);
-                fireball.setIsIncendiary(false);
-                MessageUtils.send(player, "&c✦ Hỏa Cầu Thuật!");
+                fireball.setYield((float)(damage / 15.0)); // Tăng yield theo damage
+                fireball.setIsIncendiary(damage > 20);
+                MessageUtils.send(player, "&c✦ Hỏa Cầu Thuật! (Sát thương: &c" + (int)damage + "&c)");
                 break;
             }
             case "LIGHTNING_STRIKE": {
-                double lightningDamage = skill.getDouble("damage", 25);
+                double lightningDamage = skill.getDouble("damage", 25) * proficiencyMultiplier;
                 Block target = player.getTargetBlockExact(50);
                 if (target != null) {
                     target.getWorld().strikeLightning(target.getLocation());
@@ -243,15 +263,18 @@ public class SkillManager implements Listener {
             case "SPEED_STEP": {
                 double speedMult = skill.getDouble("speed-multiplier", 1.4);
                 int speedDuration = skill.getInt("duration-seconds", 15);
-                player.setWalkSpeed((float) Math.min(1.0, 0.2 * speedMult));
+                // Tăng tốc độ và thời gian theo proficiency
+                double enhancedSpeed = speedMult * (0.8 + 0.4 * (proficiencyMultiplier / 2.0));
+                double enhancedDuration = speedDuration * (0.8 + 0.4 * (proficiencyMultiplier / 2.0));
+                player.setWalkSpeed((float) Math.min(1.0, 0.2 * enhancedSpeed));
                 Bukkit.getScheduler().runTaskLater(plugin, () -> {
                     player.setWalkSpeed(0.2f);
-                }, speedDuration * 20L);
-                MessageUtils.send(player, "&b✦ Phi Vân Bộ: Tăng &b" + (int)((speedMult-1)*100) + "% &7tốc độ!");
+                }, (long)(enhancedDuration * 20L));
+                MessageUtils.send(player, "&b✦ Phi Vân Bộ: Tăng &b" + (int)((enhancedSpeed-1)*100) + "% &7tốc độ!");
                 break;
             }
             case "TELEPORT": {
-                int maxDist = skill.getInt("max-distance", 50);
+                int maxDist = (int)(skill.getInt("max-distance", 50) * (0.8 + 0.4 * (proficiencyMultiplier / 2.0)));
                 Block teleBlock = player.getTargetBlockExact(maxDist);
                 if (teleBlock != null) {
                     player.teleport(teleBlock.getLocation().add(0.5, 1, 0.5));
@@ -262,15 +285,18 @@ public class SkillManager implements Listener {
                 break;
             }
             case "WIND_BLADE": {
-                double windDamage = skill.getDouble("damage", 12);
+                double windDamage = skill.getDouble("damage", 12) * proficiencyMultiplier;
                 Arrow arrow = player.launchProjectile(Arrow.class);
                 arrow.setDamage(windDamage);
+                // Tăng tốc độ mũi tên theo proficiency
+                arrow.setVelocity(arrow.getVelocity().multiply(0.8 + 0.4 * (proficiencyMultiplier / 2.0)));
                 MessageUtils.send(player, "&f✦ Phong Nhẫn: Gây &f" + (int)windDamage + " &7sát thương!");
                 break;
             }
             case "METEOR_STORM": {
-                int meteorCount = skill.getInt("meteor-count", 20);
-                for (int i = 0; i < Math.min(meteorCount, 10); i++) {
+                int meteorCount = (int)(skill.getInt("meteor-count", 20) * (0.8 + 0.4 * (proficiencyMultiplier / 2.0)));
+                int actualCount = Math.min(meteorCount, 20);
+                for (int i = 0; i < actualCount; i++) {
                     org.bukkit.util.Vector dir = new org.bukkit.util.Vector(
                             Math.random() - 0.5, 1, Math.random() - 0.5);
                     Fireball fb = player.getWorld().spawn(

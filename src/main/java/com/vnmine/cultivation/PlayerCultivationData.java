@@ -1,5 +1,7 @@
 package com.vnmine.cultivation;
 
+import com.vnmine.skill.PlayerSkillData;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -43,6 +45,9 @@ public class PlayerCultivationData {
     private boolean waitingForTribulation; // Đang bị chặn ở threshold level
     private boolean tribulationInProgress; // Đang trong quá trình độ kiếp
 
+    // Skill data (bar, proficiency, cooldown)
+    private PlayerSkillData skillData;
+
     public PlayerCultivationData(UUID playerUUID, String playerName) {
         this.playerUUID = playerUUID;
         this.playerName = playerName;
@@ -55,6 +60,7 @@ public class PlayerCultivationData {
         this.activePassiveSkills = new HashMap<>();
         this.lastCombatTime = 0;
         this.lastManaRegenTime = System.currentTimeMillis();
+        this.skillData = new PlayerSkillData(playerUUID, playerName);
     }
 
     // ==================== GETTERS & SETTERS ====================
@@ -104,6 +110,25 @@ public class PlayerCultivationData {
 
     public long getLastManaRegenTime() { return lastManaRegenTime; }
     public void setLastManaRegenTime(long lastManaRegenTime) { this.lastManaRegenTime = lastManaRegenTime; }
+
+    // ==================== SKILL DATA ====================
+
+    /**
+     * Lấy PlayerSkillData
+     */
+    public PlayerSkillData getSkillData() {
+        if (skillData == null) {
+            skillData = new PlayerSkillData(playerUUID, playerName);
+        }
+        return skillData;
+    }
+
+    /**
+     * Set PlayerSkillData (cho load)
+     */
+    public void setSkillData(PlayerSkillData skillData) {
+        this.skillData = skillData;
+    }
 
     // ==================== TRIBULATION ====================
 

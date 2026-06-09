@@ -1,6 +1,7 @@
 package com.vnmine.cultivation;
 
 import com.vnmine.VNMinePlugin;
+import com.vnmine.skill.PlayerSkillData;
 import com.vnmine.util.ColorUtils;
 import com.vnmine.util.MessageUtils;
 import com.vnmine.util.NameTagManager;
@@ -918,6 +919,15 @@ public class CultivationManager {
     public boolean isInTribulation(Player player) {
         PlayerCultivationData data = getPlayerData(player.getUniqueId());
         return data != null && data.isTribulationInProgress();
+    }
+
+    /**
+     * Lấy PlayerSkillData của player
+     */
+    public PlayerSkillData getPlayerSkillData(UUID uuid) {
+        PlayerCultivationData data = getPlayerData(uuid);
+        if (data == null) return null;
+        return data.getSkillData();
     }
 
     /**

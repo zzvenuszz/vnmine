@@ -1,5 +1,6 @@
 com/vnmine/cultivation/CultivationManager$TribulationSession.class
 com/vnmine/drop/DropManager$ToolConfig.class
+com/vnmine/skill/SkillBookManager$DropEntry.class
 com/vnmine/item/artifacts/abilities/FlyingSwordSession$5.class
 com/vnmine/gui/ArtifactCraftGUI$2.class
 com/vnmine/item/artifacts/abilities/ArtifactAbilityListener.class
@@ -18,8 +19,10 @@ com/vnmine/item/ItemBuilder.class
 com/vnmine/item/artifacts/abilities/FlyingSwordSession$6.class
 com/vnmine/world/WorldConfig.class
 com/vnmine/VNMinePlugin$TimeManager.class
+com/vnmine/gui/QuickMenuListener.class
 com/vnmine/gui/AlchemyCraftGUI$2.class
 com/vnmine/gui/ArtifactCraftGUI$ArtifactRecipe.class
+com/vnmine/skill/PlayerSkillData$ProficiencyLevel.class
 com/vnmine/mount/MountManager$MountConfig.class
 com/vnmine/gui/ArtifactCraftGUI$5.class
 com/vnmine/permission/PermissionCommand.class
@@ -38,8 +41,10 @@ com/vnmine/item/artifacts/abilities/FlyingSwordSession$2.class
 com/vnmine/item/PillUseListener.class
 com/vnmine/gui/ArtifactCraftGUI$4.class
 com/vnmine/skill/SkillManager.class
+com/vnmine/skill/SkillBookListener.class
 com/vnmine/gui/MainMenuGUI.class
 com/vnmine/gui/AlchemyCraftGUI$6.class
+com/vnmine/skill/PlayerSkillData.class
 com/vnmine/npc/NPCShopGUI.class
 com/vnmine/currency/CurrencyManager.class
 com/vnmine/gui/AdminMenuGUI$AdminItemDef.class
@@ -52,6 +57,7 @@ com/vnmine/cultivation/PlayerCultivationData.class
 com/vnmine/item/block/BlockPlaceListener.class
 com/vnmine/currency/CurrencyListener.class
 com/vnmine/drop/DropManager$DropRule.class
+com/vnmine/skill/SkillBarGUI.class
 com/vnmine/npc/NPCCommand.class
 com/vnmine/VNMinePlugin$TimeManager$1.class
 com/vnmine/permission/Group.class
@@ -65,6 +71,7 @@ com/vnmine/item/artifacts/abilities/FlyingSwordSession$4.class
 com/vnmine/skill/SkillManager$SkillConfig.class
 com/vnmine/gui/AlchemyCraftGUI$4.class
 com/vnmine/permission/PlayerData.class
+com/vnmine/skill/SkillBookManager.class
 com/vnmine/util/ColorUtils.class
 com/vnmine/util/NameTagManager.class
 com/vnmine/cultivation/CultivationListener.class

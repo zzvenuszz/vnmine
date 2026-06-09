@@ -389,7 +389,123 @@ skills:
         radius: 12.0
 
 # =============================================
-# VII. HỆ THỐNG QUÁI TINH ANH (ELITE MOB)
+# VII. HỆ THỐNG SÁCH CÔNG PHÁP (SKILL BOOKS)
+# =============================================
+skill-books:
+  enabled: true
+  fail-lose-book-chance: 0.50
+  drop-from-mobs:
+    enabled: true
+    drops:
+      ZOMBIE:
+        skill: "BASIC_HEAL"
+        grade: "HOANG"
+        sub-grade: "HA"
+        chance: 5.0
+      SKELETON:
+        skill: "WIND_BLADE"
+        grade: "HOANG"
+        sub-grade: "HA"
+        chance: 5.0
+      CREEPER:
+        skill: "FIRE_BALL"
+        grade: "HOANG"
+        sub-grade: "HA"
+        chance: 3.0
+      BLAZE:
+        skill: "FIRE_BALL"
+        grade: "HOANG"
+        sub-grade: "TRUNG"
+        chance: 10.0
+      WITHER_SKELETON:
+        skill: "QI_SHIELD"
+        grade: "HUYEN"
+        sub-grade: "HA"
+        chance: 8.0
+      ENDERMAN:
+        skill: "TELEPORT"
+        grade: "HUYEN"
+        sub-grade: "HA"
+        chance: 5.0
+      PILLAGER:
+        skill: "SPEED_STEP"
+        grade: "HOANG"
+        sub-grade: "HA"
+        chance: 4.0
+      WITCH:
+        skill: "BASIC_HEAL"
+        grade: "HOANG"
+        sub-grade: "TRUNG"
+        chance: 6.0
+      EVOKER:
+        skill: "LIGHTNING_STRIKE"
+        grade: "HUYEN"
+        sub-grade: "TRUNG"
+        chance: 8.0
+      VINDICATOR:
+        skill: "QI_SHIELD"
+        grade: "HOANG"
+        sub-grade: "HA"
+        chance: 5.0
+      RAVAGER:
+        skill: "METEOR_STORM"
+        grade: "THIEN"
+        sub-grade: "HA"
+        chance: 2.0
+      WARDEN:
+        skill: "METEOR_STORM"
+        grade: "THIEN"
+        sub-grade: "THUONG"
+        chance: 1.0
+  npc: # Cấu hình cho NPC Đại Sư Công Pháp
+    skill_master:
+      enabled: true
+      name: "&b&l◆ Đại Sư Công Pháp ◆"
+      type: "VILLAGER"
+      profession: "NITWIT"
+      trades:
+        SKILL_BASIC_HEAL_HOANG_HA:
+          type: "SKILL_BOOK"
+          skill-id: "BASIC_HEAL"
+          grade: "HOANG"
+          sub-grade: "HA"
+          display-name: "&aSách Trúc Cơ Liệu Thương - Hoàng Hạ Phẩm"
+          material: "ENCHANTED_BOOK"
+          amount: 1
+          lore: ["&7Sách công pháp hồi máu cơ bản"]
+          price:
+            material: "PRISMARINE_SHARD"
+            amount: 20
+          stock: 5
+        SKILL_FIRE_BALL_HOANG_TRUNG:
+          type: "SKILL_BOOK"
+          skill-id: "FIRE_BALL"
+          grade: "HOANG"
+          sub-grade: "TRUNG"
+          display-name: "&cSách Hỏa Cầu Thuật - Hoàng Trung Phẩm"
+          material: "ENCHANTED_BOOK"
+          amount: 1
+          lore: ["&7Sách công pháp hỏa cầu"]
+          price:
+            material: "PRISMARINE_SHARD"
+            amount: 50
+          stock: 3
+        SKILL_TELEPORT_HUYEN_HA:
+          type: "SKILL_BOOK"
+          skill-id: "TELEPORT"
+          grade: "HUYEN"
+          sub-grade: "HA"
+          display-name: "&dSách Thuấn Di - Huyền Hạ Phẩm"
+          material: "ENCHANTED_BOOK"
+          amount: 1
+          lore: ["&7Sách công pháp dịch chuyển"]
+          price:
+            material: "DIAMOND"
+            amount: 8
+          stock: 2
+
+# =============================================
+# VIII. HỆ THỐNG QUÁI TINH ANH (ELITE MOB)
 # =============================================
 elite-mob-settings:
   enabled: true
