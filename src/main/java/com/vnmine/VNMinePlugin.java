@@ -13,6 +13,7 @@ import com.vnmine.gui.AdminMenuGUI;
 import com.vnmine.gui.AlchemyCraftGUI;
 import com.vnmine.gui.ArtifactCraftGUI;
 import com.vnmine.gui.MainMenuGUI;
+import com.vnmine.gui.QuickMenuListener;
 import com.vnmine.item.ItemBuilder;
 import com.vnmine.item.PillUseListener;
 import com.vnmine.item.artifacts.abilities.ArtifactAbilityListener;
@@ -158,6 +159,7 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         getServer().getPluginManager().registerEvents(adminMenuGUI, this);
         getServer().getPluginManager().registerEvents(blockPlaceListener, this);
         getServer().getPluginManager().registerEvents(skillManager, this);
+        getServer().getPluginManager().registerEvents(new QuickMenuListener(this), this);
 
         // Register commands
         getCommand("vnmine").setExecutor(this);

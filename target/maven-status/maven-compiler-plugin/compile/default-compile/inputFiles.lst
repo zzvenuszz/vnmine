@@ -12,6 +12,7 @@
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/gui/AlchemyCraftGUI.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/gui/ArtifactCraftGUI.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/gui/MainMenuGUI.java
+/home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/gui/QuickMenuListener.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/item/ItemBuilder.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/item/PillUseListener.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/item/artifacts/abilities/ArtifactAbilityListener.java
