@@ -1,0 +1,108 @@
+# =============================================
+# VNMine - Hệ Thống Tu Luyện & Lôi Kiếp
+# =============================================
+
+# Bật/tắt hệ thống tu luyện
+enabled: true
+
+# EXP cần cho mỗi level = level * exp-per-level-multiplier
+# Giảm từ 100 xuống 50 để cân bằng tốc độ tu luyện
+exp-per-level-multiplier: 50
+
+# =============================================
+# CẢNH GIỚI (REALMS)
+# Mỗi 10 level = 1 đại cảnh giới
+# =============================================
+realms:
+  1:
+    name: "Khí Động"
+    prefix: "&7[Khí Động"
+  11:
+    name: "Luyện Khí"
+    prefix: "&a[Luyện Khí"
+  21:
+    name: "Trúc Cơ"
+    prefix: "&b[Trúc Cơ"
+  31:
+    name: "Kim Đan"
+    prefix: "&e[Kim Đan"
+  41:
+    name: "Nguyên Anh"
+    prefix: "&6[Nguyên Anh"
+  51:
+    name: "Hóa Thần"
+    prefix: "&c[Hóa Thần"
+  61:
+    name: "Hợp Thể"
+    prefix: "&5[Hợp Thể"
+  71:
+    name: "Độ Kiếp"
+    prefix: "&4[Độ Kiếp"
+  81:
+    name: "Đại Thừa"
+    prefix: "&d[Đại Thừa"
+  91:
+    name: "Phi Thăng"
+    prefix: "&6&l[Phi Thăng"
+
+# =============================================
+# NGUỒN EXP (EXP SOURCES)
+# =============================================
+exp-sources:
+  kill-mob:
+    enabled: true
+    amount: 15 # Tăng từ 10 lên 15
+  kill-elite:
+    enabled: true
+    amount: 75 # Tăng từ 50 lên 75
+  kill-boss:
+    enabled: true
+    amount: 300 # Tăng từ 200 lên 300
+  break-ore:
+    enabled: true
+    amount: 8 # Tăng từ 5 lên 8
+  fishing:
+    enabled: true
+    amount: 20 # Tăng từ 15 lên 20
+
+# =============================================
+# LINH LỰC (MANA)
+# =============================================
+mana:
+  base-max-mana: 100
+  mana-per-level: 10
+  regen:
+    base-amount: 5 # Tăng từ 2 lên 5 để hồi nhanh hơn
+    regen-interval-ticks: 40 # 2 giây
+    combat-delay-ticks: 100 # 5 giây không combat mới hồi
+  display:
+    bossbar-enabled: true
+
+# =============================================
+# LÔI KIẾP (TRIBULATION)
+# =============================================
+tribulation:
+  enabled: true
+  # Config sát thương
+  damage:
+    base: 2.0 # Giảm từ 3.0 xuống 2.0
+    per-strike-multiplier: 1.2
+    damage-per-level: 0.5 # Giảm từ 0.8 xuống 0.5
+    armor-reduction: 0.6
+  countdown-seconds: 5
+  strike-interval-ticks: 20
+  immunity-duration-seconds: 60
+  radius-per-level: 1.5
+  exp-for-others: 50.0
+  level-drop-on-fail: 1
+  broadcast:
+    - "&6⚡ &l{player} &r&6đang độ {strikes} lần lôi kiếp!"
+    - "&eCửu thiên thần lôi giáng lâm! Tránh xa khu vực nguy hiểm!"
+  success:
+    message:
+      - "&d&l✦ THIÊN ĐẠO CHỨNG NHẬN ✦"
+      - "&d&l{player} &r&dđã độ kiếp thành công!"
+      - "&dBước vào &e&l{realm} &r&d!"
+  fail:
+    message:
+      - "&4☠ &l{player} &r&4đã độ kiếp thất bại! Tu vi giảm sút!"
