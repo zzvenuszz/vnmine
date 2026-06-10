@@ -812,8 +812,9 @@ public class CultivationManager {
         int oldLevel = data.getLevel();
         String oldRealmName = data.getRealmName();
 
-        // Tăng level lên 1 (từ 9 → 10, 19 → 20, ...)
-        int newLevel = oldLevel + 1;
+        // Nhảy thẳng lên đại cảnh giới tiếp theo (từ 9 → 11, 19 → 21, ...)
+        // Bỏ qua cấp "Đại Viên Mãn" (10, 20, 30...) không còn tồn tại
+        int newLevel = oldLevel + 2;
         data.setLevel(newLevel);
         data.setExperience(0);
         data.setMaxExperience(newLevel * 100.0);
@@ -965,13 +966,11 @@ public class CultivationManager {
         if (realm == null) return "&7Khí Động";
 
         int levelInRealm = level - realm.startLevel + 1;
-        if (levelInRealm >= 10) {
-            return realm.name + " Đại Viên Mãn";
+        int tierIndex = levelInRealm - 1;
+        if (tierIndex >= 0 && tierIndex < TIER_NAMES.length) {
+            return realm.name + " " + TIER_NAMES[tierIndex];
         } else {
-            int tierIndex = levelInRealm - 1;
-            String tierName = (tierIndex >= 0 && tierIndex < TIER_NAMES.length)
-                    ? TIER_NAMES[tierIndex] : "?";
-            return realm.name + " " + tierName;
+            return realm.name + " cửu trọng";
         }
     }
 
@@ -983,13 +982,11 @@ public class CultivationManager {
         if (realm == null) return "&7[Khí Động";
 
         int levelInRealm = level - realm.startLevel + 1;
-        if (levelInRealm >= 10) {
-            return realm.prefix + " Đại Viên Mãn";
+        int tierIndex = levelInRealm - 1;
+        if (tierIndex >= 0 && tierIndex < TIER_NAMES.length) {
+            return realm.prefix + " " + TIER_NAMES[tierIndex];
         } else {
-            int tierIndex = levelInRealm - 1;
-            String tierName = (tierIndex >= 0 && tierIndex < TIER_NAMES.length)
-                    ? TIER_NAMES[tierIndex] : "?";
-            return realm.prefix + " " + tierName;
+            return realm.prefix + " cửu trọng]";
         }
     }
 

@@ -253,7 +253,7 @@ public class MainMenuGUI implements Listener {
                     .setLore(
                             "",
                             "&7Chưa cần độ kiếp",
-                            "&7Sẽ yêu cầu ở các cấp: &e10, 20, 30, 40, 50, 60, 70, 80, 90"
+                            "&7Sẽ yêu cầu ở các cấp: &e9, 19, 29, 39, 49, 59, 69, 79, 89"
                     ).build());
         }
 
@@ -307,14 +307,14 @@ public class MainMenuGUI implements Listener {
                 .setName("&6&lCảnh Giới & Cấp Bậc")
                 .setLore(
                         "",
-                        "&7Cứ 10 cấp là 1 đại cảnh giới:",
-                        "&7Cấp 1-10: Khí Động", "&7Cấp 11-20: Luyện Khí",
-                        "&7Cấp 21-30: Trúc Cơ", "&7Cấp 31-40: Kim Đan",
-                        "&7Cấp 41-50: Nguyên Anh", "&7Cấp 51-60: Hóa Thần",
-                        "&7Cấp 61-70: Hợp Thể", "&7Cấp 71-80: Độ Kiếp",
-                        "&7Cấp 81-90: Đại Thừa", "&7Cấp 91-100: Phi Thăng",
+                        "&7Cứ 9 cấp là 1 đại cảnh giới:",
+                        "&7Cấp 1-9: Khí Động", "&7Cấp 11-19: Luyện Khí",
+                        "&7Cấp 21-29: Trúc Cơ", "&7Cấp 31-39: Kim Đan",
+                        "&7Cấp 41-49: Nguyên Anh", "&7Cấp 51-59: Hóa Thần",
+                        "&7Cấp 61-69: Hợp Thể", "&7Cấp 71-79: Độ Kiếp",
+                        "&7Cấp 81-89: Đại Thừa", "&7Cấp 91-99: Phi Thăng",
                         "",
-                        "&7Cấp chẵn (10,20,30...) sẽ gặp lôi kiếp!"
+                        "&7Cấp lẻ (9,19,29...) sẽ gặp lôi kiếp!"
                 ).build());
 
         gui.setItem(14, new ItemBuilder(Material.POTION)
