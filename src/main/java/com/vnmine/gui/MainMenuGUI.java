@@ -78,15 +78,15 @@ public class MainMenuGUI implements Listener {
 
         gui.setItem(12, new ItemBuilder(Material.BOOK)
                 .setGlow(true)
-                .setName("&d&l◆ Công Pháp & Kỹ Năng ◆")
+                .setName("&d&l◆ Quản Lý Skill Bar ◆")
                 .setLore(
                         "",
-                        "&7Học và thi triển các công pháp",
-                        "&7Yêu cầu tu vi và linh lực",
+                        "&7Gán và sắp xếp kỹ năng vào",
+                        "&7Skill Bar để thi triển nhanh",
                         "",
                         "&fSkill đã học: &e" + skillManager.getLearnedSkillCount(player),
                         "",
-                        "&eClick để mở menu công pháp!"
+                        "&eClick để mở quản lý Skill Bar!"
                 ).build());
 
         gui.setItem(14, new ItemBuilder(Material.BREWING_STAND)
@@ -157,10 +157,10 @@ public class MainMenuGUI implements Listener {
         switch (slot) {
             case 10: openCultivationInfo(player); break;
             case 12:
-                if (skillManager != null) {
-                    skillManager.openSkillMenu(player);
+                if (plugin.getSkillBarGUI() != null) {
+                    plugin.getSkillBarGUI().openSkillManagement(player);
                 } else {
-                    MessageUtils.send(player, "&cHệ thống công pháp chưa được kích hoạt!");
+                    MessageUtils.send(player, "&cHệ thống Skill Bar chưa được kích hoạt!");
                 }
                 break;
             case 14: openAlchemyMenu(player); break;

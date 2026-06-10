@@ -2,6 +2,7 @@ package com.vnmine.skill;
 
 import com.vnmine.VNMinePlugin;
 import com.vnmine.cultivation.PlayerCultivationData;
+import com.vnmine.gui.MainMenuGUI;
 import com.vnmine.item.ItemBuilder;
 import com.vnmine.util.ColorUtils;
 import com.vnmine.util.MessageUtils;
@@ -25,7 +26,9 @@ import java.util.*;
  * SkillBarGUI - Quản lý Skill Bar và Menu gán skill
  * 
  * Chức năng:
- * 1. Skill Bar 1x9: hiển thị khi bấm phím Q (nếu không mở inventory)
+ * 1. Skill Bar 1x9: hiển thị khi bấm phím Q
+ *    - Cancel mọi tương tác với bottom inventory để không mất đồ
+ *    - Chỉ cast skill qua click skill hoặc bấm số 1-9
  * 2. Menu quản lý: xem danh sách skill đã học, gán skill vào bar
  * 3. Bấm số 1-9 khi skill bar mở → cast skill
  */
@@ -53,6 +56,7 @@ public class SkillBarGUI implements Listener {
 
     /**
      * Mở Skill Bar 1x9
+     * Chặn mọi click vào bottom inventory để không mất đồ
      */
     public void openSkillBar(Player player) {
         PlayerSkillData skillData = plugin.getCultivationManager().getPlayerSkillData(player.getUniqueId());
@@ -131,15 +135,15 @@ public class SkillBarGUI implements Listener {
     // ==================== MENU QUẢN LÝ SKILL BAR ====================
 
     /**
-     * Mở menu quản lý gán skill - KHÔNG cleanup để tránh mất trạng thái
+     * Mở menu quản lý gán skill - LUÔN bật chế độ gán mặc định
      */
     public void openSkillManagement(Player player) {
         PlayerSkillData skillData = plugin.getCultivationManager().getPlayerSkillData(player.getUniqueId());
         PlayerCultivationData cultData = plugin.getCultivationManager().getPlayerData(player.getUniqueId());
         if (skillData == null || cultData == null) return;
 
-        // Lưu trạng thái assign mode hiện tại trước khi tạo GUI mới
-        boolean currentAssignMode = assignMode.getOrDefault(player.getUniqueId(), false);
+        // Luôn bật chế độ gán mặc định
+        assignMode.put(player.getUniqueId(), true);
 
         Inventory gui = Bukkit.createInventory(null, 54,
                 ColorUtils.colorize("&8✦ Quản Lý Skill Bar ✦"));
@@ -150,10 +154,10 @@ public class SkillBarGUI implements Listener {
                 .setLore(
                         "",
                         "&7Kéo thả skill vào Skill Bar bên dưới",
-                        "&7Skill trong bar không thể di chuyển",
-                        "&7Bấm &eHoàn Tất &7hoặc &cESC &7để lưu",
+                        "&7Click vào skill đã học để gán nhanh",
+                        "&7Click vào skill trong bar để tháo",
                         "",
-                        "&eClick vào skill đã học để gán nhanh"
+                        "&7Chế độ gán luôn &aBẬT &7khi mở menu"
                 ).build());
 
         // Danh sách skill đã học (slot 9-35) - chỉ hiển thị skill đã học
@@ -237,17 +241,6 @@ public class SkillBarGUI implements Listener {
             gui.setItem(36 + i, barItem);
         }
 
-        // Nút bật/tắt chế độ gán skill
-        gui.setItem(48, new ItemBuilder(currentAssignMode ? Material.GREEN_DYE : Material.GRAY_DYE)
-                .setName((currentAssignMode ? "&a&l✦ Chế Độ Gán: BẬT ✦" : "&7✦ Chế Độ Gán: TẮT ✦"))
-                .setLore(
-                        "",
-                        "&7Bật chế độ gán skill để",
-                        "&7có thể kéo thả skill xuống Skill Bar",
-                        "",
-                        currentAssignMode ? "&eClick để tắt" : "&eClick để bật"
-                ).build());
-
         // Nút xóa toàn bộ Skill Bar
         gui.setItem(49, new ItemBuilder(Material.BARRIER)
                 .setName("&c&l✦ Xóa Skill Bar")
@@ -258,6 +251,12 @@ public class SkillBarGUI implements Listener {
         gui.setItem(50, new ItemBuilder(Material.LIME_DYE)
                 .setName("&a&l✦ Hoàn Tất")
                 .setLore("", "&7Lưu cấu hình Skill Bar", "", "&eClick để lưu")
+                .build());
+
+        // Nút quay lại menu chính
+        gui.setItem(48, new ItemBuilder(Material.ARROW)
+                .setName("&e&l← Quay Lại Menu Chính")
+                .setLore("", "&eClick để quay lại menu chính")
                 .build());
 
         // Viền
@@ -273,14 +272,12 @@ public class SkillBarGUI implements Listener {
         // Lưu temp skill bar để lưu khi đóng (ESC)
         tempSkillBar.put(player.getUniqueId(), skillData.getSkillBarSlots());
 
-        // Ghi đè assign mode sau khi tạo GUI xong
-        // Quan trọng: làm điều này SAU KHI tạo GUI để tránh mất trạng thái
         player.openInventory(gui);
     }
 
     /**
      * Xử lý click trong menu quản lý skill bar
-     * Slot 48: nút chế độ gán
+     * Slot 48: nút quay lại menu chính
      * Slot 49: nút xóa bar
      * Slot 50: nút hoàn tất
      * Slot 9-35: skill đã học → gán vào ô trống đầu tiên
@@ -291,12 +288,14 @@ public class SkillBarGUI implements Listener {
         PlayerCultivationData cultData = plugin.getCultivationManager().getPlayerData(player.getUniqueId());
         if (skillData == null || cultData == null) return;
 
-        // Nút chế độ gán (slot 48) - toggle KHÔNG refresh lại GUI
+        // Nút quay lại menu chính (slot 48)
         if (slot == 48) {
-            boolean current = assignMode.getOrDefault(player.getUniqueId(), false);
-            assignMode.put(player.getUniqueId(), !current);
-            // Chỉ refresh lại GUI để cập nhật trạng thái nút
-            openSkillManagement(player);
+            MainMenuGUI mainMenu = plugin.getMainMenuGUI();
+            if (mainMenu != null) {
+                mainMenu.openMainMenu(player);
+            } else {
+                player.closeInventory();
+            }
             return;
         }
 
@@ -429,8 +428,14 @@ public class SkillBarGUI implements Listener {
             return;
         }
 
-        // Kiểm tra cooldown
-        if (skillData.isOnCooldown(skillId)) {
+        // Kiểm tra cooldown (nếu không có bypass)
+        boolean bypassCooldown = false;
+        if (skillData.isCooldownBypass() && 
+            plugin.getPermissionManager() != null &&
+            plugin.getPermissionManager().hasPermission(player, "vnmine.skill.cooldown.bypass")) {
+            bypassCooldown = true;
+        }
+        if (!bypassCooldown && skillData.isOnCooldown(skillId)) {
             long remaining = skillData.getCooldownRemaining(skillId);
             MessageUtils.send(player, "&cKỹ năng &e" + ColorUtils.stripColor(skill.name) + " &cđang hồi chiêu! (&e" + remaining + "s&c)");
             closeSkillBar(player);
@@ -458,8 +463,10 @@ public class SkillBarGUI implements Listener {
         // Tăng proficiency
         skillData.incrementSkillUsage(skillId);
 
-        // Set cooldown
-        skillData.setCooldown(skillId, skill.cooldownSeconds);
+        // Set cooldown (nếu không bypass)
+        if (!bypassCooldown) {
+            skillData.setCooldown(skillId, skill.cooldownSeconds);
+        }
 
         // Đóng skill bar
         closeSkillBar(player);
@@ -522,9 +529,10 @@ public class SkillBarGUI implements Listener {
 
         // Xử lý click trong Skill Bar (1x9)
         if (title.contains("Skill Bar")) {
+            // Cancel MỌI click để không mất đồ từ bottom inventory
             event.setCancelled(true);
 
-            // === Xử lý bấm phím số 1-9 ===
+            // Xử lý bấm phím số 1-9
             int hotbarSlot = event.getHotbarButton();
             if (hotbarSlot >= 0 && hotbarSlot < 9) {
                 castSkillFromBar(player, hotbarSlot);
@@ -537,6 +545,7 @@ public class SkillBarGUI implements Listener {
             if (rawSlot >= 0 && rawSlot < 9) {
                 castSkillFromBar(player, rawSlot);
             }
+            // Click vào bottom inventory (rawSlot >= 9) bị cancel, không làm gì cả
             return;
         }
     }
@@ -549,37 +558,28 @@ public class SkillBarGUI implements Listener {
 
         if (!title.contains("Quản Lý Skill Bar")) return;
 
-        boolean isAssignMode = assignMode.getOrDefault(player.getUniqueId(), false);
-        if (!isAssignMode) {
-            event.setCancelled(true);
-            return;
-        }
-
-        // Trong chế độ gán, kiểm tra các slot kéo thả
+        // Luôn cho phép kéo thả (chế độ gán mặc định BẬT)
         Set<Integer> rawSlots = event.getRawSlots();
         boolean dragToBar = false;
         boolean dragFromBar = false;
 
         for (Integer slot : rawSlots) {
             if (slot >= 36 && slot < 45) {
-                dragToBar = true; // Kéo vào skill bar
+                dragToBar = true;
             } else if (slot >= 0 && slot < 36) {
-                dragFromBar = true; // Kéo từ skill bar ra
+                dragFromBar = true;
             }
         }
 
-        // Nếu kéo từ bar ra ngoài → cancel
         if (dragFromBar) {
             event.setCancelled(true);
             return;
         }
 
-        // Nếu kéo vào bar → cho phép
         if (dragToBar) {
             return;
         }
 
-        // Các trường hợp khác: cancel
         event.setCancelled(true);
     }
 
@@ -590,13 +590,11 @@ public class SkillBarGUI implements Listener {
         UUID uuid = player.getUniqueId();
         String title = event.getView().getTitle();
 
-        // Khi đóng Menu quản lý TRƯỚC (vì "Quản Lý Skill Bar" cũng chứa "Skill Bar")
+        // Khi đóng Menu quản lý
         if (title.contains("Quản Lý Skill Bar")) {
-            // Lưu skill bar nếu có temp data (ESC hoặc đóng bằng nút X)
             if (tempSkillBar.containsKey(uuid)) {
                 tempSkillBar.remove(uuid);
             }
-            // Dọn dẹp - KHÔNG xóa assignMode ở đây để giữ trạng thái
             skillBarOpen.remove(uuid);
             tempSkillBar.remove(uuid);
             return;
@@ -604,7 +602,7 @@ public class SkillBarGUI implements Listener {
 
         // Khi đóng Skill Bar (1x9)
         if (title.contains("Skill Bar")) {
-            // KHÔNG xóa skillBarOpen ngay lập tức, delay 1 tick để tránh conflict
+            // Xóa trạng thái skill bar sau 1 tick
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 skillBarOpen.remove(uuid);
             }, 1L);
@@ -614,36 +612,29 @@ public class SkillBarGUI implements Listener {
 
     /**
      * Xử lý phím Q - mở Skill Bar khi không mở inventory
-     * 
-     * Kiểm tra bằng inventory type thay vì title string để tránh
-     * lỗi locale (title tiếng Việt "Túi đồ" khác "Inventory").
      */
     @EventHandler
     public void onPlayerDropItem(PlayerDropItemEvent event) {
         Player player = event.getPlayer();
 
         try {
-            // Kiểm tra player có đang mở GUI không bằng inventory type
             InventoryView openInv = player.getOpenInventory();
             if (openInv != null) {
                 org.bukkit.inventory.Inventory topInv = openInv.getTopInventory();
                 if (topInv != null) {
                     InventoryType invType = topInv.getType();
-                    // Nếu là inventory mặc định của player (CRAFTING hoặc PLAYER)
-                    // thì cho phép mở skill bar, nếu không thì đang mở GUI → drop item bình thường
                     if (invType != InventoryType.CRAFTING && invType != InventoryType.PLAYER) {
                         return;
                     }
                 }
             }
         } catch (Exception e) {
-            // Nếu có lỗi gì đó, vẫn cho mở skill bar
+            // Bỏ qua lỗi
         }
 
         // Kiểm tra player đã có dữ liệu skill chưa
         PlayerSkillData skillData = plugin.getCultivationManager().getPlayerSkillData(player.getUniqueId());
         if (skillData == null) {
-            // Chưa có dữ liệu skill → thông báo hướng dẫn
             MessageUtils.send(player, "&c✦ Bạn chưa có dữ liệu công pháp! Dùng &e/vnskill &cđể xem.");
             return;
         }
@@ -652,7 +643,4 @@ public class SkillBarGUI implements Listener {
         event.setCancelled(true);
         openSkillBar(player);
     }
-
-    // NOTE: Xử lý phím số 1-9 đã được tích hợp vào onInventoryClick() ở trên.
-    // Handler riêng bị xóa để tránh event priority conflict.
 }

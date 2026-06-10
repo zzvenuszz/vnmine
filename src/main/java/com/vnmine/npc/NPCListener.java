@@ -33,8 +33,10 @@ public class NPCListener implements Listener {
             if (villager.hasMetadata("vnmine_npc_id")) {
                 event.setCancelled(true); // Không mở giao dịch mặc định
                 
-                String npcId = villager.getMetadata("vnmine_npc_id").get(0).asString();
-                npcShopGUI.openShop(event.getPlayer(), npcId);
+                // Lấy instance ID từ metadata
+                String instanceId = villager.getMetadata("vnmine_npc_id").get(0).asString();
+                
+                npcShopGUI.openShop(event.getPlayer(), instanceId);
             }
         }
     }

@@ -42,7 +42,7 @@ commands:
     permission: vnmine.command.vnmine
   vnnpc:
     description: Quản lý NPC shop
-    usage: /vnnpc <create|remove|list|reload>
+    usage: /vnnpc <create|remove|list|tp|movehere|rename|removeall|skin|reload>
     permission: vnmine.command.npc
   vngive:
     description: Give item/skill/pill cho người chơi

@@ -22,12 +22,16 @@ public class PlayerSkillData {
     // Cooldown tracking: skill_id → thời gian kết thúc cooldown (millis)
     private final Map<String, Long> cooldownMap;
 
+    // Bypass cooldown (cho phép admin bỏ qua cooldown)
+    private boolean cooldownBypass;
+
     public PlayerSkillData(UUID playerUUID, String playerName) {
         this.playerUUID = playerUUID;
         this.playerName = playerName;
         this.skillBarSlots = new String[9];
         this.proficiencyMap = new HashMap<>();
         this.cooldownMap = new HashMap<>();
+        this.cooldownBypass = false;
     }
 
     // ==================== SKILL BAR ====================
@@ -179,6 +183,22 @@ public class PlayerSkillData {
      */
     public Map<String, Long> getCooldownMap() {
         return cooldownMap;
+    }
+
+    // ==================== COOLDOWN BYPASS ====================
+
+    /**
+     * Kiểm tra cooldown bypass
+     */
+    public boolean isCooldownBypass() {
+        return cooldownBypass;
+    }
+
+    /**
+     * Set cooldown bypass
+     */
+    public void setCooldownBypass(boolean bypass) {
+        this.cooldownBypass = bypass;
     }
 
     // ==================== PROFICIENCY LEVEL ENUM ====================

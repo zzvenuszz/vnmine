@@ -27,6 +27,7 @@ public class NPCShopGUI implements Listener {
     private final VNMinePlugin plugin;
     private final NPCManager npcManager;
 
+    // Map: player UUID -> instance ID của NPC đang mở shop
     private final Map<UUID, String> openShops;
     private final Map<UUID, Map<String, Long>> tradeCooldowns;
 
@@ -37,8 +38,13 @@ public class NPCShopGUI implements Listener {
         this.tradeCooldowns = new HashMap<>();
     }
 
-    public void openShop(Player player, String npcId) {
-        NPCData data = npcManager.getNPCData(npcId);
+    /**
+     * Mở shop NPC cho người chơi
+     * @param player người chơi
+     * @param instanceId ID của NPC instance
+     */
+    public void openShop(Player player, String instanceId) {
+        NPCData data = npcManager.getNPCDataFromInstance(instanceId);
         if (data == null) return;
 
         Inventory gui = Bukkit.createInventory(null, 54,
@@ -99,7 +105,7 @@ public class NPCShopGUI implements Listener {
                 .setName("&e&l← Đóng")
                 .build());
 
-        openShops.put(player.getUniqueId(), npcId);
+        openShops.put(player.getUniqueId(), instanceId);
         player.openInventory(gui);
         MessageUtils.playSound(player, Sound.BLOCK_CHEST_OPEN);
     }
@@ -108,11 +114,10 @@ public class NPCShopGUI implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player)) return;
         Player player = (Player) event.getWhoClicked();
-        String npcId = openShops.get(player.getUniqueId());
-        if (npcId == null) return;
+        String instanceId = openShops.get(player.getUniqueId());
+        if (instanceId == null) return;
 
         // Chỉ cancel khi click vào top inventory (GUI slots 0-53)
-        // Cho phép click vào bottom inventory (kho đồ người chơi, slot >= 54)
         int slot = event.getRawSlot();
         if (slot >= 0 && slot < 54) {
             event.setCancelled(true);
@@ -125,7 +130,8 @@ public class NPCShopGUI implements Listener {
             if (slot < 9 || slot >= 54) return;
             if (event.getCurrentItem() == null || event.getCurrentItem().getType() == Material.AIR) return;
 
-            NPCData data = npcManager.getNPCData(npcId);
+            // Lấy NPCData từ instance ID
+            NPCData data = npcManager.getNPCDataFromInstance(instanceId);
             if (data == null) return;
 
             int index = slot - 9;
@@ -205,12 +211,14 @@ public class NPCShopGUI implements Listener {
         data.learnSkill(skillId);
         MessageUtils.send(player, "&a✦ Bạn đã học được công pháp mới!");
         // Reload shop để cập nhật
-        openShop(player, openShops.get(player.getUniqueId()));
+        String instanceId = openShops.get(player.getUniqueId());
+        if (instanceId != null) {
+            openShop(player, instanceId);
+        }
     }
 
     private void giveArtifact(Player player, NPCTrade trade) {
         String itemId = trade.getItemId();
-        // Tạo item artifact dựa vào ID
         ItemStack artifact = createArtifactItem(itemId);
         if (artifact != null) {
             player.getInventory().addItem(artifact);
@@ -235,7 +243,6 @@ public class NPCShopGUI implements Listener {
     }
 
     private void handleCurrencyBuy(Player player, NPCTrade trade) {
-        // Player bán item cho NPC → nhận linh thạch
         Material sellMat = Material.getMaterial(trade.getMaterial());
         if (sellMat == null) return;
         if (!hasItems(player, sellMat, trade.getAmount())) {
@@ -249,7 +256,6 @@ public class NPCShopGUI implements Listener {
     }
 
     private void handleCurrencySell(Player player, NPCTrade trade) {
-        // Player mua item từ NPC = trả linh thạch
         if (!plugin.getCurrencyManager().withdraw(player, trade.getPriceAmount())) {
             MessageUtils.send(player, "&cBạn không có đủ Linh Thạch!");
             return;
@@ -269,12 +275,10 @@ public class NPCShopGUI implements Listener {
     }
 
     private ItemStack createArtifactItem(String itemId) {
-        // Tạo item dựa vào artifact ID (giống trong ArtifactCraftGUI)
         switch (itemId.toUpperCase()) {
             case "FLYING_SWORD":
                 return new ItemBuilder(Material.DIAMOND_SWORD)
-                        .setName("&b&l◆ Kiếm Phi Hành ◆")
-                        .setGlow(true)
+                        .setName("&b&l◆ Kiếm Phi Hành ◆").setGlow(true)
                         .setLore("", "&7Click phải để ngự kiếm phi hành", "", "&6&l✦ Pháp bảo thượng phẩm ✦")
                         .build();
             case "SPIRIT_BELL":

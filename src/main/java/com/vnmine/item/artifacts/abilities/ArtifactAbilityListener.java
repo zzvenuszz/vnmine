@@ -6,6 +6,7 @@ import com.vnmine.util.ColorUtils;
 import com.vnmine.util.MessageUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.entity.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
@@ -286,36 +287,76 @@ public class ArtifactAbilityListener implements Listener {
 
     /**
      * Lôi Ấn - Gọi sét đánh mục tiêu, CD 10s
+     * - Ưu tiên entity player đang aim vào (ray trace)
+     * - Nếu không có aim, tìm entity gần nhất
+     * - Cho phép Phantom, Animals (trừ pet của bản thân)
+     * - Không set cooldown nếu không tìm thấy mục tiêu
      * "Lôi Ấn! Thiên Lôi Dẫn!"
      */
     private void activateThunderSeal(Player player) {
-        if (!checkCooldown(player, THUNDER_SEAL, 10)) return;
         if (!consumeMana(player, 25)) return;
 
-        // Tìm mục tiêu gần nhất
+        // Bước 1: Thử ray trace để tìm entity player đang aim
         Entity target = null;
-        double closest = 20.0;
-        for (Entity entity : player.getNearbyEntities(20, 10, 20)) {
-            if (entity instanceof Monster || entity instanceof Player) {
+        try {
+            Entity targetEntity = player.getTargetEntity(50);
+            if (targetEntity != null && targetEntity != player && !isOwnPet(player, targetEntity)) {
+                target = targetEntity;
+            }
+        } catch (Exception e) {
+            // Fallback nếu getTargetEntity không hoạt động
+        }
+
+        // Bước 2: Nếu không có target từ ray trace, tìm entity gần nhất
+        if (target == null) {
+            double closest = 20.0;
+            for (Entity entity : player.getNearbyEntities(20, 10, 20)) {
                 if (entity.equals(player)) continue;
-                double dist = player.getLocation().distance(entity.getLocation());
-                if (dist < closest) {
-                    closest = dist;
-                    target = entity;
+                if (isOwnPet(player, entity)) continue;
+
+                // Cho phép: Monster, Player, Phantom, Animals, và các LivingEntity khác
+                if (entity instanceof LivingEntity) {
+                    double dist = player.getLocation().distance(entity.getLocation());
+                    if (dist < closest) {
+                        closest = dist;
+                        target = entity;
+                    }
                 }
             }
         }
 
+        // Không tìm thấy mục tiêu → không cast, không set cooldown, không tốn mana
         if (target == null) {
             MessageUtils.send(player, "&cKhông có mục tiêu nào trong phạm vi!");
+            // Hoàn lại mana vì không cast
+            PlayerCultivationData data = plugin.getCultivationManager().getPlayerData(player.getUniqueId());
+            if (data != null) {
+                data.regenMana(25);
+            }
             return;
         }
+
+        // Kiểm tra cooldown SAU KHI đã có target (nếu không có target thì không check)
+        if (!checkCooldown(player, THUNDER_SEAL, 10)) return;
 
         chant(player, "§e✦ Lôi Ấn! Thiên Lôi Dẫn! ✦");
 
         // Gọi sét
         target.getWorld().strikeLightning(target.getLocation());
-        MessageUtils.send(player, "&e✦ Lôi Ấn giáng sét xuống &f" + target.getName() + "&e!");
+        String targetName = (target instanceof Player) ? target.getName() : target.getType().name();
+        MessageUtils.send(player, "&e✦ Lôi Ấn giáng sét xuống &f" + targetName + "&e!");
         player.getWorld().playSound(player.getLocation(), org.bukkit.Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 1.0f, 1.0f);
+    }
+
+    /**
+     * Kiểm tra entity có phải pet của player này không
+     */
+    private boolean isOwnPet(Player player, Entity entity) {
+        if (entity instanceof Tameable) {
+            Tameable tameable = (Tameable) entity;
+            AnimalTamer owner = tameable.getOwner();
+            return owner != null && owner.getUniqueId().equals(player.getUniqueId());
+        }
+        return false;
     }
 }

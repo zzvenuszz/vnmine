@@ -25,6 +25,7 @@
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/npc/NPCListener.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/npc/NPCManager.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/npc/NPCShopGUI.java
+/home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/npc/SkinFetcher.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/permission/Group.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/permission/PermissionCommand.java
 /home/hoan/testpaper/dev/vnmine plugin/src/main/java/com/vnmine/permission/PermissionManager.java

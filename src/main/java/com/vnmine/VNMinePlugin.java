@@ -26,6 +26,7 @@ import com.vnmine.npc.NPCManager;
 import com.vnmine.npc.NPCShopGUI;
 import com.vnmine.permission.PermissionCommand;
 import com.vnmine.permission.PermissionManager;
+import com.vnmine.skill.PlayerSkillData;
 import com.vnmine.skill.SkillManager;
 import com.vnmine.skill.SkillBarGUI;
 import com.vnmine.skill.SkillBookListener;
@@ -332,6 +333,8 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
             case "cultivation":
                 return handleCultivationCommand(sender, args);
             case "elite": return handleEliteCommand(sender, args);
+            case "player":
+                return handlePlayerCommand(sender, args);
             case "reload": return handleReload(sender);
             default:
                 sendHelp(sender);
@@ -396,7 +399,7 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         sender.sendMessage("§6=== VNMine v2.1.0 Help ===");
         sender.sendMessage("§e/vn §f- Mở menu chính");
         sender.sendMessage("§e/vn start §f- Bắt đầu tu tiên");
-        sender.sendMessage("§e/vnskill §f- Công pháp/kỹ năng");
+        sender.sendMessage("§e/vnskill §f- Quản lý Skill Bar");
         sender.sendMessage("§e/vnalchemy §f- Luyện đan");
         sender.sendMessage("§e/vnitem list §f- Danh sách pháp bảo");
         sender.sendMessage("§e/mount list §f- Tọa kỵ phi hành");
@@ -526,13 +529,46 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
                 if (skillBookManager != null) { skillBookManager.reload(); sender.sendMessage("§6[VNMine] §aĐã reload sách công pháp!"); }
                 break;
             case "my":
-                if (sender instanceof Player && skillManager != null) skillManager.openSkillMenu((Player) sender);
+                if (sender instanceof Player && skillBarGUI != null) skillBarGUI.openSkillManagement((Player) sender);
                 break;
             case "bar":
                 if (sender instanceof Player && skillBarGUI != null) {
                     skillBarGUI.openSkillManagement((Player) sender);
                 }
                 break;
+            case "cooldown":
+                if (!sender.hasPermission("vnmine.skill.cooldown.bypass")) {
+                    sender.sendMessage("§cBạn không có quyền sử dụng lệnh này! (Cần vnmine.skill.cooldown.bypass)");
+                    return true;
+                }
+                if (!(sender instanceof Player)) {
+                    sender.sendMessage("§cChỉ người chơi mới có thể dùng lệnh này!");
+                    return true;
+                }
+                Player cooldownPlayer = (Player) sender;
+                PlayerSkillData cooldownData = cultivationManager.getPlayerSkillData(cooldownPlayer.getUniqueId());
+                if (cooldownData == null) {
+                    sender.sendMessage("§cKhông có dữ liệu skill!");
+                    return true;
+                }
+                if (args.length < 2) {
+                    sender.sendMessage("§cSử dụng: /vnskill cooldown <on|off>");
+                    sender.sendMessage("§7Trạng thái hiện tại: " + (cooldownData.isCooldownBypass() ? "§aON" : "§cOFF"));
+                    return true;
+                }
+                switch (args[1].toLowerCase()) {
+                    case "on":
+                        cooldownData.setCooldownBypass(true);
+                        sender.sendMessage("§aĐã bật bypass cooldown! Bạn có thể dùng skill không cần hồi chiêu.");
+                        break;
+                    case "off":
+                        cooldownData.setCooldownBypass(false);
+                        sender.sendMessage("§cĐã tắt bypass cooldown! Skill sẽ hồi chiêu bình thường.");
+                        break;
+                    default:
+                        sender.sendMessage("§cSử dụng: /vnskill cooldown <on|off>");
+                }
+                return true;
             case "book":
                 // Admin command: give a skill book
                 if (sender.hasPermission("vnmine.command.admin") && args.length >= 4) {
@@ -556,7 +592,7 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
                     sender.sendMessage("§cSử dụng: /vnskill book <player> <skill_id> <THIEN|DIA|HUYEN|HOANG> [THUONG|TRUNG|HA]");
                 }
                 break;
-            default: sender.sendMessage("§cSử dụng: /vnskill <toggle|reload|my|bar|book>");
+            default: sender.sendMessage("§cSử dụng: /vnskill <toggle|reload|my|bar|cooldown|book>");
         }
         return true;
     }
@@ -692,6 +728,69 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
             if (args.length == 1) completions.addAll(Arrays.asList("menu", "start", "time", "perm", "world", "drop", "cultivate", "elite", "reload"));
         }
         return completions;
+    }
+
+    // ==================== PLAYER COMMAND ====================
+    /**
+     * Xử lý lệnh /vn player <name> setlevel <level>
+     * Yêu cầu quyền vnmine.command.admin
+     */
+    private boolean handlePlayerCommand(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("vnmine.command.admin")) {
+            sender.sendMessage("§cBạn không có quyền! (Cần vnmine.command.admin)");
+            return true;
+        }
+        if (args.length < 3) {
+            sender.sendMessage("§6=== VNMine Player Command ===");
+            sender.sendMessage("§e/vn player <player> setlevel <level> §f- Set cấp độ cho người chơi (bỏ qua độ kiếp)");
+            return true;
+        }
+
+        String playerName = args[1];
+        String action = args[2].toLowerCase();
+
+        if (!action.equals("setlevel")) {
+            sender.sendMessage("§cHành động không hợp lệ! Chỉ hỗ trợ: setlevel");
+            return true;
+        }
+        if (args.length < 4) {
+            sender.sendMessage("§cSử dụng: /vn player <player> setlevel <level>");
+            return true;
+        }
+
+        Player target = Bukkit.getPlayer(playerName);
+        if (target == null) {
+            sender.sendMessage("§cNgười chơi '" + playerName + "' không trực tuyến!");
+            return true;
+        }
+
+        int level;
+        try {
+            level = Integer.parseInt(args[3]);
+            if (level < 1 || level > 100) {
+                sender.sendMessage("§cLevel phải từ 1 đến 100!");
+                return true;
+            }
+        } catch (NumberFormatException e) {
+            sender.sendMessage("§cLevel phải là số nguyên!");
+            return true;
+        }
+
+        PlayerCultivationData data = cultivationManager.getOrCreatePlayerData(target.getUniqueId(), target.getName());
+        data.setLevel(level);
+        data.setExperience(0);
+        data.setMaxMana(100 + (level * 10));
+        data.setMana(data.getMaxMana());
+        // Bỏ qua trạng thái độ kiếp
+        data.setWaitingForTribulation(false);
+        data.setTribulationInProgress(false);
+
+        // Cập nhật name tag
+        nameTagManager.updateNameTag(target);
+
+        MessageUtils.send(target, "&d✦ Admin đã set cấp độ của bạn thành &e" + level + " &d(bỏ qua độ kiếp)!");
+        sender.sendMessage("§aĐã set level " + target.getName() + " thành " + level + " (bỏ qua độ kiếp)");
+        return true;
     }
 
     // ==================== TimeManager ====================
