@@ -21,22 +21,40 @@ import java.util.*;
 /**
  * AdminMenuGUI - Menu admin phân nhóm
  * Menu chính → chọn nhóm → sub-menu với các item
+ * Sử dụng title-based detection để tránh conflict với MainMenuGUI
  */
 public class AdminMenuGUI implements Listener {
 
     private final VNMinePlugin plugin;
-    private final Map<UUID, String> openMenus = new HashMap<>();
 
-    private static final String ADMIN_MAIN = "admin_main";
-    private static final String SUB_PILLS = "admin_pills";
-    private static final String SUB_ARTIFACTS = "admin_artifacts";
-    private static final String SUB_SKILLS = "admin_skills";
-    private static final String SUB_HERBS = "admin_herbs";
-    private static final String SUB_MATERIALS = "admin_materials";
-    private static final String SUB_MOUNTS = "admin_mounts";
+    // Titles cố định cho các menu admin
+    private static final String TITLE_ADMIN_MAIN = "✦ VNMine Admin Menu ✦";
+    private static final String TITLE_PILLS = "✦ Admin - Đan Dược ✦";
+    private static final String TITLE_ARTIFACTS = "✦ Admin - Pháp Bảo ✦";
+    private static final String TITLE_SKILLS = "✦ Admin - Công Pháp ✦";
+    private static final String TITLE_HERBS = "✦ Admin - Linh Thảo ✦";
+    private static final String TITLE_MATERIALS = "✦ Admin - Nguyên Liệu ✦";
+    private static final String TITLE_MOUNTS = "✦ Admin - Tọa Kỵ ✦";
+
+    // List tất cả các title admin
+    private static final List<String> ADMIN_TITLES = Arrays.asList(
+        TITLE_ADMIN_MAIN, TITLE_PILLS, TITLE_ARTIFACTS, TITLE_SKILLS,
+        TITLE_HERBS, TITLE_MATERIALS, TITLE_MOUNTS
+    );
 
     public AdminMenuGUI(VNMinePlugin plugin) {
         this.plugin = plugin;
+    }
+
+    /**
+     * Kiểm tra inventory hiện tại có phải admin menu không
+     */
+    private boolean isOwnInventory(InventoryClickEvent event) {
+        String title = event.getView().getTitle();
+        for (String t : ADMIN_TITLES) {
+            if (title.contains(t)) return true;
+        }
+        return false;
     }
 
     // ==================== ĐỊNH NGHĨA ITEM ====================
@@ -177,7 +195,7 @@ public class AdminMenuGUI implements Listener {
      */
     public void open(Player player) {
         Inventory gui = Bukkit.createInventory(null, 27,
-                ColorUtils.colorize("&8✦ VNMine Admin Menu ✦"));
+                ColorUtils.colorize("&8" + TITLE_ADMIN_MAIN));
 
         // Viền
         ItemStack border = new ItemBuilder(Material.GRAY_STAINED_GLASS_PANE)
@@ -265,7 +283,6 @@ public class AdminMenuGUI implements Listener {
                 .setName("&c&lĐóng")
                 .build());
 
-        openMenus.put(player.getUniqueId(), ADMIN_MAIN);
         player.openInventory(gui);
         MessageUtils.playSound(player, Sound.BLOCK_ENDER_CHEST_OPEN);
     }
@@ -273,12 +290,12 @@ public class AdminMenuGUI implements Listener {
     /**
      * Mở sub-menu với danh sách item
      */
-    private void openSubMenu(Player player, String menuKey, String title, List<AdminItemDef> items) {
+    private void openSubMenu(Player player, String titleSuffix, List<AdminItemDef> items) {
         int size = ((items.size() / 9) + 1) * 9;
         if (size < 18) size = 18;
 
         Inventory gui = Bukkit.createInventory(null, Math.min(size, 54),
-                ColorUtils.colorize(title));
+                ColorUtils.colorize("&8" + titleSuffix));
 
         // Đổ item vào
         int slot = 0;
@@ -292,7 +309,6 @@ public class AdminMenuGUI implements Listener {
                 .setName("&e&l← Quay Lại")
                 .build());
 
-        openMenus.put(player.getUniqueId(), menuKey);
         player.openInventory(gui);
         MessageUtils.playSound(player, Sound.BLOCK_ENDER_CHEST_OPEN);
     }
@@ -319,71 +335,58 @@ public class AdminMenuGUI implements Listener {
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player)) return;
-        Player player = (Player) event.getWhoClicked();
-        String currentMenu = openMenus.get(player.getUniqueId());
-        if (currentMenu == null) return;
 
-        // Cancel tất cả mọi click (cả top và bottom inventory)
+        // Title-based detection: chỉ xử lý nếu là admin menu
+        if (!isOwnInventory(event)) return;
+
+        Player player = (Player) event.getWhoClicked();
         event.setCancelled(true);
 
-        // Chỉ xử lý click vào top inventory
         if (event.getClickedInventory() == null) return;
-        InventoryView view = event.getView();
-        if (event.getClickedInventory() != view.getTopInventory()) {
-            // Bottom inventory click: đã cancel ở trên, không xử lý gì thêm
-            return;
-        }
-
         int slot = event.getRawSlot();
-        if (slot < 0 || slot >= view.getTopInventory().getSize()) return;
+        if (slot < 0 || slot >= event.getView().getTopInventory().getSize()) return;
 
         ItemStack clicked = event.getCurrentItem();
         if (clicked == null || clicked.getType() == Material.AIR) return;
 
-        switch (currentMenu) {
-            case ADMIN_MAIN:
-                handleAdminMainClick(player, slot);
-                break;
-            case SUB_PILLS:
-                handleSubItemClick(player, PILLS, clicked);
-                break;
-            case SUB_ARTIFACTS:
-                handleSubItemClick(player, ARTIFACTS, clicked);
-                break;
-            case SUB_SKILLS:
-                handleSkillClick(player, clicked, slot);
-                break;
-            case SUB_HERBS:
-                handleSubItemClick(player, HERBS, clicked);
-                break;
-            case SUB_MATERIALS:
-                handleSubItemClick(player, MATERIALS, clicked);
-                break;
-            case SUB_MOUNTS:
-                handleMountClick(player, clicked, slot);
-                break;
+        String title = event.getView().getTitle();
+
+        if (title.contains(TITLE_ADMIN_MAIN)) {
+            handleAdminMainClick(player, slot);
+        } else if (title.contains(TITLE_PILLS)) {
+            handleSubItemClick(player, PILLS, clicked);
+        } else if (title.contains(TITLE_ARTIFACTS)) {
+            handleSubItemClick(player, ARTIFACTS, clicked);
+        } else if (title.contains(TITLE_SKILLS)) {
+            handleSkillClick(player, clicked, slot);
+        } else if (title.contains(TITLE_HERBS)) {
+            handleSubItemClick(player, HERBS, clicked);
+        } else if (title.contains(TITLE_MATERIALS)) {
+            handleSubItemClick(player, MATERIALS, clicked);
+        } else if (title.contains(TITLE_MOUNTS)) {
+            handleMountClick(player, clicked, slot);
         }
     }
 
     private void handleAdminMainClick(Player player, int slot) {
         switch (slot) {
             case 11: // Tu Luyện
-                openSubMenu(player, SUB_PILLS, "&8✦ Admin - Đan Dược ✦", PILLS);
+                openSubMenu(player, TITLE_PILLS, PILLS);
                 break;
             case 12: // Pháp Bảo
-                openSubMenu(player, SUB_ARTIFACTS, "&8✦ Admin - Pháp Bảo ✦", ARTIFACTS);
+                openSubMenu(player, TITLE_ARTIFACTS, ARTIFACTS);
                 break;
             case 13: // Công Pháp
-                openSubMenu(player, SUB_SKILLS, "&8✦ Admin - Công Pháp ✦", SKILL_BOOKS);
+                openSubMenu(player, TITLE_SKILLS, SKILL_BOOKS);
                 break;
             case 14: // Linh Thảo
-                openSubMenu(player, SUB_HERBS, "&8✦ Admin - Linh Thảo ✦", HERBS);
+                openSubMenu(player, TITLE_HERBS, HERBS);
                 break;
             case 15: // Nguyên Liệu
-                openSubMenu(player, SUB_MATERIALS, "&8✦ Admin - Nguyên Liệu ✦", MATERIALS);
+                openSubMenu(player, TITLE_MATERIALS, MATERIALS);
                 break;
             case 22: // Tọa Kỵ
-                openSubMenu(player, SUB_MOUNTS, "&8✦ Admin - Tọa Kỵ ✦", MOUNT_KEYS);
+                openSubMenu(player, TITLE_MOUNTS, MOUNT_KEYS);
                 break;
             case 26: // Đóng
                 player.closeInventory();
@@ -392,10 +395,9 @@ public class AdminMenuGUI implements Listener {
     }
 
     private void handleSubItemClick(Player player, List<AdminItemDef> items, ItemStack clicked) {
-        // Kiểm tra nếu là nút quay lại (back arrow ở slot cuối)
         String stripped = stripColor(clicked.getItemMeta() != null
                 ? clicked.getItemMeta().getDisplayName() : "");
-        if (stripped.contains("Quay Lại") || stripped.contains("Back") || stripped.contains("←")) {
+        if (stripped.contains("Quay Lại") || stripped.contains("←")) {
             open(player);
             return;
         }
@@ -407,7 +409,6 @@ public class AdminMenuGUI implements Listener {
     }
 
     private void handleSkillClick(Player player, ItemStack clicked, int slot) {
-        // Kiểm tra nếu là nút quay lại
         String stripped = stripColor(clicked.getItemMeta() != null
                 ? clicked.getItemMeta().getDisplayName() : "");
         if (stripped.contains("Quay Lại") || stripped.contains("←")) {
@@ -415,20 +416,16 @@ public class AdminMenuGUI implements Listener {
             return;
         }
 
-        // Tìm skill match
         AdminItemDef matched = findItemInList(SKILL_BOOKS, clicked);
         if (matched == null) return;
 
-        // Lấy skill ID từ tên
         String skillId = SKILL_ID_MAP.get(stripColor(matched.displayName));
         if (skillId == null) {
             MessageUtils.send(player, "&cKhông tìm thấy skill ID!");
             return;
         }
 
-        // Give skill book
         if (plugin.getSkillBookManager() != null) {
-            // Mặc định grade Hoàng Hạ
             String grade = "HOANG";
             String subGrade = "HA";
             String strippedName = stripColor(matched.displayName);
@@ -439,7 +436,6 @@ public class AdminMenuGUI implements Listener {
 
             ItemStack book = plugin.getSkillBookManager().createSkillBook(skillId, grade, subGrade);
             if (book != null) {
-                // Gắn NBT tag
                 ItemBuilder builder = new ItemBuilder(book.getType())
                         .setAmount(1);
                 if (book.hasItemMeta() && book.getItemMeta().hasDisplayName()) {
@@ -461,7 +457,6 @@ public class AdminMenuGUI implements Listener {
     }
 
     private void handleMountClick(Player player, ItemStack clicked, int slot) {
-        // Kiểm tra nếu là nút quay lại
         String stripped = stripColor(clicked.getItemMeta() != null
                 ? clicked.getItemMeta().getDisplayName() : "");
         if (stripped.contains("Quay Lại") || stripped.contains("←")) {
@@ -472,7 +467,6 @@ public class AdminMenuGUI implements Listener {
         AdminItemDef matched = findItemInList(MOUNT_KEYS, clicked);
         if (matched == null) return;
 
-        // Give mount key item và unlock mount
         String mountId = null;
         String strippedName = stripColor(matched.displayName);
         if (strippedName.contains("Phượng Hoàng")) mountId = "PHUONG_HOANG";
@@ -480,9 +474,7 @@ public class AdminMenuGUI implements Listener {
         else if (strippedName.contains("Thanh Long")) mountId = "THANH_LONG";
 
         if (mountId != null && plugin.getMountManager() != null) {
-            // Unlock mount
             plugin.getMountManager().unlockMount(player, mountId);
-            // Give item
             giveItemToPlayer(player, matched);
             MessageUtils.send(player, "&a✦ Đã mở khóa tọa kỵ: " + matched.displayName + " &a(click phải item để học)");
         } else {
@@ -499,12 +491,9 @@ public class AdminMenuGUI implements Listener {
                 .setGlow(true)
                 .setAmount(amount);
 
-        // Gắn persistent data "vnmine_item" để BlockPlaceListener chặn đặt
         giveBuilder.setPersistentData("vnmine_item", "true");
-
         ItemStack giveItem = giveBuilder.build();
 
-        // Thêm vào kho, nếu đầy thì drop
         Map<Integer, ItemStack> leftover = player.getInventory().addItem(giveItem);
         for (ItemStack drop : leftover.values()) {
             player.getWorld().dropItemNaturally(player.getLocation(), drop);
@@ -535,11 +524,6 @@ public class AdminMenuGUI implements Listener {
 
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
-        if (!(event.getPlayer() instanceof Player)) return;
-        cleanupPlayer(event.getPlayer().getUniqueId());
-    }
-
-    public void cleanupPlayer(UUID uuid) {
-        openMenus.remove(uuid);
+        // Không cần cleanup vì dùng title-based detection
     }
 }

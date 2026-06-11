@@ -22,6 +22,7 @@ import java.util.*;
 
 /**
  * MainMenuGUI - Menu Inventory quản lý tất cả chức năng
+ * Sử dụng title-based detection để tránh conflict với các GUI khác
  */
 public class MainMenuGUI implements Listener {
 
@@ -30,7 +31,11 @@ public class MainMenuGUI implements Listener {
     private final SkillManager skillManager;
     private final AdminMenuGUI adminMenuGUI;
 
-    private final Map<UUID, String> openMenus;
+    // Các title mà GUI này quản lý
+    private static final String TITLE_MAIN = "✦ VNMine - Tu Tiên Giới ✦";
+    private static final String TITLE_CULTIVATION = "✦ Tu Vi Chi Tiết ✦";
+    private static final String TITLE_GUIDE = "✦ Hướng Dẫn Tu Tiên ✦";
+
     private final Map<UUID, AlchemyCraftGUI> alchemyGUIs;
     private final Map<UUID, ArtifactCraftGUI> artifactGUIs;
 
@@ -40,14 +45,21 @@ public class MainMenuGUI implements Listener {
         this.cultivationManager = cultivationManager;
         this.skillManager = skillManager;
         this.adminMenuGUI = new AdminMenuGUI(plugin);
-        this.openMenus = new HashMap<>();
         this.alchemyGUIs = new HashMap<>();
         this.artifactGUIs = new HashMap<>();
     }
 
+    /**
+     * Kiểm tra inventory hiện tại có phải do GUI này quản lý không
+     */
+    private boolean isOwnInventory(InventoryClickEvent event) {
+        String title = event.getView().getTitle();
+        return title.contains(TITLE_MAIN) || title.contains(TITLE_CULTIVATION) || title.contains(TITLE_GUIDE);
+    }
+
     public void openMainMenu(Player player) {
         Inventory gui = Bukkit.createInventory(null, 54, 
-                ColorUtils.colorize("&8✦ VNMine - Tu Tiên Giới ✦"));
+                ColorUtils.colorize("&8" + TITLE_MAIN));
 
         PlayerCultivationData data = cultivationManager.getPlayerData(player.getUniqueId());
         if (data == null) {
@@ -166,7 +178,6 @@ public class MainMenuGUI implements Listener {
                 .build());
 
         player.openInventory(gui);
-        openMenus.put(player.getUniqueId(), "main");
         MessageUtils.playSound(player, Sound.BLOCK_ENDER_CHEST_OPEN);
     }
 
@@ -175,6 +186,7 @@ public class MainMenuGUI implements Listener {
             case 10: openCultivationInfo(player); break;
             case 12:
                 if (plugin.getSkillBarGUI() != null) {
+                    player.closeInventory();
                     plugin.getSkillBarGUI().openSkillManagement(player);
                 } else {
                     MessageUtils.send(player, "&cHệ thống Skill Bar chưa được kích hoạt!");
@@ -188,7 +200,7 @@ public class MainMenuGUI implements Listener {
             case 34: openGuide(player); break;
             case 40:
                 if (hasAdminPermission(player)) {
-                    cleanupPlayer(player.getUniqueId());
+                    player.closeInventory();
                     adminMenuGUI.open(player);
                 }
                 break;
@@ -209,7 +221,7 @@ public class MainMenuGUI implements Listener {
 
     private void openCultivationInfo(Player player) {
         Inventory gui = Bukkit.createInventory(null, 27,
-                ColorUtils.colorize("&8✦ Tu Vi Chi Tiết ✦"));
+                ColorUtils.colorize("&8" + TITLE_CULTIVATION));
 
         PlayerCultivationData data = cultivationManager.getPlayerData(player.getUniqueId());
         if (data == null) return;
@@ -292,33 +304,26 @@ public class MainMenuGUI implements Listener {
         }
 
         player.openInventory(gui);
-        openMenus.put(player.getUniqueId(), "cultivation_info");
     }
 
     /**
-     * Mở menu luyện đan - PUBLIC để VNMinePlugin gọi được
+     * Mở menu luyện đan
      */
     public void openAlchemyMenu(Player player) {
         AlchemyCraftGUI gui = alchemyGUIs.computeIfAbsent(player.getUniqueId(), 
                 k -> new AlchemyCraftGUI(plugin, this));
         gui.open(player);
-        // Note: openMenus.put is inside gui.open()'s player.openInventory(),
-        // so we put it AFTER to avoid InventoryCloseEvent clearing it
-        openMenus.put(player.getUniqueId(), "alchemy");
     }
 
     private void openArtifactCraftMenu(Player player) {
         ArtifactCraftGUI gui = artifactGUIs.computeIfAbsent(player.getUniqueId(),
                 k -> new ArtifactCraftGUI(plugin, this));
         gui.open(player);
-        // Note: openMenus.put is inside gui.open()'s player.openInventory(),
-        // so we put it AFTER to avoid InventoryCloseEvent clearing it
-        openMenus.put(player.getUniqueId(), "artifact");
     }
 
     private void openGuide(Player player) {
         Inventory gui = Bukkit.createInventory(null, 27,
-                ColorUtils.colorize("&8✦ Hướng Dẫn Tu Tiên ✦"));
+                ColorUtils.colorize("&8" + TITLE_GUIDE));
 
         gui.setItem(10, new ItemBuilder(Material.WRITABLE_BOOK)
                 .setName("&6&lGiới Thiệu")
@@ -396,42 +401,37 @@ public class MainMenuGUI implements Listener {
                 .build());
 
         player.openInventory(gui);
-        openMenus.put(player.getUniqueId(), "guide");
     }
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player)) return;
-        Player player = (Player) event.getWhoClicked();
-        String currentMenu = openMenus.get(player.getUniqueId());
-        if (currentMenu == null) return;
+        
+        // Title-based detection: chỉ xử lý nếu inventory thuộc GUI này
+        if (!isOwnInventory(event)) return;
 
-        // Cancel tất cả mọi click (cả top và bottom inventory)
+        Player player = (Player) event.getWhoClicked();
         event.setCancelled(true);
 
-        // Chỉ xử lý click vào top inventory
         int slot = event.getRawSlot();
-        if (slot < 0 || slot >= 54) return;
-        
+        if (slot < 0) return;
+
         ItemStack clicked = event.getCurrentItem();
         if (clicked == null || clicked.getType() == Material.AIR) return;
 
-        switch (currentMenu) {
-            case "main":
-                handleMainMenuClick(player, slot);
-                break;
-            case "cultivation_info":
-                if (slot == 22) {
-                    openMainMenu(player);
-                } else if (slot == 16) {
-                    // Nút Độ Kiếp
-                    cultivationManager.startTribulation(player);
-                    player.closeInventory();
-                }
-                break;
-            case "guide":
-                if (slot == 26) openMainMenu(player);
-                break;
+        String title = event.getView().getTitle();
+
+        if (title.contains(TITLE_MAIN)) {
+            handleMainMenuClick(player, slot);
+        } else if (title.contains(TITLE_CULTIVATION)) {
+            if (slot == 22) {
+                openMainMenu(player);
+            } else if (slot == 16) {
+                cultivationManager.startTribulation(player);
+                player.closeInventory();
+            }
+        } else if (title.contains(TITLE_GUIDE)) {
+            if (slot == 26) openMainMenu(player);
         }
     }
 
@@ -442,7 +442,6 @@ public class MainMenuGUI implements Listener {
     }
 
     public void cleanupPlayer(UUID uuid) {
-        openMenus.remove(uuid);
         alchemyGUIs.remove(uuid);
         artifactGUIs.remove(uuid);
     }
