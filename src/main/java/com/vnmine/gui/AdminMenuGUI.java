@@ -323,17 +323,19 @@ public class AdminMenuGUI implements Listener {
         String currentMenu = openMenus.get(player.getUniqueId());
         if (currentMenu == null) return;
 
+        // Cancel tất cả mọi click (cả top và bottom inventory)
+        event.setCancelled(true);
+
         // Chỉ xử lý click vào top inventory
         if (event.getClickedInventory() == null) return;
         InventoryView view = event.getView();
         if (event.getClickedInventory() != view.getTopInventory()) {
-            event.setCancelled(true);
+            // Bottom inventory click: đã cancel ở trên, không xử lý gì thêm
             return;
         }
 
         int slot = event.getRawSlot();
-        if (slot < 0) return;
-        event.setCancelled(true);
+        if (slot < 0 || slot >= view.getTopInventory().getSize()) return;
 
         ItemStack clicked = event.getCurrentItem();
         if (clicked == null || clicked.getType() == Material.AIR) return;

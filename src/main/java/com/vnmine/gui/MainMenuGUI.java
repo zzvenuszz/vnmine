@@ -188,6 +188,7 @@ public class MainMenuGUI implements Listener {
             case 34: openGuide(player); break;
             case 40:
                 if (hasAdminPermission(player)) {
+                    cleanupPlayer(player.getUniqueId());
                     adminMenuGUI.open(player);
                 }
                 break;
@@ -405,32 +406,32 @@ public class MainMenuGUI implements Listener {
         String currentMenu = openMenus.get(player.getUniqueId());
         if (currentMenu == null) return;
 
-        // Chỉ cancel khi click vào top inventory (GUI slots 0-53)
-        // Cho phép click vào bottom inventory (kho đồ người chơi, slot >= 54)
+        // Cancel tất cả mọi click (cả top và bottom inventory)
+        event.setCancelled(true);
+
+        // Chỉ xử lý click vào top inventory
         int slot = event.getRawSlot();
-        if (slot >= 0 && slot < 54) {
-            event.setCancelled(true);
+        if (slot < 0 || slot >= 54) return;
+        
+        ItemStack clicked = event.getCurrentItem();
+        if (clicked == null || clicked.getType() == Material.AIR) return;
 
-            ItemStack clicked = event.getCurrentItem();
-            if (clicked == null || clicked.getType() == Material.AIR) return;
-
-            switch (currentMenu) {
-                case "main":
-                    handleMainMenuClick(player, slot);
-                    break;
-                case "cultivation_info":
-                    if (slot == 22) {
-                        openMainMenu(player);
-                    } else if (slot == 16) {
-                        // Nút Độ Kiếp
-                        cultivationManager.startTribulation(player);
-                        player.closeInventory();
-                    }
-                    break;
-                case "guide":
-                    if (slot == 26) openMainMenu(player);
-                    break;
-            }
+        switch (currentMenu) {
+            case "main":
+                handleMainMenuClick(player, slot);
+                break;
+            case "cultivation_info":
+                if (slot == 22) {
+                    openMainMenu(player);
+                } else if (slot == 16) {
+                    // Nút Độ Kiếp
+                    cultivationManager.startTribulation(player);
+                    player.closeInventory();
+                }
+                break;
+            case "guide":
+                if (slot == 26) openMainMenu(player);
+                break;
         }
     }
 
