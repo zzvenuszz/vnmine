@@ -242,57 +242,64 @@ public class AlchemyCraftGUI implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player)) return;
         Player player = (Player) event.getWhoClicked();
+
+        // Title-based detection
+        String title = ColorUtils.stripColor(event.getView().getTitle());
+        if (!title.contains("Luyện Đan")) return;
+
         AlchemySession session = activeSessions.get(player.getUniqueId());
         if (session == null) return;
 
         int slot = event.getRawSlot();
         ItemStack clicked = event.getCurrentItem();
-        ItemStack cursor = event.getCursor();
         Inventory gui = event.getInventory();
 
-        // Cho phép đặt nguyên liệu vào input slots
-        if (slot >= 0 && slot < 54) {
-            if (slot == SLOT_INPUT_1 || slot == SLOT_INPUT_2 || slot == SLOT_INPUT_3 ||
-                slot == SLOT_INPUT_4 || slot == SLOT_INPUT_5 || slot == SLOT_INPUT_6) {
-                // Cho phép đặt và lấy nguyên liệu
-                return; // Không cancel
-            }
+        // Cancel tất cả mọi click trước
+        event.setCancelled(true);
 
-            if (slot == SLOT_RESULT) {
-                event.setCancelled(true);
-                // Lấy kết quả
-                if (clicked != null && clicked.getType() != Material.AIR && 
-                    clicked.getType() != Material.BARRIER) {
-                    player.getInventory().addItem(clicked);
-                    gui.setItem(slot, new ItemBuilder(Material.BARRIER)
-                            .setName("&c&lKết Quả")
-                            .setLore("", "&7Luyện đan thành công sẽ hiện ở đây")
-                            .build());
-                    MessageUtils.playSound(player, Sound.ENTITY_ITEM_PICKUP);
-                }
-                return;
-            }
+        // Nếu là bottom inventory (slot > 53), chỉ cancel không xử lý
+        if (slot < 0 || slot >= 54) return;
 
-            event.setCancelled(true);
+        // Input slots: cho phép đặt/lấy nguyên liệu
+        if (slot == SLOT_INPUT_1 || slot == SLOT_INPUT_2 || slot == SLOT_INPUT_3 ||
+            slot == SLOT_INPUT_4 || slot == SLOT_INPUT_5 || slot == SLOT_INPUT_6) {
+            event.setCancelled(false); // Cho phép thao tác
+            return;
+        }
 
-            switch (slot) {
-                case SLOT_CRAFT:
-                    attemptCraft(player, session);
-                    break;
-                case SLOT_BACK:
-                    mainMenu.openMainMenu(player);
-                    break;
-                case SLOT_GUIDE:
-                    MessageUtils.send(player, "&6&lCông Thức Luyện Đan:");
-                    MessageUtils.send(player, "&aHồi Linh Đan: &73 Linh Thảo + 1 Nước → Hồi 30 mana");
-                    MessageUtils.send(player, "&bĐại Hồi Linh Đan: &72 Hồi Linh Đan + 2 Huyết LT + 5 LT → Hồi 100 mana");
-                    MessageUtils.send(player, "&cCương Thể Đan: &73 Huyết LT + 5 LT + 1 Blaze → +20% DMG 60s");
-                    MessageUtils.send(player, "&aThanh Tâm Đan: &75 LT + 1 Nước → Giải trừ trạng thái");
-                    MessageUtils.send(player, "&bTốc Thánh Đan: &73 LT + 2 Đường + 1 Lông → +50% Speed 30s");
-                    MessageUtils.send(player, "&5Tu Luyện Đan: &710 LT + 5 Huyết LT + 2 Long Huyết + 1 Vàng → +50 EXP");
-                    MessageUtils.send(player, "&6Phi Thăng Đan: &73 Tu Luyện Đan + 10 Long Huyết + 1 Hơi Rồng + 2 Netherite → +500 EXP");
-                    break;
+        if (clicked == null || clicked.getType() == Material.AIR) return;
+
+        // Result slot
+        if (slot == SLOT_RESULT) {
+            if (clicked.getType() != Material.BARRIER) {
+                player.getInventory().addItem(clicked);
+                gui.setItem(slot, new ItemBuilder(Material.BARRIER)
+                        .setName("&c&lKết Quả")
+                        .setLore("", "&7Luyện đan thành công sẽ hiện ở đây")
+                        .build());
+                MessageUtils.playSound(player, Sound.ENTITY_ITEM_PICKUP);
             }
+            return;
+        }
+
+        // Các nút chức năng
+        switch (slot) {
+            case SLOT_CRAFT:
+                attemptCraft(player, session);
+                break;
+            case SLOT_BACK:
+                mainMenu.openMainMenu(player);
+                break;
+            case SLOT_GUIDE:
+                MessageUtils.send(player, "&6&lCông Thức Luyện Đan:");
+                MessageUtils.send(player, "&aHồi Linh Đan: &73 Linh Thảo + 1 Nước → Hồi 30 mana");
+                MessageUtils.send(player, "&bĐại Hồi Linh Đan: &72 Hồi Linh Đan + 2 Huyết LT + 5 LT → Hồi 100 mana");
+                MessageUtils.send(player, "&cCương Thể Đan: &73 Huyết LT + 5 LT + 1 Blaze → +20% DMG 60s");
+                MessageUtils.send(player, "&aThanh Tâm Đan: &75 LT + 1 Nước → Giải trừ trạng thái");
+                MessageUtils.send(player, "&bTốc Thánh Đan: &73 LT + 2 Đường + 1 Lông → +50% Speed 30s");
+                MessageUtils.send(player, "&5Tu Luyện Đan: &710 LT + 5 Huyết LT + 2 Long Huyết + 1 Vàng → +50 EXP");
+                MessageUtils.send(player, "&6Phi Thăng Đan: &73 Tu Luyện Đan + 10 Long Huyết + 1 Hơi Rồng + 2 Netherite → +500 EXP");
+                break;
         }
     }
 

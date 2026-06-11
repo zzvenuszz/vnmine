@@ -12,6 +12,7 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -32,9 +33,9 @@ public class MainMenuGUI implements Listener {
     private final AdminMenuGUI adminMenuGUI;
 
     // Các title mà GUI này quản lý
-    private static final String TITLE_MAIN = "✦ VNMine - Tu Tiên Giới ✦";
-    private static final String TITLE_CULTIVATION = "✦ Tu Vi Chi Tiết ✦";
-    private static final String TITLE_GUIDE = "✦ Hướng Dẫn Tu Tiên ✦";
+    private static final String TITLE_MAIN = "VNMine - Tu Tiên Giới";
+    private static final String TITLE_CULTIVATION = "Tu Vi Chi Tiết";
+    private static final String TITLE_GUIDE = "Hướng Dẫn Tu Tiên";
 
     private final Map<UUID, AlchemyCraftGUI> alchemyGUIs;
     private final Map<UUID, ArtifactCraftGUI> artifactGUIs;
@@ -59,7 +60,7 @@ public class MainMenuGUI implements Listener {
 
     public void openMainMenu(Player player) {
         Inventory gui = Bukkit.createInventory(null, 54, 
-                ColorUtils.colorize("&8" + TITLE_MAIN));
+                ColorUtils.colorize("&8✦ " + TITLE_MAIN + " ✦"));
 
         PlayerCultivationData data = cultivationManager.getPlayerData(player.getUniqueId());
         if (data == null) {
@@ -68,7 +69,6 @@ public class MainMenuGUI implements Listener {
 
         String realmPrefix = data.getRealmPrefix();
         double expPercent = data.getExpPercent();
-        double manaPercent = data.getManaPercent();
         int level = data.getLevel();
 
         gui.setItem(10, new ItemBuilder(Material.PLAYER_HEAD)
@@ -186,21 +186,24 @@ public class MainMenuGUI implements Listener {
             case 10: openCultivationInfo(player); break;
             case 12:
                 if (plugin.getSkillBarGUI() != null) {
-                    player.closeInventory();
                     plugin.getSkillBarGUI().openSkillManagement(player);
                 } else {
                     MessageUtils.send(player, "&cHệ thống Skill Bar chưa được kích hoạt!");
                 }
                 break;
-            case 14: openAlchemyMenu(player); break;
-            case 16: openArtifactCraftMenu(player); break;
+            case 14:
+                openAlchemyMenu(player);
+                break;
+            case 16:
+                openArtifactCraftMenu(player);
+                break;
             case 28: MessageUtils.send(player, "&aTính năng Linh Điền đang phát triển..."); break;
             case 30: MessageUtils.send(player, "&aTính năng đang phát triển..."); break;
             case 32: MessageUtils.send(player, "&aTính năng đang phát triển..."); break;
             case 34: openGuide(player); break;
             case 40:
                 if (hasAdminPermission(player)) {
-                    player.closeInventory();
+                    cleanupPlayer(player.getUniqueId());
                     adminMenuGUI.open(player);
                 }
                 break;
@@ -208,9 +211,6 @@ public class MainMenuGUI implements Listener {
         }
     }
 
-    /**
-     * Kiểm tra player có quyền admin hay không
-     */
     private boolean hasAdminPermission(Player player) {
         com.vnmine.permission.PermissionManager permManager = plugin.getPermissionManager();
         if (permManager != null && permManager.isEnabled()) {
@@ -221,7 +221,7 @@ public class MainMenuGUI implements Listener {
 
     private void openCultivationInfo(Player player) {
         Inventory gui = Bukkit.createInventory(null, 27,
-                ColorUtils.colorize("&8" + TITLE_CULTIVATION));
+                ColorUtils.colorize("&8✦ " + TITLE_CULTIVATION + " ✦"));
 
         PlayerCultivationData data = cultivationManager.getPlayerData(player.getUniqueId());
         if (data == null) return;
@@ -272,7 +272,6 @@ public class MainMenuGUI implements Listener {
                 .setName("&e&l← Quay Lại")
                 .build());
 
-        // Nút Độ Kiếp - chỉ hiện khi cần (level 10,20,30...)
         if (data.isWaitingForTribulation()) {
             List<String> lore = new ArrayList<>();
             lore.add("");
@@ -306,9 +305,6 @@ public class MainMenuGUI implements Listener {
         player.openInventory(gui);
     }
 
-    /**
-     * Mở menu luyện đan
-     */
     public void openAlchemyMenu(Player player) {
         AlchemyCraftGUI gui = alchemyGUIs.computeIfAbsent(player.getUniqueId(), 
                 k -> new AlchemyCraftGUI(plugin, this));
@@ -323,7 +319,7 @@ public class MainMenuGUI implements Listener {
 
     private void openGuide(Player player) {
         Inventory gui = Bukkit.createInventory(null, 27,
-                ColorUtils.colorize("&8" + TITLE_GUIDE));
+                ColorUtils.colorize("&8✦ " + TITLE_GUIDE + " ✦"));
 
         gui.setItem(10, new ItemBuilder(Material.WRITABLE_BOOK)
                 .setName("&6&lGiới Thiệu")
@@ -403,11 +399,10 @@ public class MainMenuGUI implements Listener {
         player.openInventory(gui);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player)) return;
         
-        // Title-based detection: chỉ xử lý nếu inventory thuộc GUI này
         if (!isOwnInventory(event)) return;
 
         Player player = (Player) event.getWhoClicked();
