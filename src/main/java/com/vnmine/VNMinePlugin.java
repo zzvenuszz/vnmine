@@ -95,6 +95,7 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
     public SkillBookManager getSkillBookManager() { return skillBookManager; }
     public SkillBarGUI getSkillBarGUI() { return skillBarGUI; }
     public MainMenuGUI getMainMenuGUI() { return mainMenuGUI; }
+    public AdminMenuGUI getAdminMenuGUI() { return adminMenuGUI; }
     public PermissionManager getPermissionManager() { return permissionManager; }
     public CurrencyManager getCurrencyManager() { return currencyManager; }
     public NPCManager getNPCManager() { return npcManager; }
@@ -121,10 +122,10 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         skillManager = new SkillManager(this);
         skillBookManager = new SkillBookManager(this);
         skillBarGUI = new SkillBarGUI(this);
-        mainMenuGUI = new MainMenuGUI(this, cultivationManager, skillManager);
+        adminMenuGUI = new AdminMenuGUI(this);
+        mainMenuGUI = new MainMenuGUI(this, cultivationManager, skillManager, adminMenuGUI);
         alchemyCraftGUI = new AlchemyCraftGUI(this, mainMenuGUI);
         artifactCraftGUI = new ArtifactCraftGUI(this, mainMenuGUI);
-        adminMenuGUI = new AdminMenuGUI(this);
 
         // Initialize NEW systems
         currencyManager = new CurrencyManager(this);

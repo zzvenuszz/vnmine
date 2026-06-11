@@ -43,11 +43,11 @@ public class MainMenuGUI implements Listener {
     private final Map<UUID, ArtifactCraftGUI> artifactGUIs;
 
     public MainMenuGUI(VNMinePlugin plugin, CultivationManager cultivationManager, 
-                       SkillManager skillManager) {
+                       SkillManager skillManager, AdminMenuGUI adminMenuGUI) {
         this.plugin = plugin;
         this.cultivationManager = cultivationManager;
         this.skillManager = skillManager;
-        this.adminMenuGUI = new AdminMenuGUI(plugin);
+        this.adminMenuGUI = adminMenuGUI;
         this.alchemyGUIs = new HashMap<>();
         this.artifactGUIs = new HashMap<>();
     }
