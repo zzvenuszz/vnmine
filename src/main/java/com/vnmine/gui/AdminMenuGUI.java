@@ -48,9 +48,10 @@ public class AdminMenuGUI implements Listener {
 
     /**
      * Kiểm tra inventory hiện tại có phải admin menu không
+     * Strip màu trước khi so sánh để tránh lỗi
      */
     private boolean isOwnInventory(InventoryClickEvent event) {
-        String title = event.getView().getTitle();
+        String title = ColorUtils.stripColor(event.getView().getTitle());
         for (String t : ADMIN_TITLES) {
             if (title.contains(t)) return true;
         }
@@ -349,7 +350,7 @@ public class AdminMenuGUI implements Listener {
         ItemStack clicked = event.getCurrentItem();
         if (clicked == null || clicked.getType() == Material.AIR) return;
 
-        String title = event.getView().getTitle();
+        String title = ColorUtils.stripColor(event.getView().getTitle());
 
         if (title.contains(TITLE_ADMIN_MAIN)) {
             handleAdminMainClick(player, slot);

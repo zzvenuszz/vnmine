@@ -53,7 +53,7 @@ public class MainMenuGUI implements Listener {
      * Kiểm tra inventory hiện tại có phải do GUI này quản lý không
      */
     private boolean isOwnInventory(InventoryClickEvent event) {
-        String title = event.getView().getTitle();
+        String title = ColorUtils.stripColor(event.getView().getTitle());
         return title.contains(TITLE_MAIN) || title.contains(TITLE_CULTIVATION) || title.contains(TITLE_GUIDE);
     }
 
@@ -419,7 +419,7 @@ public class MainMenuGUI implements Listener {
         ItemStack clicked = event.getCurrentItem();
         if (clicked == null || clicked.getType() == Material.AIR) return;
 
-        String title = event.getView().getTitle();
+        String title = ColorUtils.stripColor(event.getView().getTitle());
 
         if (title.contains(TITLE_MAIN)) {
             handleMainMenuClick(player, slot);

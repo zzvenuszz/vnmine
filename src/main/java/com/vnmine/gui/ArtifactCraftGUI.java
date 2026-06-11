@@ -224,46 +224,56 @@ public class ArtifactCraftGUI implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player)) return;
         Player player = (Player) event.getWhoClicked();
+        
+        // Title-based detection
+        String title = event.getView().getTitle();
+        if (!title.contains("Luyện Chế Pháp Bảo")) return;
+        
         ArtifactSession session = activeSessions.get(player.getUniqueId());
         if (session == null) return;
 
         int slot = event.getRawSlot();
         ItemStack clicked = event.getCurrentItem();
-        Inventory gui = event.getInventory();
 
-        if (slot >= 0 && slot < 54) {
-            if (slot == SLOT_INPUT_1 || slot == SLOT_INPUT_2 || slot == SLOT_INPUT_3 ||
-                slot == SLOT_INPUT_4 || slot == SLOT_INPUT_5 || slot == SLOT_INPUT_6) {
-                return; // Cho phép đặt nguyên liệu
+        // Cancel tất cả click trước
+        event.setCancelled(true);
+
+        // Chỉ xử lý click vào top inventory
+        if (slot < 0 || slot >= 54) return;
+
+        // Input slots: cho phép đặt nguyên liệu (không cancel)
+        if (slot == SLOT_INPUT_1 || slot == SLOT_INPUT_2 || slot == SLOT_INPUT_3 ||
+            slot == SLOT_INPUT_4 || slot == SLOT_INPUT_5 || slot == SLOT_INPUT_6) {
+            event.setCancelled(false);
+            return;
+        }
+
+        if (clicked == null || clicked.getType() == Material.AIR) return;
+
+        // Result slot
+        if (slot == SLOT_RESULT) {
+            if (clicked.getType() != Material.BARRIER) {
+                player.getInventory().addItem(clicked);
+                event.getInventory().setItem(slot, new ItemBuilder(Material.BARRIER)
+                        .setName("&c&lKết Quả")
+                        .setLore("", "&7Chế tạo thành công sẽ hiện ở đây")
+                        .build());
+                MessageUtils.playSound(player, Sound.ENTITY_ITEM_PICKUP);
             }
+            return;
+        }
 
-            if (slot == SLOT_RESULT) {
-                event.setCancelled(true);
-                if (clicked != null && clicked.getType() != Material.AIR && 
-                    clicked.getType() != Material.BARRIER) {
-                    player.getInventory().addItem(clicked);
-                    event.getInventory().setItem(slot, new ItemBuilder(Material.BARRIER)
-                            .setName("&c&lKết Quả")
-                            .setLore("", "&7Chế tạo thành công sẽ hiện ở đây")
-                            .build());
-                    MessageUtils.playSound(player, Sound.ENTITY_ITEM_PICKUP);
-                }
-                return;
-            }
-
-            event.setCancelled(true);
-
-            switch (slot) {
-                case SLOT_CRAFT:
-                    attemptCraft(player, session);
-                    break;
-                case SLOT_BACK:
-                    mainMenu.openMainMenu(player);
-                    break;
-                case SLOT_GUIDE:
-                    showRecipe(player);
-                    break;
-            }
+        // Các nút chức năng khác
+        switch (slot) {
+            case SLOT_CRAFT:
+                attemptCraft(player, session);
+                break;
+            case SLOT_BACK:
+                mainMenu.openMainMenu(player);
+                break;
+            case SLOT_GUIDE:
+                showRecipe(player);
+                break;
         }
     }
 
