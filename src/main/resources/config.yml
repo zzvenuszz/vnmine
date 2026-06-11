@@ -227,21 +227,13 @@ cultivation:
     damage:
       base: 3.0
       per-strike-multiplier: 1.2
-      # Sát thương mỗi level (tăng dần theo cấp)
       damage-per-level: 0.8
-      # Giảm sát thương từ giáp (0.0-0.8) - 0.6 = 60% giảm cho full iron
-      # Công thức: sát thương = (base + level*damage-per-level + wave*3) * (1 - armor-reduction)
-      # Level 9 full iron: ~(3 + 7.2 + 0)*0.4 = ~4 dmg/giây → sống được
-      # Level 29 full diamond: ~(3 + 23.2 + 6)*0.35 = ~11.3 dmg/giây → cần thuốc hồi
       armor-reduction: 0.6
     countdown-seconds: 5
     strike-interval-ticks: 20
     immunity-duration-seconds: 60
-    # Bán kính ảnh hưởng = level * radius-per-level (block)
     radius-per-level: 1.5
-    # EXP cho người chơi khác bị lôi kiếp đánh trúng
     exp-for-others: 50.0
-    # Số level tụt tối thiểu khi độ kiếp thất bại (có thể +1 random)
     level-drop-on-fail: 1
     broadcast:
       - "&6⚡ &l{player} &r&6đang độ {strikes} lần lôi kiếp!"
@@ -457,7 +449,7 @@ skill-books:
         grade: "THIEN"
         sub-grade: "THUONG"
         chance: 1.0
-  npc: # Cấu hình cho NPC Đại Sư Công Pháp
+  npc:
     skill_master:
       enabled: true
       name: "&b&l◆ Đại Sư Công Pháp ◆"
@@ -518,19 +510,71 @@ elite-mob-settings:
     boss-despawn-seconds: 600
 
 # =============================================
-# VIII. HỆ THỐNG ITEM & PHÁP BẢO
+# IX. HỆ THỐNG PHÁP BẢO (ARTIFACTS)
 # =============================================
 items:
   enabled: true
+  artifacts:
+    # Kiếm Phi Hành - config trong FlyingSwordSession
+    flying_sword:
+      enabled: true
+      cooldown-seconds: 30
+      mana-cost-per-second: 10
+    
+    # Linh Chung - Làm choáng quái
+    spirit_bell:
+      enabled: true
+      stun-duration-seconds: 5
+      stun-radius: 5
+      mana-cost: 15
+      cooldown-seconds: 15
+    
+    # Bát Quái Kính - Giảm sát thương
+    bagua_mirror:
+      enabled: true
+      damage-reduction: 0.3
+      notify-player: true
+      notify-message: "&5◆ Bát Quái Kính ◆ &7đã chặn &c{reduced} &7sát thương!"
+    
+    # Hồn Ngọc - Tự động hồi máu
+    soul_jade:
+      enabled: true
+      hp-threshold: 0.3
+      heal-percent: 0.5
+      cooldown-seconds: 120
+      notify-player: true
+      notify-message: "&a✦ Hồn Ngọc tỏa sáng! Hồi phục &f{healed} &amáu!"
+    
+    # Thiên Linh Thuẫn - Bất tử tạm thời
+    heaven_shield:
+      enabled: true
+      invulnerability-seconds: 5
+      cooldown-seconds: 180
+      mana-cost: 40
+    
+    # Lôi Ấn - Gọi sét
+    thunder_seal:
+      enabled: true
+      cooldown-seconds: 10
+      mana-cost: 25
+      range: 20
+    
+    # Phượng Hoàng Lệnh - Hồi sinh
+    phoenix_rebirth:
+      enabled: true
+      cooldown-seconds: 3600
+      notify-player: true
+      notify-message: "&6✦ Phượng Hoàng Lệnh! Hồi sinh thành công!"
+      cooldown-message: "&cPhượng Hoàng Lệnh đang hồi phục! Còn &e{remaining} &cgiây!"
 
 # =============================================
-# IX. HỆ THỐNG LINH THẢO & LINH ĐIỀN
+# X. HỆ THỐNG LINH THẢO & LINH ĐIỀN
 # =============================================
 spirit-farming:
   enabled: true
 
 # =============================================
-# X. HỆ THỐNG NPC SHOP
+# XI. HỆ THỐNG NPC SHOP
 # =============================================
 npc-shop:
   enabled: true
@@ -657,8 +701,52 @@ npc-shop:
             amount: 10
           stock: -1
 
+    # Mount NPC - Tọa Kỵ Thương
+    mount_master:
+      enabled: true
+      name: "&6&l◆ Tọa Kỵ Thương ◆"
+      type: "VILLAGER"
+      profession: "ARMORER"
+      trades:
+        PHUONG_HOANG_KEY:
+          type: "MOUNT_KEY"
+          item-id: "PHUONG_HOANG"
+          display-name: "&6&l◆ Phượng Hoàng Lệnh Bài ◆"
+          material: "FEATHER"
+          amount: 1
+          lore: ["&7Dùng để triệu hồi Phượng Hoàng tọa kỵ", "", "&eClick phải để học cách triệu hồi!"]
+          price:
+            material: "DIAMOND"
+            amount: 32
+          stock: 3
+          cooldown-seconds: 3600
+        BACH_HO_KEY:
+          type: "MOUNT_KEY"
+          item-id: "BACH_HO"
+          display-name: "&f&l◆ Bạch Hổ Lệnh Bài ◆"
+          material: "BONE"
+          amount: 1
+          lore: ["&7Dùng để triệu hồi Bạch Hổ tọa kỵ", "", "&eClick phải để học cách triệu hồi!"]
+          price:
+            material: "DIAMOND"
+            amount: 48
+          stock: 2
+          cooldown-seconds: 3600
+        THANH_LONG_KEY:
+          type: "MOUNT_KEY"
+          item-id: "THANH_LONG"
+          display-name: "&a&l◆ Thanh Long Lệnh Bài ◆"
+          material: "DRAGON_BREATH"
+          amount: 1
+          lore: ["&7Dùng để triệu hồi Thanh Long tọa kỵ", "", "&eClick phải để học cách triệu hồi!"]
+          price:
+            material: "DIAMOND"
+            amount: 64
+          stock: 1
+          cooldown-seconds: 3600
+
 # =============================================
-# XI. HỆ THỐNG LINH THẠCH (CURRENCY)
+# XII. HỆ THỐNG LINH THẠCH (CURRENCY)
 # =============================================
 currency:
   enabled: true
@@ -687,7 +775,7 @@ currency:
       amount: 1
 
 # =============================================
-# XII. HỆ THỐNG TỌA KỴ (MOUNT)
+# XIII. HỆ THỐNG TỌA KỴ (MOUNT)
 # =============================================
 mount:
   enabled: true

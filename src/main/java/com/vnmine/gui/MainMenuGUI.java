@@ -28,6 +28,7 @@ public class MainMenuGUI implements Listener {
     private final VNMinePlugin plugin;
     private final CultivationManager cultivationManager;
     private final SkillManager skillManager;
+    private final AdminMenuGUI adminMenuGUI;
 
     private final Map<UUID, String> openMenus;
     private final Map<UUID, AlchemyCraftGUI> alchemyGUIs;
@@ -38,6 +39,7 @@ public class MainMenuGUI implements Listener {
         this.plugin = plugin;
         this.cultivationManager = cultivationManager;
         this.skillManager = skillManager;
+        this.adminMenuGUI = new AdminMenuGUI(plugin);
         this.openMenus = new HashMap<>();
         this.alchemyGUIs = new HashMap<>();
         this.artifactGUIs = new HashMap<>();
@@ -144,6 +146,21 @@ public class MainMenuGUI implements Listener {
             }
         }
 
+        // Nút Admin Menu - chỉ hiển thị nếu có quyền
+        if (hasAdminPermission(player)) {
+            gui.setItem(40, new ItemBuilder(Material.COMMAND_BLOCK)
+                    .setGlow(true)
+                    .setName("&c&l◆ Admin Menu ◆")
+                    .setLore(
+                            "",
+                            "&7Quản lý và lấy item test",
+                            "&7(Phân theo nhóm: Tu Luyện, Pháp Bảo,",
+                            "&7Công Pháp, Linh Thảo, Nguyên Liệu, Tọa Kỵ)",
+                            "",
+                            "&c&lChỉ dành cho Admin!"
+                    ).build());
+        }
+
         gui.setItem(49, new ItemBuilder(Material.BARRIER)
                 .setName("&c&lĐóng")
                 .build());
@@ -169,8 +186,24 @@ public class MainMenuGUI implements Listener {
             case 30: MessageUtils.send(player, "&aTính năng đang phát triển..."); break;
             case 32: MessageUtils.send(player, "&aTính năng đang phát triển..."); break;
             case 34: openGuide(player); break;
+            case 40:
+                if (hasAdminPermission(player)) {
+                    adminMenuGUI.open(player);
+                }
+                break;
             case 49: player.closeInventory(); break;
         }
+    }
+
+    /**
+     * Kiểm tra player có quyền admin hay không
+     */
+    private boolean hasAdminPermission(Player player) {
+        com.vnmine.permission.PermissionManager permManager = plugin.getPermissionManager();
+        if (permManager != null && permManager.isEnabled()) {
+            return permManager.hasPermission(player, "vnmine.command.admin");
+        }
+        return player.isOp();
     }
 
     private void openCultivationInfo(Player player) {

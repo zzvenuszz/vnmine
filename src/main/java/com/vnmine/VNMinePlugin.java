@@ -17,6 +17,8 @@ import com.vnmine.gui.QuickMenuListener;
 import com.vnmine.item.ItemBuilder;
 import com.vnmine.item.PillUseListener;
 import com.vnmine.item.artifacts.abilities.ArtifactAbilityListener;
+import com.vnmine.item.artifacts.abilities.MountItemListener;
+import com.vnmine.item.artifacts.abilities.PhoenixRebirthListener;
 import com.vnmine.item.block.BlockPlaceListener;
 import com.vnmine.mount.MountCommand;
 import com.vnmine.mount.MountManager;
@@ -122,7 +124,7 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         mainMenuGUI = new MainMenuGUI(this, cultivationManager, skillManager);
         alchemyCraftGUI = new AlchemyCraftGUI(this, mainMenuGUI);
         artifactCraftGUI = new ArtifactCraftGUI(this, mainMenuGUI);
-        adminMenuGUI = new AdminMenuGUI();
+        adminMenuGUI = new AdminMenuGUI(this);
 
         // Initialize NEW systems
         currencyManager = new CurrencyManager(this);
@@ -156,6 +158,10 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         // Register block place listener (chặn đặt item đặc biệt)
         BlockPlaceListener blockPlaceListener = new BlockPlaceListener();
 
+        // Register new listeners
+        MountItemListener mountItemListener = new MountItemListener(this);
+        PhoenixRebirthListener phoenixRebirthListener = new PhoenixRebirthListener(this);
+
         // Register events
         getServer().getPluginManager().registerEvents(blockDropListener, this);
         getServer().getPluginManager().registerEvents(artifactAbilityListener, this);
@@ -173,6 +179,8 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         getServer().getPluginManager().registerEvents(skillBarGUI, this);
         getServer().getPluginManager().registerEvents(new SkillBookListener(this), this);
         getServer().getPluginManager().registerEvents(new QuickMenuListener(this), this);
+        getServer().getPluginManager().registerEvents(mountItemListener, this);
+        getServer().getPluginManager().registerEvents(phoenixRebirthListener, this);
 
         // Register commands
         getCommand("vnmine").setExecutor(this);

@@ -17,6 +17,8 @@
 /home/admin/vnmine/src/main/java/com/vnmine/item/PillUseListener.java
 /home/admin/vnmine/src/main/java/com/vnmine/item/artifacts/abilities/ArtifactAbilityListener.java
 /home/admin/vnmine/src/main/java/com/vnmine/item/artifacts/abilities/FlyingSwordSession.java
+/home/admin/vnmine/src/main/java/com/vnmine/item/artifacts/abilities/MountItemListener.java
+/home/admin/vnmine/src/main/java/com/vnmine/item/artifacts/abilities/PhoenixRebirthListener.java
 /home/admin/vnmine/src/main/java/com/vnmine/item/block/BlockPlaceListener.java
 /home/admin/vnmine/src/main/java/com/vnmine/mount/MountCommand.java
 /home/admin/vnmine/src/main/java/com/vnmine/mount/MountManager.java

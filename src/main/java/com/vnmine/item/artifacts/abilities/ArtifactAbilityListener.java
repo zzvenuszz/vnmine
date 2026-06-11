@@ -7,7 +7,6 @@ import com.vnmine.util.MessageUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.*;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
@@ -15,13 +14,14 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
@@ -30,6 +30,8 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * ArtifactAbilityListener - Xử lý kích hoạt pháp bảo
  * Click phải để thi triển, kèm niệm khẩu quyết
+ * 
+ * Tất cả thời gian trong config đều tính bằng giây
  */
 public class ArtifactAbilityListener implements Listener {
 
@@ -50,8 +52,13 @@ public class ArtifactAbilityListener implements Listener {
     private static final String THUNDER_SEAL = "Lôi Ấn";
     private static final String PHOENIX_REBIRTH = "Phượng Hoàng Lệnh";
 
+    // Soul Jade cooldown per player
+    private final Map<UUID, Long> soulJadeCooldowns = new HashMap<>();
+
     public ArtifactAbilityListener(VNMinePlugin plugin) {
         this.plugin = plugin;
+        // Start Soul Jade check task
+        startSoulJadeCheckTask();
     }
 
     /**
@@ -79,6 +86,13 @@ public class ArtifactAbilityListener implements Listener {
 
     private String stripColor(String input) {
         return input.replaceAll("§[0-9a-fk-or]", "").trim();
+    }
+
+    /**
+     * Đọc config seconds và convert ra milliseconds cho cooldown
+     */
+    private int getConfigCooldown(String artifactPath, int defaultSeconds) {
+        return plugin.getConfig().getInt("items.artifacts." + artifactPath, defaultSeconds);
     }
 
     /**
@@ -113,7 +127,7 @@ public class ArtifactAbilityListener implements Listener {
     }
 
     /**
-     * Niệm khẩu quyết - broadcast tên kỹ năng lên chat (dùng ColorUtils, không gọi player.chat)
+     * Niệm khẩu quyết - broadcast tên kỹ năng lên chat
      */
     private void chant(Player player, String incantation) {
         Bukkit.broadcastMessage(ColorUtils.colorize("&7[&e" + player.getName() + "&7] &f" + incantation));
@@ -152,12 +166,117 @@ public class ArtifactAbilityListener implements Listener {
                 MessageUtils.send(player, "&5&l◆ Bát Quái Kính ◆ &7- Giảm 30% sát thương khi cầm trên tay.");
                 break;
             case SOUL_JADE:
-                MessageUtils.send(player, "&a&l◆ Hồn Ngọc ◆ &7- Tự động hồi 50% máu khi HP < 20%.");
+                MessageUtils.send(player, "&a&l◆ Hồn Ngọc ◆ &7- Tự động hồi 50% máu khi HP < 30%.");
                 break;
             case PHOENIX_REBIRTH:
                 MessageUtils.send(player, "&6&l◆ Phượng Hoàng Lệnh ◆ &7- Tự động hồi sinh 1 lần sau khi chết.");
                 break;
         }
+    }
+
+    // ==================== BÁT QUÁI KÍNH - GIẢM SÁT THƯƠNG ====================
+    
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void onEntityDamage(EntityDamageEvent event) {
+        if (!(event.getEntity() instanceof Player)) return;
+        Player player = (Player) event.getEntity();
+
+        // Kiểm tra player có đang cầm Bát Quái Kính không (main hand hoặc off hand)
+        if (!isHoldingBaguaMirror(player)) return;
+
+        // Đọc config
+        double reduction = plugin.getConfig().getDouble("items.artifacts.bagua_mirror.damage-reduction", 0.3);
+        boolean notify = plugin.getConfig().getBoolean("items.artifacts.bagua_mirror.notify-player", true);
+
+        // Giảm sát thương
+        double original = event.getDamage();
+        double reduced = original * reduction;
+        event.setDamage(original - reduced);
+
+        // Thông báo
+        if (notify && reduced > 0) {
+            String msg = plugin.getConfig().getString("items.artifacts.bagua_mirror.notify-message",
+                    "&5◆ Bát Quái Kính ◆ &7đã chặn &c{reduced} &7sát thương!");
+            msg = msg.replace("{reduced}", String.format("%.1f", reduced));
+            msg = msg.replace("{original}", String.format("%.1f", original));
+            MessageUtils.send(player, msg);
+        }
+    }
+
+    private boolean isHoldingBaguaMirror(Player player) {
+        ItemStack mainHand = player.getInventory().getItemInMainHand();
+        if (mainHand != null && mainHand.getType() != Material.AIR) {
+            String id = getArtifactId(mainHand);
+            if (BAGUA_MIRROR.equals(id)) return true;
+        }
+        ItemStack offHand = player.getInventory().getItemInOffHand();
+        if (offHand != null && offHand.getType() != Material.AIR) {
+            String id = getArtifactId(offHand);
+            if (BAGUA_MIRROR.equals(id)) return true;
+        }
+        return false;
+    }
+
+    // ==================== HỒN NGỌC - TỰ HỒI MÁU ====================
+
+    /**
+     * Kiểm tra định kỳ HP của player có Hồn Ngọc
+     */
+    private void startSoulJadeCheckTask() {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (!plugin.getConfig().getBoolean("items.artifacts.soul_jade.enabled", true)) return;
+                
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    // Kiểm tra có Hồn Ngọc trong inventory
+                    if (!hasSoulJade(player)) continue;
+
+                    double hpPercent = player.getHealth() / player.getMaxHealth();
+                    double threshold = plugin.getConfig().getDouble("items.artifacts.soul_jade.hp-threshold", 0.3);
+                    
+                    if (hpPercent > threshold) continue;
+
+                    UUID uuid = player.getUniqueId();
+                    long now = System.currentTimeMillis();
+                    int cooldownSeconds = plugin.getConfig().getInt("items.artifacts.soul_jade.cooldown-seconds", 120);
+                    long lastUse = soulJadeCooldowns.getOrDefault(uuid, 0L);
+                    long remaining = (lastUse + (cooldownSeconds * 1000L)) - now;
+                    if (remaining > 0) continue;
+
+                    // Hồi máu
+                    double healPercent = plugin.getConfig().getDouble("items.artifacts.soul_jade.heal-percent", 0.5);
+                    double healAmount = player.getMaxHealth() * healPercent;
+                    player.setHealth(Math.min(player.getMaxHealth(), player.getHealth() + healAmount));
+                    soulJadeCooldowns.put(uuid, now);
+
+                    // Thông báo
+                    boolean notify = plugin.getConfig().getBoolean("items.artifacts.soul_jade.notify-player", true);
+                    if (notify) {
+                        String msg = plugin.getConfig().getString("items.artifacts.soul_jade.notify-message",
+                                "&a✦ Hồn Ngọc tỏa sáng! Hồi phục &f{healed} &amáu!");
+                        msg = msg.replace("{healed}", String.format("%.0f", healAmount));
+                        MessageUtils.send(player, msg);
+                    }
+
+                    // Hiệu ứng
+                    player.getWorld().playSound(player.getLocation(),
+                            org.bukkit.Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
+                }
+            }
+        }.runTaskTimer(plugin, 20L, 20L); // Check mỗi giây
+    }
+
+    private boolean hasSoulJade(Player player) {
+        for (ItemStack item : player.getInventory().getContents()) {
+            if (item == null || item.getType() == Material.AIR) continue;
+            if (!item.hasItemMeta()) continue;
+            ItemMeta meta = item.getItemMeta();
+            if (!meta.hasDisplayName()) continue;
+            String name = meta.getDisplayName().replaceAll("§[0-9a-fk-or]", "").trim();
+            if (name.contains(SOUL_JADE)) return true;
+        }
+        return false;
     }
 
     // ==================== EVENT HANDLERS CHO FLYING SWORD ====================
@@ -170,12 +289,10 @@ public class ArtifactAbilityListener implements Listener {
 
         FlyingSwordSession session = activeSessions.get(uuid);
         if (session != null && !session.isEnded()) {
-            // Hủy sát thương rơi khi đang ngự kiếm (fall distance đã được reset mỗi tick)
             if (event.getCause() == EntityDamageEvent.DamageCause.FALL) {
                 event.setCancelled(true);
                 return;
             }
-            // Các loại sát thương khác → kết thúc ngự kiếm
             session.end();
             activeSessions.remove(uuid);
         }
@@ -196,13 +313,9 @@ public class ArtifactAbilityListener implements Listener {
     // ==================== KỸ NĂNG PHÁP BẢO ====================
 
     /**
-     * Kiếm Phi Hành - Ngự kiếm phi hành với cơ chế bay hoàn chỉnh
-     * Space = lên, Ctrl = xuống, Shift gần đất = nhảy xuống kết thúc
-     * Tiêu hao 10 linh lực/giây, hết linh lực = tự kết thúc + hồi chiêu CD 30s
-     * "Thiên Ngự Kiếm!"
+     * Kiếm Phi Hành - Ngự kiếm phi hành
      */
     private void activateFlyingSword(Player player, ItemStack item) {
-        // Kiểm tra nếu đang có session active thì kết thúc session cũ
         UUID uuid = player.getUniqueId();
         FlyingSwordSession existingSession = activeSessions.get(uuid);
         if (existingSession != null && !existingSession.isEnded()) {
@@ -211,71 +324,78 @@ public class ArtifactAbilityListener implements Listener {
             return;
         }
 
-        // Kiểm tra cooldown
-        if (!checkCooldown(player, FLYING_SWORD, FlyingSwordSession.getCooldownSeconds())) return;
+        int cd = getConfigCooldown("flying_sword.cooldown-seconds", 30);
+        if (!checkCooldown(player, FLYING_SWORD, cd)) return;
 
-        // Tiêu hao mana ngay lúc kích hoạt (1 lần đầu)
         int initialManaCost = FlyingSwordSession.getManaCostPerSecond();
         if (!consumeMana(player, initialManaCost)) return;
 
         chant(player, "§b✦ Thiên Ngự Kiếm! ✦");
 
-        // Tạo và khởi động session
         FlyingSwordSession session = new FlyingSwordSession(plugin, player);
         activeSessions.put(uuid, session);
         session.start();
     }
 
     /**
-     * Linh Chung - Làm choáng quái trong bán kính
-     * "Chung Âm Chấn!"
+     * Linh Chung - Làm choáng quái (cấu hình được)
      */
     private void activateSpiritBell(Player player) {
-        if (!checkCooldown(player, SPIRIT_BELL, 15)) return;
-        if (!consumeMana(player, 15)) return;
+        int cd = getConfigCooldown("spirit_bell.cooldown-seconds", 15);
+        if (!checkCooldown(player, SPIRIT_BELL, cd)) return;
+        
+        int manaCost = plugin.getConfig().getInt("items.artifacts.spirit_bell.mana-cost", 15);
+        if (!consumeMana(player, manaCost)) return;
 
         chant(player, "§6✦ Chung Âm Chấn! ✦");
 
-        // Làm choáng quái trong bán kính 5 block
-        int radius = 5;
+        // Đọc config: stun-duration-seconds (giây) → ticks
+        int stunSeconds = plugin.getConfig().getInt("items.artifacts.spirit_bell.stun-duration-seconds", 5);
+        int stunTicks = stunSeconds * 20;
+        int radius = plugin.getConfig().getInt("items.artifacts.spirit_bell.stun-radius", 5);
+
         int stunned = 0;
         for (Entity entity : player.getNearbyEntities(radius, radius, radius)) {
             if (entity instanceof Monster && entity instanceof LivingEntity) {
                 LivingEntity living = (LivingEntity) entity;
-                living.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 60, 10, false, false, false));
-                living.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 60, 10, false, false, false));
+                living.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, stunTicks, 10, false, false, false));
+                living.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, stunTicks, 10, false, false, false));
                 stunned++;
             }
         }
 
-        MessageUtils.send(player, "&6✦ Linh Chung vang lên, làm choáng &e" + stunned + " &6quái vật!");
+        MessageUtils.send(player, "&6✦ Linh Chung vang lên, làm choáng &e" + stunned + " &6quái vật trong &e" + stunSeconds + "&6 giây!");
         player.getWorld().playSound(player.getLocation(), org.bukkit.Sound.BLOCK_BELL_USE, 1.0f, 1.0f);
     }
 
     /**
-     * Thiên Linh Thuẫn - Bất tử 5 giây, CD 3 phút
-     * "Thiên Linh Thuẫn Hộ Thể!"
+     * Thiên Linh Thuẫn - Bất tử (cấu hình được)
      */
     private void activateHeavenShield(Player player) {
-        if (!checkCooldown(player, HEAVEN_SHIELD, 180)) return; // CD 3 phút
-        if (!consumeMana(player, 40)) return;
+        int cd = getConfigCooldown("heaven_shield.cooldown-seconds", 180);
+        if (!checkCooldown(player, HEAVEN_SHIELD, cd)) return;
+        
+        int manaCost = plugin.getConfig().getInt("items.artifacts.heaven_shield.mana-cost", 40);
+        if (!consumeMana(player, manaCost)) return;
 
         chant(player, "§4✦ Thiên Linh Thuẫn Hộ Thể! ✦");
 
-        // Bất tử 5 giây - sử dụng damage resistance max
-        player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 100, 10, true, true, true));
-        player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 100, 4, true, true, true));
+        // Đọc invulnerability-seconds → ticks
+        int invulSeconds = plugin.getConfig().getInt("items.artifacts.heaven_shield.invulnerability-seconds", 5);
+        int invulTicks = invulSeconds * 20;
+
+        player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, invulTicks, 10, true, true, true));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, invulTicks, 4, true, true, true));
         player.setFireTicks(0);
 
-        MessageUtils.send(player, "&4✦ Thiên Linh Thuẫn kích hoạt! Bất tử 5 giây.");
+        MessageUtils.send(player, "&4✦ Thiên Linh Thuẫn kích hoạt! Bất tử &e" + invulSeconds + " &4giây.");
         player.getWorld().playSound(player.getLocation(), org.bukkit.Sound.ITEM_TOTEM_USE, 1.0f, 1.0f);
 
-        // Hiệu ứng visual
         new BukkitRunnable() {
             int count = 0;
             @Override
             public void run() {
-                if (count >= 5 || !player.isOnline()) {
+                if (count >= invulSeconds || !player.isOnline()) {
                     this.cancel();
                     return;
                 }
@@ -286,35 +406,29 @@ public class ArtifactAbilityListener implements Listener {
     }
 
     /**
-     * Lôi Ấn - Gọi sét đánh mục tiêu, CD 10s
-     * - Ưu tiên entity player đang aim vào (ray trace)
-     * - Nếu không có aim, tìm entity gần nhất
-     * - Cho phép Phantom, Animals (trừ pet của bản thân)
-     * - Không set cooldown nếu không tìm thấy mục tiêu
-     * "Lôi Ấn! Thiên Lôi Dẫn!"
+     * Lôi Ấn - Gọi sét (cấu hình được)
      */
     private void activateThunderSeal(Player player) {
-        if (!consumeMana(player, 25)) return;
+        int manaCost = plugin.getConfig().getInt("items.artifacts.thunder_seal.mana-cost", 25);
+        if (!consumeMana(player, manaCost)) return;
 
-        // Bước 1: Thử ray trace để tìm entity player đang aim
+        int range = plugin.getConfig().getInt("items.artifacts.thunder_seal.range", 20);
+
         Entity target = null;
         try {
-            Entity targetEntity = player.getTargetEntity(50);
+            Entity targetEntity = player.getTargetEntity(range);
             if (targetEntity != null && targetEntity != player && !isOwnPet(player, targetEntity)) {
                 target = targetEntity;
             }
         } catch (Exception e) {
-            // Fallback nếu getTargetEntity không hoạt động
+            // Fallback
         }
 
-        // Bước 2: Nếu không có target từ ray trace, tìm entity gần nhất
         if (target == null) {
-            double closest = 20.0;
-            for (Entity entity : player.getNearbyEntities(20, 10, 20)) {
+            double closest = (double) range;
+            for (Entity entity : player.getNearbyEntities(range, 10, range)) {
                 if (entity.equals(player)) continue;
                 if (isOwnPet(player, entity)) continue;
-
-                // Cho phép: Monster, Player, Phantom, Animals, và các LivingEntity khác
                 if (entity instanceof LivingEntity) {
                     double dist = player.getLocation().distance(entity.getLocation());
                     if (dist < closest) {
@@ -325,32 +439,24 @@ public class ArtifactAbilityListener implements Listener {
             }
         }
 
-        // Không tìm thấy mục tiêu → không cast, không set cooldown, không tốn mana
         if (target == null) {
             MessageUtils.send(player, "&cKhông có mục tiêu nào trong phạm vi!");
-            // Hoàn lại mana vì không cast
             PlayerCultivationData data = plugin.getCultivationManager().getPlayerData(player.getUniqueId());
-            if (data != null) {
-                data.regenMana(25);
-            }
+            if (data != null) data.regenMana(manaCost);
             return;
         }
 
-        // Kiểm tra cooldown SAU KHI đã có target (nếu không có target thì không check)
-        if (!checkCooldown(player, THUNDER_SEAL, 10)) return;
+        int cd = getConfigCooldown("thunder_seal.cooldown-seconds", 10);
+        if (!checkCooldown(player, THUNDER_SEAL, cd)) return;
 
         chant(player, "§e✦ Lôi Ấn! Thiên Lôi Dẫn! ✦");
 
-        // Gọi sét
         target.getWorld().strikeLightning(target.getLocation());
         String targetName = (target instanceof Player) ? target.getName() : target.getType().name();
         MessageUtils.send(player, "&e✦ Lôi Ấn giáng sét xuống &f" + targetName + "&e!");
         player.getWorld().playSound(player.getLocation(), org.bukkit.Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 1.0f, 1.0f);
     }
 
-    /**
-     * Kiểm tra entity có phải pet của player này không
-     */
     private boolean isOwnPet(Player player, Entity entity) {
         if (entity instanceof Tameable) {
             Tameable tameable = (Tameable) entity;

@@ -4,6 +4,7 @@ com/vnmine/skill/SkillBookManager$DropEntry.class
 com/vnmine/gui/ArtifactCraftGUI$2.class
 com/vnmine/gui/ArtifactCraftGUI$6.class
 com/vnmine/gui/AlchemyCraftGUI$AlchemyRecipe.class
+com/vnmine/item/artifacts/abilities/ArtifactAbilityListener$2.class
 com/vnmine/gui/AlchemyCraftGUI$1.class
 com/vnmine/gui/AlchemyCraftGUI$5.class
 com/vnmine/npc/NPCData$NPCTrade.class
@@ -17,6 +18,7 @@ com/vnmine/permission/PermissionManager.class
 com/vnmine/permission/PermissionCommand.class
 com/vnmine/gui/ArtifactCraftGUI$1.class
 com/vnmine/world/WorldManager.class
+com/vnmine/item/artifacts/abilities/MountItemListener.class
 com/vnmine/cultivation/CultivationManager.class
 com/vnmine/gui/AdminMenuGUI.class
 com/vnmine/drop/BlockDropListener.class
@@ -37,6 +39,7 @@ com/vnmine/skill/SkillBarGUI.class
 com/vnmine/VNMinePlugin$TimeManager$1.class
 com/vnmine/gui/AlchemyCraftGUI$7.class
 com/vnmine/gui/AlchemyCraftGUI.class
+com/vnmine/item/artifacts/abilities/PhoenixRebirthListener.class
 com/vnmine/npc/NPCManager.class
 com/vnmine/VNMinePlugin.class
 com/vnmine/skill/SkillManager$SkillConfig.class

@@ -2,6 +2,7 @@ package com.vnmine.mount;
 
 import com.vnmine.VNMinePlugin;
 import com.vnmine.cultivation.PlayerCultivationData;
+import com.vnmine.item.ItemBuilder;
 import com.vnmine.util.ColorUtils;
 import com.vnmine.util.MessageUtils;
 import org.bukkit.Bukkit;
@@ -173,6 +174,54 @@ public class MountManager {
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
     public int getRequiredLevel() { return requiredLevel; }
     public Collection<MountConfig> getMountConfigs() { return mountConfigs.values(); }
+
+    /**
+     * Mở khóa tọa kỵ cho player (thêm scoreboard tag)
+     */
+    public void unlockMount(Player player, String mountId) {
+        String tag = "vnmine_mount_" + mountId.toLowerCase();
+        if (!player.getScoreboardTags().contains(tag)) {
+            player.addScoreboardTag(tag);
+        }
+    }
+
+    /**
+     * Kiểm tra player đã mở khóa tọa kỵ chưa
+     */
+    public boolean hasUnlockedMount(Player player, String mountId) {
+        return player.getScoreboardTags().contains("vnmine_mount_" + mountId.toLowerCase());
+    }
+
+    /**
+     * Tạo item key triệu hồi tọa kỵ (cho admin give)
+     */
+    public ItemStack createMountKey(String mountId) {
+        MountConfig config = mountConfigs.get(mountId);
+        if (config == null) return null;
+
+        Material mat;
+        switch (mountId) {
+            case "PHUONG_HOANG": mat = Material.FEATHER; break;
+            case "BACH_HO": mat = Material.BONE; break;
+            case "THANH_LONG": mat = Material.DRAGON_BREATH; break;
+            default: mat = Material.SADDLE;
+        }
+
+        ItemStack key = new ItemBuilder(mat)
+                .setName(config.name + " &7(Lệnh Bài)")
+                .setLore(
+                        "",
+                        "&7Click phải để học cách triệu hồi",
+                        "&7" + config.name,
+                        "",
+                        "&eYêu cầu cấp: &b" + config.requiredLevel
+                )
+                .setPersistentData("vnmine_item", "true")
+                .setPersistentData("vnmine_mount_key", mountId)
+                .build();
+
+        return key;
+    }
 
     public void reload() {
         for (org.bukkit.entity.Entity mount : activeMounts.values()) {
