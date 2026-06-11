@@ -14,8 +14,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -399,6 +401,17 @@ public class MainMenuGUI implements Listener {
         player.openInventory(gui);
     }
 
+    /**
+     * Xử lý drag trong MainMenu - chặn mọi drag
+     */
+    @EventHandler
+    public void onInventoryDrag(InventoryDragEvent event) {
+        if (!(event.getWhoClicked() instanceof Player)) return;
+        String title = ColorUtils.stripColor(event.getView().getTitle());
+        if (!title.contains(TITLE_MAIN) && !title.contains(TITLE_CULTIVATION) && !title.contains(TITLE_GUIDE)) return;
+        event.setCancelled(true);
+    }
+
     @EventHandler(priority = EventPriority.HIGH)
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player)) return;
@@ -406,6 +419,18 @@ public class MainMenuGUI implements Listener {
         if (!isOwnInventory(event)) return;
 
         Player player = (Player) event.getWhoClicked();
+        
+        // Chặn mọi click type đặc biệt (shift, double, drop, number key, v.v.)
+        ClickType click = event.getClick();
+        if (click == ClickType.SHIFT_LEFT || click == ClickType.SHIFT_RIGHT ||
+            click == ClickType.DOUBLE_CLICK || click == ClickType.DROP ||
+            click == ClickType.CONTROL_DROP ||
+            click == ClickType.NUMBER_KEY || click == ClickType.WINDOW_BORDER_LEFT ||
+            click == ClickType.WINDOW_BORDER_RIGHT) {
+            event.setCancelled(true);
+            return;
+        }
+
         event.setCancelled(true);
 
         int slot = event.getRawSlot();

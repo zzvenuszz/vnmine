@@ -11,8 +11,10 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -150,6 +152,11 @@ public class ArtifactCraftGUI implements Listener {
         ));
     }
 
+    private boolean isInputSlot(int slot) {
+        return slot == SLOT_INPUT_1 || slot == SLOT_INPUT_2 || slot == SLOT_INPUT_3 ||
+               slot == SLOT_INPUT_4 || slot == SLOT_INPUT_5 || slot == SLOT_INPUT_6;
+    }
+
     private static final Map<UUID, ArtifactSession> activeSessions = new HashMap<>();
 
     public ArtifactCraftGUI(VNMinePlugin plugin, MainMenuGUI mainMenu) {
@@ -220,6 +227,24 @@ public class ArtifactCraftGUI implements Listener {
         player.openInventory(gui);
     }
 
+    /**
+     * Xử lý drag trong GUI chế tạo pháp bảo - chặn drag item vào các slot không được phép
+     */
+    @EventHandler
+    public void onInventoryDrag(InventoryDragEvent event) {
+        if (!(event.getWhoClicked() instanceof Player)) return;
+        String title = event.getView().getTitle();
+        if (!title.contains("Luyện Chế Pháp Bảo")) return;
+
+        // Chỉ cho phép drag trong các input slots
+        for (Integer slot : event.getRawSlots()) {
+            if (slot >= 54 || !isInputSlot(slot)) {
+                event.setCancelled(true);
+                return;
+            }
+        }
+    }
+
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player)) return;
@@ -235,15 +260,30 @@ public class ArtifactCraftGUI implements Listener {
         int slot = event.getRawSlot();
         ItemStack clicked = event.getCurrentItem();
 
-        // Cancel tất cả click trước
+        // Chặn shift-click, double-click, drop (phím Q), number key để đưa item lên GUI
+        ClickType click = event.getClick();
+        if (click == ClickType.SHIFT_LEFT || click == ClickType.SHIFT_RIGHT ||
+            click == ClickType.DOUBLE_CLICK || click == ClickType.DROP ||
+            click == ClickType.CONTROL_DROP ||
+            click == ClickType.NUMBER_KEY || click == ClickType.WINDOW_BORDER_LEFT ||
+            click == ClickType.WINDOW_BORDER_RIGHT) {
+            event.setCancelled(true);
+            return;
+        }
+
+        // Bottom inventory (slot >= 54): chỉ cho phép click bình thường (lấy đồ từ túi)
+        if (slot >= 54) {
+            return;
+        }
+
+        // Cancel tất cả click vào top inventory trước
         event.setCancelled(true);
 
-        // Chỉ xử lý click vào top inventory
-        if (slot < 0 || slot >= 54) return;
+        // Nếu là slot âm, thoát
+        if (slot < 0) return;
 
         // Input slots: cho phép đặt nguyên liệu (không cancel)
-        if (slot == SLOT_INPUT_1 || slot == SLOT_INPUT_2 || slot == SLOT_INPUT_3 ||
-            slot == SLOT_INPUT_4 || slot == SLOT_INPUT_5 || slot == SLOT_INPUT_6) {
+        if (isInputSlot(slot)) {
             event.setCancelled(false);
             return;
         }

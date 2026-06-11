@@ -11,8 +11,10 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
@@ -235,6 +237,29 @@ public class AlchemyCraftGUI implements Listener {
         player.openInventory(gui);
     }
 
+    private boolean isInputSlot(int slot) {
+        return slot == SLOT_INPUT_1 || slot == SLOT_INPUT_2 || slot == SLOT_INPUT_3 ||
+               slot == SLOT_INPUT_4 || slot == SLOT_INPUT_5 || slot == SLOT_INPUT_6;
+    }
+
+    /**
+     * Xử lý drag trong GUI luyện đan - chặn drag item vào các slot không được phép
+     */
+    @EventHandler
+    public void onInventoryDrag(InventoryDragEvent event) {
+        if (!(event.getWhoClicked() instanceof Player)) return;
+        String title = ColorUtils.stripColor(event.getView().getTitle());
+        if (!title.contains("Luyện Đan")) return;
+
+        // Chỉ cho phép drag trong các input slots
+        for (Integer slot : event.getRawSlots()) {
+            if (slot >= 54 || !isInputSlot(slot)) {
+                event.setCancelled(true);
+                return;
+            }
+        }
+    }
+
     /**
      * Xử lý click trong GUI luyện đan
      */
@@ -254,15 +279,31 @@ public class AlchemyCraftGUI implements Listener {
         ItemStack clicked = event.getCurrentItem();
         Inventory gui = event.getInventory();
 
-        // Cancel tất cả mọi click trước
+        // Chặn shift-click, double-click, drop (phím Q), number key để đưa item lên GUI
+        ClickType click = event.getClick();
+        if (click == ClickType.SHIFT_LEFT || click == ClickType.SHIFT_RIGHT ||
+            click == ClickType.DOUBLE_CLICK || click == ClickType.DROP ||
+            click == ClickType.CONTROL_DROP ||
+            click == ClickType.NUMBER_KEY || click == ClickType.WINDOW_BORDER_LEFT ||
+            click == ClickType.WINDOW_BORDER_RIGHT) {
+            event.setCancelled(true);
+            return;
+        }
+
+        // Bottom inventory (slot >= 54): chỉ cho phép click bình thường (lấy đồ từ túi)
+        if (slot >= 54) {
+            // Cho phép click bình thường vào bottom inventory
+            return;
+        }
+
+        // Cancel tất cả click vào top inventory trước
         event.setCancelled(true);
 
-        // Nếu là bottom inventory (slot > 53), chỉ cancel không xử lý
-        if (slot < 0 || slot >= 54) return;
+        // Nếu là slot âm, thoát
+        if (slot < 0) return;
 
         // Input slots: cho phép đặt/lấy nguyên liệu
-        if (slot == SLOT_INPUT_1 || slot == SLOT_INPUT_2 || slot == SLOT_INPUT_3 ||
-            slot == SLOT_INPUT_4 || slot == SLOT_INPUT_5 || slot == SLOT_INPUT_6) {
+        if (isInputSlot(slot)) {
             event.setCancelled(false); // Cho phép thao tác
             return;
         }
