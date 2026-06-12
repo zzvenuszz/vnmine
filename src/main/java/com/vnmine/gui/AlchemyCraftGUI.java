@@ -290,23 +290,21 @@ public class AlchemyCraftGUI implements Listener {
             return;
         }
 
-        // Bottom inventory (slot >= 54): chỉ cho phép click bình thường (lấy đồ từ túi)
+        // Bottom inventory (slot >= 54): cho phép tương tác
         if (slot >= 54) {
-            // Cho phép click bình thường vào bottom inventory
             return;
         }
-
-        // Cancel tất cả click vào top inventory trước
-        event.setCancelled(true);
 
         // Nếu là slot âm, thoát
         if (slot < 0) return;
 
         // Input slots: cho phép đặt/lấy nguyên liệu
         if (isInputSlot(slot)) {
-            event.setCancelled(false); // Cho phép thao tác
             return;
         }
+
+        // Cancel tất cả click vào top inventory (trừ input slots đã xử lý ở trên)
+        event.setCancelled(true);
 
         if (clicked == null || clicked.getType() == Material.AIR) return;
 
