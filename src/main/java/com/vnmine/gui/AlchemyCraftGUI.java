@@ -285,7 +285,7 @@ public class AlchemyCraftGUI implements Listener {
             return;
         }
 
-        // Bottom inventory (slot >= 54): cho phép tương tác
+        // Bottom inventory (slot >= 54): cho phép tương tác, không cancel
         if (slot >= 54) {
             return;
         }
@@ -293,13 +293,14 @@ public class AlchemyCraftGUI implements Listener {
         // Nếu là slot âm, thoát
         if (slot < 0) return;
 
-        // Input slots: cho phép đặt/lấy nguyên liệu
+        // Cancel TẤT CẢ top inventory NGAY LẬP TỨC trước khi xử lý bất cứ gì
+        event.setCancelled(true);
+
+        // Input slots: cho phép đặt/lấy nguyên liệu (un-cancel)
         if (isInputSlot(slot)) {
+            event.setCancelled(false);
             return;
         }
-
-        // Cancel tất cả click vào top inventory (trừ input slots đã xử lý ở trên)
-        event.setCancelled(true);
 
         if (clicked == null || clicked.getType() == Material.AIR) return;
 
