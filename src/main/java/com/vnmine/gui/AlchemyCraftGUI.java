@@ -9,7 +9,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -258,81 +260,84 @@ public class AlchemyCraftGUI implements Listener {
     /**
      * Xử lý click trong GUI luyện đan
      */
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player)) return;
-        Player player = (Player) event.getWhoClicked();
 
         // Title-based detection
         String title = ColorUtils.stripColor(event.getView().getTitle());
         if (!title.contains("Luyện Đan")) return;
 
+        Player player = (Player) event.getWhoClicked();
         AlchemySession session = activeSessions.get(player.getUniqueId());
-        if (session == null) return;
-
-        int slot = event.getRawSlot();
-        ItemStack clicked = event.getCurrentItem();
-        Inventory gui = event.getInventory();
-
-        // Chặn shift-click, double-click, drop (phím Q), number key để đưa item lên GUI
-        ClickType click = event.getClick();
-        if (click == ClickType.SHIFT_LEFT || click == ClickType.SHIFT_RIGHT ||
-            click == ClickType.DOUBLE_CLICK || click == ClickType.DROP ||
-            click == ClickType.CONTROL_DROP ||
-            click == ClickType.NUMBER_KEY || click == ClickType.WINDOW_BORDER_LEFT ||
-            click == ClickType.WINDOW_BORDER_RIGHT) {
+        if (session == null) {
+            // Không có session → vẫn chặn click để bảo vệ GUI
             event.setCancelled(true);
+            event.setResult(Event.Result.DENY);
             return;
         }
 
-        // Bottom inventory (slot >= 54): cho phép tương tác, không cancel
+        int slot = event.getRawSlot();
+        Inventory gui = event.getInventory();
+
+        // Bottom inventory (slot >= 54): cho phép tương tác tự do
         if (slot >= 54) {
             return;
         }
 
-        // Nếu là slot âm, thoát
-        if (slot < 0) return;
-
-        // Cancel TẤT CẢ top inventory NGAY LẬP TỨC trước khi xử lý bất cứ gì
-        event.setCancelled(true);
-
-        // Input slots: cho phép đặt/lấy nguyên liệu (un-cancel)
-        if (isInputSlot(slot)) {
-            event.setCancelled(false);
+        // Slot âm: chặn
+        if (slot < 0) {
+            event.setCancelled(true);
+            event.setResult(Event.Result.DENY);
             return;
         }
 
-        if (clicked == null || clicked.getType() == Material.AIR) return;
+        // === TẤT CẢ top inventory slots đều bị chặn ===
+        event.setCancelled(true);
+        event.setResult(Event.Result.DENY);
 
-        // Result slot - cho phép lấy thành phẩm
+        // Input slots (19-21, 28-30): cho phép đặt/lấy nguyên liệu
+        if (isInputSlot(slot)) {
+            event.setCancelled(false);
+            event.setResult(Event.Result.DEFAULT);
+            return;
+        }
+
+        // Result slot (24): cho phép lấy thành phẩm
         if (slot == SLOT_RESULT) {
-            // Nếu có item thật (không phải AIR), cho lấy
-            if (clicked.getType() != Material.AIR) {
+            ItemStack clicked = event.getCurrentItem();
+            if (clicked != null && clicked.getType() != Material.AIR) {
                 player.getInventory().addItem(clicked);
-                gui.setItem(slot, null); // Đặt lại null thay vì BARRIER
+                gui.setItem(slot, null);
                 MessageUtils.playSound(player, Sound.ENTITY_ITEM_PICKUP);
             }
             return;
         }
 
-        // Các nút chức năng
-        switch (slot) {
-            case SLOT_CRAFT:
-                attemptCraft(player, session);
-                break;
-            case SLOT_BACK:
-                mainMenu.openMainMenu(player);
-                break;
-            case SLOT_GUIDE:
-                MessageUtils.send(player, "&6&lCông Thức Luyện Đan:");
-                MessageUtils.send(player, "&aHồi Linh Đan: &73 Linh Thảo + 1 Nước → Hồi 30 mana");
-                MessageUtils.send(player, "&bĐại Hồi Linh Đan: &72 Hồi Linh Đan + 2 Huyết LT + 5 LT → Hồi 100 mana");
-                MessageUtils.send(player, "&cCương Thể Đan: &73 Huyết LT + 5 LT + 1 Blaze → +20% DMG 60s");
-                MessageUtils.send(player, "&aThanh Tâm Đan: &75 LT + 1 Nước → Giải trừ trạng thái");
-                MessageUtils.send(player, "&bTốc Thánh Đan: &73 LT + 2 Đường + 1 Lông → +50% Speed 30s");
-                MessageUtils.send(player, "&5Tu Luyện Đan: &710 LT + 5 Huyết LT + 2 Long Huyết + 1 Vàng → +50 EXP");
-                MessageUtils.send(player, "&6Phi Thăng Đan: &73 Tu Luyện Đan + 10 Long Huyết + 1 Hơi Rồng + 2 Netherite → +500 EXP");
-                break;
+        // Các nút chức năng: chặn click nhưng thực hiện chức năng
+        ItemStack clicked = event.getCurrentItem();
+        if (clicked == null || clicked.getType() == Material.AIR) return;
+
+        ClickType clickType = event.getClick();
+        if (clickType == ClickType.LEFT || clickType == ClickType.RIGHT) {
+            switch (slot) {
+                case SLOT_CRAFT:
+                    attemptCraft(player, session);
+                    break;
+                case SLOT_BACK:
+                    mainMenu.openMainMenu(player);
+                    break;
+                case SLOT_GUIDE:
+                    MessageUtils.send(player, "&6&lCông Thức Luyện Đan:");
+                    MessageUtils.send(player, "&aHồi Linh Đan: &73 Linh Thảo + 1 Nước → Hồi 30 mana");
+                    MessageUtils.send(player, "&bĐại Hồi Linh Đan: &72 Hồi Linh Đan + 2 Huyết LT + 5 LT → Hồi 100 mana");
+                    MessageUtils.send(player, "&cCương Thể Đan: &73 Huyết LT + 5 LT + 1 Blaze → +20% DMG 60s");
+                    MessageUtils.send(player, "&aThanh Tâm Đan: &75 LT + 1 Nước → Giải trừ trạng thái");
+                    MessageUtils.send(player, "&bTốc Thánh Đan: &73 LT + 2 Đường + 1 Lông → +50% Speed 30s");
+                    MessageUtils.send(player, "&5Tu Luyện Đan: &710 LT + 5 Huyết LT + 2 Long Huyết + 1 Vàng → +50 EXP");
+                    MessageUtils.send(player, "&6Phi Thăng Đan: &73 Tu Luyện Đan + 10 Long Huyết + 1 Hơi Rồng + 2 Netherite → +500 EXP");
+                    break;
+            }
         }
     }
 
