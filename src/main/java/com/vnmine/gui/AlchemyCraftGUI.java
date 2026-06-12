@@ -168,13 +168,10 @@ public class AlchemyCraftGUI implements Listener {
         ItemStack border = new ItemBuilder(Material.GRAY_STAINED_GLASS_PANE)
                 .setName("&r")
                 .build();
-        ItemStack inputBorder = new ItemBuilder(Material.BLUE_STAINED_GLASS_PANE)
-                .setName("&b◆ Nguyên Liệu")
-                .build();
 
-        // Khu vực nguyên liệu (3x2)
+        // Khu vực nguyên liệu (3x2) - để trống, không đặt glass
         for (int slot : new int[]{19, 20, 21, 28, 29, 30}) {
-            gui.setItem(slot, null); // Để trống cho nguyên liệu
+            gui.setItem(slot, null);
         }
 
         // Nút luyện đan
@@ -190,11 +187,8 @@ public class AlchemyCraftGUI implements Listener {
                         "&7Cấp 3+ để sử dụng"
                 ).build());
 
-        // Khu vực kết quả
-        gui.setItem(SLOT_RESULT, new ItemBuilder(Material.BARRIER)
-                .setName("&c&lKết Quả")
-                .setLore("", "&7Luyện đan thành công sẽ hiện ở đây")
-                .build());
+        // Khu vực kết quả - để trống, không đặt BARRIER
+        gui.setItem(SLOT_RESULT, null);
 
         // Trạng thái
         gui.setItem(SLOT_STATUS, new ItemBuilder(Material.PAPER)
@@ -219,9 +213,9 @@ public class AlchemyCraftGUI implements Listener {
                         "&6Phi Thăng Đan: &73 Tu Luyện Đan + 10 Long Huyết + 1 Hơi Rồng + 2 Netherite"
                 ).build());
 
-        // Viền
+        // Viền - chỉ đặt glass vào các slot trống còn lại (không phải input, result)
         for (int i = 0; i < 54; i++) {
-            if (gui.getItem(i) == null) {
+            if (gui.getItem(i) == null && !isInputSlot(i) && i != SLOT_RESULT) {
                 gui.setItem(i, border);
             }
         }
@@ -251,9 +245,10 @@ public class AlchemyCraftGUI implements Listener {
         String title = ColorUtils.stripColor(event.getView().getTitle());
         if (!title.contains("Luyện Đan")) return;
 
-        // Chỉ cho phép drag trong các input slots
+        // Chỉ chặn nếu có slot nào trong top inventory (0-53) KHÔNG phải input slot
+        // Cho phép drag từ bottom inventory (>=54) vào input slots
         for (Integer slot : event.getRawSlots()) {
-            if (slot >= 54 || !isInputSlot(slot)) {
+            if (slot < 54 && !isInputSlot(slot)) {
                 event.setCancelled(true);
                 return;
             }
@@ -308,14 +303,12 @@ public class AlchemyCraftGUI implements Listener {
 
         if (clicked == null || clicked.getType() == Material.AIR) return;
 
-        // Result slot
+        // Result slot - cho phép lấy thành phẩm
         if (slot == SLOT_RESULT) {
-            if (clicked.getType() != Material.BARRIER) {
+            // Nếu có item thật (không phải AIR), cho lấy
+            if (clicked.getType() != Material.AIR) {
                 player.getInventory().addItem(clicked);
-                gui.setItem(slot, new ItemBuilder(Material.BARRIER)
-                        .setName("&c&lKết Quả")
-                        .setLore("", "&7Luyện đan thành công sẽ hiện ở đây")
-                        .build());
+                gui.setItem(slot, null); // Đặt lại null thay vì BARRIER
                 MessageUtils.playSound(player, Sound.ENTITY_ITEM_PICKUP);
             }
             return;
@@ -416,10 +409,23 @@ public class AlchemyCraftGUI implements Listener {
                         "&7Tỉ lệ: &a" + finalRecipe.successChance + "%"
                 ).build());
 
-        // Xóa nguyên liệu
+        // Chỉ tiêu hao đúng số lượng nguyên liệu cần, trả surplus vào túi
         for (int slot : new int[]{SLOT_INPUT_1, SLOT_INPUT_2, SLOT_INPUT_3,
                                    SLOT_INPUT_4, SLOT_INPUT_5, SLOT_INPUT_6}) {
-            finalGui.setItem(slot, null);
+            ItemStack item = finalGui.getItem(slot);
+            if (item != null && item.getType() != Material.AIR) {
+                int needed = finalRecipe.ingredients.getOrDefault(item.getType(), 0);
+                if (needed > 0) {
+                    int surplus = item.getAmount() - needed;
+                    if (surplus > 0) {
+                        ItemStack returnItem = item.clone();
+                        returnItem.setAmount(surplus);
+                        player.getInventory().addItem(returnItem);
+                    }
+                    finalGui.setItem(slot, null);
+                }
+                // Nếu là item không phải nguyên liệu của công thức này, giữ lại
+            }
         }
 
         MessageUtils.playSound(player, Sound.BLOCK_FIRE_AMBIENT);
@@ -537,13 +543,12 @@ public class AlchemyCraftGUI implements Listener {
         AlchemySession session = activeSessions.get(player.getUniqueId());
         if (session == null) return;
 
-        // Trả nguyên liệu nếu còn trong GUI
+        // Trả nguyên liệu và thành phẩm về túi nếu còn trong GUI
         Inventory gui = event.getInventory();
         for (int slot : new int[]{SLOT_INPUT_1, SLOT_INPUT_2, SLOT_INPUT_3,
                                    SLOT_INPUT_4, SLOT_INPUT_5, SLOT_INPUT_6, SLOT_RESULT}) {
             ItemStack item = gui.getItem(slot);
-            if (item != null && item.getType() != Material.AIR && 
-                item.getType() != Material.BARRIER) {
+            if (item != null && item.getType() != Material.AIR) {
                 player.getInventory().addItem(item);
             }
         }

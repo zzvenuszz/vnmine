@@ -168,7 +168,7 @@ public class ArtifactCraftGUI implements Listener {
         Inventory gui = Bukkit.createInventory(null, 54,
                 ColorUtils.colorize("&8✦ Luyện Chế Pháp Bảo ✦"));
 
-        // Khu vực nguyên liệu
+        // Khu vực nguyên liệu - để trống, không đặt glass
         for (int slot : new int[]{SLOT_INPUT_1, SLOT_INPUT_2, SLOT_INPUT_3,
                                    SLOT_INPUT_4, SLOT_INPUT_5, SLOT_INPUT_6}) {
             gui.setItem(slot, null);
@@ -186,10 +186,8 @@ public class ArtifactCraftGUI implements Listener {
                         "&cYêu cầu: Kỹ năng Luyện Khí Thuật"
                 ).build());
 
-        gui.setItem(SLOT_RESULT, new ItemBuilder(Material.BARRIER)
-                .setName("&c&lKết Quả")
-                .setLore("", "&7Chế tạo thành công sẽ hiện ở đây")
-                .build());
+        // Khu vực kết quả - để trống, không đặt BARRIER
+        gui.setItem(SLOT_RESULT, null);
 
         gui.setItem(SLOT_STATUS, new ItemBuilder(Material.PAPER)
                 .setName("&e&lTrạng Thái")
@@ -209,12 +207,12 @@ public class ArtifactCraftGUI implements Listener {
                         "&6Phượng Hoàng Lệnh: &71 Lông + 8 Vàng Khối + 4 Netherite + 1 Trứng Rồng"
                 ).build());
 
-        // Viền
+        // Viền - chỉ đặt glass vào các slot trống còn lại (không phải input, result)
         ItemStack border = new ItemBuilder(Material.GRAY_STAINED_GLASS_PANE)
                 .setName("&r")
                 .build();
         for (int i = 0; i < 54; i++) {
-            if (gui.getItem(i) == null) {
+            if (gui.getItem(i) == null && !isInputSlot(i) && i != SLOT_RESULT) {
                 gui.setItem(i, border);
             }
         }
@@ -236,9 +234,10 @@ public class ArtifactCraftGUI implements Listener {
         String title = ColorUtils.stripColor(event.getView().getTitle());
         if (!title.contains("Luyện Chế Pháp Bảo")) return;
 
-        // Chỉ cho phép drag trong các input slots
+        // Chỉ chặn nếu có slot nào trong top inventory (0-53) KHÔNG phải input slot
+        // Cho phép drag từ bottom inventory (>=54) vào input slots
         for (Integer slot : event.getRawSlots()) {
-            if (slot >= 54 || !isInputSlot(slot)) {
+            if (slot < 54 && !isInputSlot(slot)) {
                 event.setCancelled(true);
                 return;
             }
@@ -289,14 +288,12 @@ public class ArtifactCraftGUI implements Listener {
 
         if (clicked == null || clicked.getType() == Material.AIR) return;
 
-        // Result slot
+        // Result slot - cho phép lấy thành phẩm
         if (slot == SLOT_RESULT) {
-            if (clicked.getType() != Material.BARRIER) {
+            // Nếu có item thật (không phải AIR), cho lấy
+            if (clicked.getType() != Material.AIR) {
                 player.getInventory().addItem(clicked);
-                event.getInventory().setItem(slot, new ItemBuilder(Material.BARRIER)
-                        .setName("&c&lKết Quả")
-                        .setLore("", "&7Chế tạo thành công sẽ hiện ở đây")
-                        .build());
+                event.getInventory().setItem(slot, null); // Đặt lại null
                 MessageUtils.playSound(player, Sound.ENTITY_ITEM_PICKUP);
             }
             return;
@@ -381,9 +378,23 @@ public class ArtifactCraftGUI implements Listener {
                         "&7Tỉ lệ: &a" + finalRecipe.successChance + "%"
                 ).build());
 
+        // Chỉ tiêu hao đúng số lượng vật liệu cần, trả surplus vào túi
         for (int slot : new int[]{SLOT_INPUT_1, SLOT_INPUT_2, SLOT_INPUT_3,
                                    SLOT_INPUT_4, SLOT_INPUT_5, SLOT_INPUT_6}) {
-            finalGui.setItem(slot, null);
+            ItemStack item = finalGui.getItem(slot);
+            if (item != null && item.getType() != Material.AIR) {
+                int needed = finalRecipe.ingredients.getOrDefault(item.getType(), 0);
+                if (needed > 0) {
+                    int surplus = item.getAmount() - needed;
+                    if (surplus > 0) {
+                        ItemStack returnItem = item.clone();
+                        returnItem.setAmount(surplus);
+                        player.getInventory().addItem(returnItem);
+                    }
+                    finalGui.setItem(slot, null);
+                }
+                // Nếu là item không phải nguyên liệu của công thức này, giữ lại
+            }
         }
 
         MessageUtils.playSound(player, Sound.BLOCK_ANVIL_USE);
@@ -470,8 +481,7 @@ public class ArtifactCraftGUI implements Listener {
         for (int slot : new int[]{SLOT_INPUT_1, SLOT_INPUT_2, SLOT_INPUT_3,
                                    SLOT_INPUT_4, SLOT_INPUT_5, SLOT_INPUT_6, SLOT_RESULT}) {
             ItemStack item = gui.getItem(slot);
-            if (item != null && item.getType() != Material.AIR && 
-                item.getType() != Material.BARRIER) {
+            if (item != null && item.getType() != Material.AIR) {
                 player.getInventory().addItem(item);
             }
         }
