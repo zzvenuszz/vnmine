@@ -8,8 +8,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
@@ -304,8 +307,8 @@ public class AdminMenuGUI implements Listener {
             gui.setItem(slot++, createMenuItem(item));
         }
 
-        // Nút quay lại
-        int backSlot = Math.min(size, 53);
+        // Nút quay lại - slot cuối cùng của inventory
+        int backSlot = size - 1;
         gui.setItem(backSlot, new ItemBuilder(Material.ARROW)
                 .setName("&e&l← Quay Lại")
                 .build());
@@ -333,7 +336,7 @@ public class AdminMenuGUI implements Listener {
 
     // ==================== XỬ LÝ CLICK ====================
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player)) return;
 
@@ -341,11 +344,27 @@ public class AdminMenuGUI implements Listener {
         if (!isOwnInventory(event)) return;
 
         Player player = (Player) event.getWhoClicked();
-        event.setCancelled(true);
 
-        if (event.getClickedInventory() == null) return;
+        // Bottom inventory: cho phép tương tác tự do
+        if (event.getRawSlot() >= event.getView().getTopInventory().getSize()) {
+            return;
+        }
+
+        // Slot âm: chặn
+        if (event.getRawSlot() < 0) {
+            event.setCancelled(true);
+            event.setResult(Event.Result.DENY);
+            return;
+        }
+
+        // Chặn TẤT CẢ click trên top inventory admin menu
+        event.setCancelled(true);
+        event.setResult(Event.Result.DENY);
+
         int slot = event.getRawSlot();
-        if (slot < 0 || slot >= event.getView().getTopInventory().getSize()) return;
+
+        // Chỉ xử lý LEFT click
+        if (event.getClick() != ClickType.LEFT && event.getClick() != ClickType.RIGHT) return;
 
         ItemStack clicked = event.getCurrentItem();
         if (clicked == null || clicked.getType() == Material.AIR) return;

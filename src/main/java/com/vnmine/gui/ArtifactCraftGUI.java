@@ -9,7 +9,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -244,72 +246,76 @@ public class ArtifactCraftGUI implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player)) return;
-        Player player = (Player) event.getWhoClicked();
-        
+
         // Title-based detection
         String title = ColorUtils.stripColor(event.getView().getTitle());
         if (!title.contains("Luyện Chế Pháp Bảo")) return;
-        
+
+        Player player = (Player) event.getWhoClicked();
         ArtifactSession session = activeSessions.get(player.getUniqueId());
-        if (session == null) return;
-
-        int slot = event.getRawSlot();
-        ItemStack clicked = event.getCurrentItem();
-
-        // Chặn shift-click, double-click, drop (phím Q), number key để đưa item lên GUI
-        ClickType click = event.getClick();
-        if (click == ClickType.SHIFT_LEFT || click == ClickType.SHIFT_RIGHT ||
-            click == ClickType.DOUBLE_CLICK || click == ClickType.DROP ||
-            click == ClickType.CONTROL_DROP ||
-            click == ClickType.NUMBER_KEY || click == ClickType.WINDOW_BORDER_LEFT ||
-            click == ClickType.WINDOW_BORDER_RIGHT) {
+        if (session == null) {
             event.setCancelled(true);
+            event.setResult(Event.Result.DENY);
             return;
         }
 
-        // Bottom inventory (slot >= 54): cho phép tương tác với túi đồ
+        int slot = event.getRawSlot();
+        Inventory gui = event.getInventory();
+
+        // Bottom inventory: cho phép tương tác tự do
         if (slot >= 54) {
             return;
         }
 
-        // Nếu là slot âm, thoát
-        if (slot < 0) return;
-
-        // Input slots: cho phép đặt nguyên liệu
-        if (isInputSlot(slot)) {
+        // Slot âm: chặn
+        if (slot < 0) {
+            event.setCancelled(true);
+            event.setResult(Event.Result.DENY);
             return;
         }
 
-        // Cancel tất cả click vào top inventory (trừ input slots đã xử lý ở trên)
+        // === TẤT CẢ top inventory slots đều bị chặn ===
         event.setCancelled(true);
+        event.setResult(Event.Result.DENY);
 
-        if (clicked == null || clicked.getType() == Material.AIR) return;
+        // Input slots: cho phép đặt/lấy vật liệu
+        if (isInputSlot(slot)) {
+            event.setCancelled(false);
+            event.setResult(Event.Result.DEFAULT);
+            return;
+        }
 
-        // Result slot - cho phép lấy thành phẩm
+        // Result slot: cho phép lấy thành phẩm
         if (slot == SLOT_RESULT) {
-            // Nếu có item thật (không phải AIR), cho lấy
-            if (clicked.getType() != Material.AIR) {
+            ItemStack clicked = event.getCurrentItem();
+            if (clicked != null && clicked.getType() != Material.AIR) {
                 player.getInventory().addItem(clicked);
-                event.getInventory().setItem(slot, null); // Đặt lại null
+                gui.setItem(slot, null);
                 MessageUtils.playSound(player, Sound.ENTITY_ITEM_PICKUP);
             }
             return;
         }
 
-        // Các nút chức năng khác
-        switch (slot) {
-            case SLOT_CRAFT:
-                attemptCraft(player, session);
-                break;
-            case SLOT_BACK:
-                mainMenu.openMainMenu(player);
-                break;
-            case SLOT_GUIDE:
-                showRecipe(player);
-                break;
+        // Các nút chức năng: chặn click nhưng thực hiện chức năng
+        ItemStack clicked = event.getCurrentItem();
+        if (clicked == null || clicked.getType() == Material.AIR) return;
+
+        ClickType clickType = event.getClick();
+        if (clickType == ClickType.LEFT || clickType == ClickType.RIGHT) {
+            switch (slot) {
+                case SLOT_CRAFT:
+                    attemptCraft(player, session);
+                    break;
+                case SLOT_BACK:
+                    mainMenu.openMainMenu(player);
+                    break;
+                case SLOT_GUIDE:
+                    showRecipe(player);
+                    break;
+            }
         }
     }
 
