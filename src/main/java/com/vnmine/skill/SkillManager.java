@@ -290,7 +290,39 @@ public class SkillManager implements Listener {
                 arrow.setDamage(windDamage);
                 // Tăng tốc độ mũi tên theo proficiency
                 arrow.setVelocity(arrow.getVelocity().multiply(0.8 + 0.4 * (proficiencyMultiplier / 2.0)));
-                MessageUtils.send(player, "&f✦ Phong Nhẫn: Gây &f" + (int)windDamage + " &7sát thương!");
+                MessageUtils.send(player, "&f✦ Phong Nhẫn: Gây &f" + (int)windDamage + " &7sát thương xuyên thấu!");
+                break;
+            }
+            case "FIRE_CONTROL": {
+                // Khống Hỏa Thuật - PASSIVE: hiển thị thông tin thành thục
+                PlayerSkillData psd = plugin.getCultivationManager().getPlayerSkillData(player.getUniqueId());
+                if (psd != null) {
+                    PlayerSkillData.ProficiencyLevel profLevel = psd.getProficiencyLevel("FIRE_CONTROL");
+                    double timeReduction = psd.getAlchemyTimeReduction();
+                    int gradeBonus = psd.getAlchemyGradeBonus();
+                    int usage = psd.getSkillUsageCount("FIRE_CONTROL");
+                    MessageUtils.send(player, "&c✦ Khống Hỏa Thuật ✦");
+                    MessageUtils.send(player, "&7Độ thuần thục: " + profLevel.getDisplayName());
+                    MessageUtils.send(player, "&7Lần sử dụng: &e" + usage);
+                    MessageUtils.send(player, "&7Giảm thời gian luyện đan: &c" + (int)(timeReduction * 100) + "%");
+                    MessageUtils.send(player, "&7Tăng phẩm cấp đan dược: &e+" + gradeBonus);
+                }
+                break;
+            }
+            case "FORGE_MASTERY": {
+                // Luyện Khí Thuật - PASSIVE: hiển thị thông tin thành thục
+                PlayerSkillData psd2 = plugin.getCultivationManager().getPlayerSkillData(player.getUniqueId());
+                if (psd2 != null) {
+                    PlayerSkillData.ProficiencyLevel profLevel2 = psd2.getProficiencyLevel("FORGE_MASTERY");
+                    double manaReduction2 = psd2.getForgeManaReduction();
+                    int gradeBonus2 = psd2.getForgeGradeBonus();
+                    int usage2 = psd2.getSkillUsageCount("FORGE_MASTERY");
+                    MessageUtils.send(player, "&6✦ Luyện Khí Thuật ✦");
+                    MessageUtils.send(player, "&7Độ thuần thục: " + profLevel2.getDisplayName());
+                    MessageUtils.send(player, "&7Lần sử dụng: &e" + usage2);
+                    MessageUtils.send(player, "&7Giảm tiêu hao linh lực: &6" + (int)(manaReduction2 * 100) + "%");
+                    MessageUtils.send(player, "&7Tăng phẩm cấp pháp khí: &e+" + gradeBonus2);
+                }
                 break;
             }
             case "METEOR_STORM": {

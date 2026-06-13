@@ -60,6 +60,10 @@ commands:
     description: Chuyển linh thạch cho người chơi khác
     usage: /vnpay <player> <amount>
     permission: vnmine.command.vnmine
+  vnexchange:
+    description: Đổi linh thạch giữa các phẩm cấp
+    usage: /vnexchange <ha-trung|trung-ha|trung-thuong|thuong-trung> <amount>
+    permission: vnmine.command.vnmine
   vnadmin:
     description: Menu admin lấy item test (yêu cầu quyền admin)
     usage: /vnadmin

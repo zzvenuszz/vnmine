@@ -5,6 +5,7 @@ import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.time.Duration;
@@ -72,6 +73,18 @@ public class MessageUtils {
     public static void send(Player player, String message) {
         if (player == null || !player.isOnline() || message == null) return;
         player.sendMessage(ColorUtils.toComponent(message));
+    }
+
+    /**
+     * Gửi tin nhắn cho CommandSender (Player hoặc Console)
+     */
+    public static void send(CommandSender sender, String message) {
+        if (sender == null || message == null) return;
+        if (sender instanceof Player) {
+            send((Player) sender, message);
+        } else {
+            sender.sendMessage(ColorUtils.stripColor(message));
+        }
     }
 
     /**

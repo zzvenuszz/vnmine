@@ -1,5 +1,6 @@
 com/vnmine/drop/DropManager$ToolConfig.class
 com/vnmine/cultivation/CultivationManager$TribulationSession.class
+com/vnmine/gui/AlchemyCraftGUI$8.class
 com/vnmine/skill/SkillBookManager$DropEntry.class
 com/vnmine/item/artifacts/abilities/FlyingSwordSession$5.class
 com/vnmine/gui/ArtifactCraftGUI$2.class
@@ -26,12 +27,14 @@ com/vnmine/gui/AlchemyCraftGUI$2.class
 com/vnmine/gui/ArtifactCraftGUI$ArtifactRecipe.class
 com/vnmine/skill/PlayerSkillData$ProficiencyLevel.class
 com/vnmine/mount/MountManager$MountConfig.class
+com/vnmine/gui/AlchemyCraftGUI$9.class
 com/vnmine/gui/ArtifactCraftGUI$5.class
 com/vnmine/permission/PermissionManager.class
 com/vnmine/permission/PermissionCommand.class
 com/vnmine/gui/ArtifactCraftGUI$1.class
 com/vnmine/util/MessageUtils.class
 com/vnmine/world/WorldManager.class
+com/vnmine/gui/AlchemyCraftGUI$10.class
 com/vnmine/item/artifacts/abilities/MountItemListener.class
 com/vnmine/command/GiveCommand.class
 com/vnmine/cultivation/CultivationManager.class
@@ -48,9 +51,11 @@ com/vnmine/gui/ArtifactCraftGUI$4.class
 com/vnmine/skill/SkillBookListener.class
 com/vnmine/npc/SkinFetcher$SkinData.class
 com/vnmine/gui/MainMenuGUI.class
+com/vnmine/currency/CurrencyManager$CurrencyTier.class
 com/vnmine/gui/AlchemyCraftGUI$6.class
 com/vnmine/skill/PlayerSkillData.class
 com/vnmine/npc/NPCShopGUI.class
+com/vnmine/gui/AlchemyCraftGUI$11.class
 com/vnmine/currency/CurrencyManager.class
 com/vnmine/gui/AdminMenuGUI$AdminItemDef.class
 com/vnmine/gui/ArtifactCraftGUI$7.class

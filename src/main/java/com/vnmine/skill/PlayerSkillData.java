@@ -36,18 +36,12 @@ public class PlayerSkillData {
 
     // ==================== SKILL BAR ====================
 
-    /**
-     * Gán skill vào slot trong Skill Bar
-     */
     public void setSkillBarSlot(int slot, String skillId) {
         if (slot >= 0 && slot < 9) {
             skillBarSlots[slot] = skillId;
         }
     }
 
-    /**
-     * Lấy skill_id từ slot
-     */
     public String getSkillBarSlot(int slot) {
         if (slot >= 0 && slot < 9) {
             return skillBarSlots[slot];
@@ -55,25 +49,16 @@ public class PlayerSkillData {
         return null;
     }
 
-    /**
-     * Lấy toàn bộ skill bar
-     */
     public String[] getSkillBarSlots() {
         return skillBarSlots.clone();
     }
 
-    /**
-     * Xóa skill khỏi slot
-     */
     public void clearSkillBarSlot(int slot) {
         if (slot >= 0 && slot < 9) {
             skillBarSlots[slot] = null;
         }
     }
 
-    /**
-     * Xóa toàn bộ skill bar
-     */
     public void clearSkillBar() {
         for (int i = 0; i < 9; i++) {
             skillBarSlots[i] = null;
@@ -82,121 +67,161 @@ public class PlayerSkillData {
 
     // ==================== PROFICIENCY ====================
 
-    /**
-     * Lấy số lần đã sử dụng skill
-     */
     public int getSkillUsageCount(String skillId) {
         return proficiencyMap.getOrDefault(skillId, 0);
     }
 
-    /**
-     * Tăng số lần sử dụng skill lên 1
-     */
     public void incrementSkillUsage(String skillId) {
         proficiencyMap.put(skillId, proficiencyMap.getOrDefault(skillId, 0) + 1);
     }
 
-    /**
-     * Lấy cấp độ thành thục dựa vào số lần sử dụng
-     */
     public ProficiencyLevel getProficiencyLevel(String skillId) {
         int usage = getSkillUsageCount(skillId);
         return ProficiencyLevel.fromUsage(usage);
     }
 
-    /**
-     * Lấy hệ số sức mạnh của skill dựa vào độ thành thục
-     */
     public double getProficiencyMultiplier(String skillId) {
         return getProficiencyLevel(skillId).multiplier;
     }
 
-    /**
-     * Lấy giảm cooldown dựa vào độ thành thục (giây)
-     */
     public int getCooldownReduction(String skillId) {
         ProficiencyLevel level = getProficiencyLevel(skillId);
         return level.cooldownReduction;
     }
 
-    /**
-     * Lấy tăng thời gian hiệu lực dựa vào độ thành thục
-     */
     public double getDurationMultiplier(String skillId) {
         ProficiencyLevel level = getProficiencyLevel(skillId);
         return level.durationMultiplier;
     }
 
-    /**
-     * Set số lần sử dụng (cho load data)
-     */
     public void setSkillUsage(String skillId, int count) {
         proficiencyMap.put(skillId, count);
     }
 
-    /**
-     * Lấy toàn bộ proficiency map
-     */
     public Map<String, Integer> getProficiencyMap() {
         return proficiencyMap;
     }
 
-    // ==================== COOLDOWN ====================
+    // ==================== KHỐNG HỎA THUẬT EFFECTS ====================
 
     /**
-     * Kiểm tra skill có đang cooldown không
+     * Lấy tỉ lệ giảm thời gian luyện đan từ Khống Hỏa Thuật
+     * @return 0.0 - 0.75 (giảm từ 0% đến 75%)
      */
+    public double getAlchemyTimeReduction() {
+        ProficiencyLevel level = getProficiencyLevel("FIRE_CONTROL");
+        switch (level) {
+            case NHAP_MON: return 0.0;
+            case TIEU_THANH: return 0.15;
+            case DAI_THANH: return 0.30;
+            case VIEN_MAN: return 0.45;
+            case XUAT_THAN_NHAP_HOA: return 0.60;
+            case DANG_PHONG_TAO_CUC: return 0.75;
+            default: return 0.0;
+        }
+    }
+
+    /**
+     * Lấy bonus phẩm cấp đan dược từ Khống Hỏa Thuật
+     * @return 0 - 5 (cộng vào grade index)
+     */
+    public int getAlchemyGradeBonus() {
+        ProficiencyLevel level = getProficiencyLevel("FIRE_CONTROL");
+        switch (level) {
+            case NHAP_MON: return 0;
+            case TIEU_THANH: return 1;
+            case DAI_THANH: return 2;
+            case VIEN_MAN: return 3;
+            case XUAT_THAN_NHAP_HOA: return 4;
+            case DANG_PHONG_TAO_CUC: return 5;
+            default: return 0;
+        }
+    }
+
+    /**
+     * Lấy tên hiển thị proficiency cho Khống Hỏa Thuật
+     */
+    public String getFireControlProficiencyName() {
+        return getProficiencyLevel("FIRE_CONTROL").getDisplayName();
+    }
+
+    // ==================== LUYỆN KHÍ THUẬT EFFECTS ====================
+
+    /**
+     * Lấy tỉ lệ giảm tiêu hao linh lực pháp bảo từ Luyện Khí Thuật
+     * @return 0.0 - 0.50 (giảm từ 0% đến 50% mana cost)
+     */
+    public double getForgeManaReduction() {
+        ProficiencyLevel level = getProficiencyLevel("FORGE_MASTERY");
+        switch (level) {
+            case NHAP_MON: return 0.0;
+            case TIEU_THANH: return 0.10;
+            case DAI_THANH: return 0.20;
+            case VIEN_MAN: return 0.30;
+            case XUAT_THAN_NHAP_HOA: return 0.40;
+            case DANG_PHONG_TAO_CUC: return 0.50;
+            default: return 0.0;
+        }
+    }
+
+    /**
+     * Lấy bonus phẩm cấp pháp khí từ Luyện Khí Thuật
+     * @return 0 - 5 (cộng vào grade index)
+     */
+    public int getForgeGradeBonus() {
+        ProficiencyLevel level = getProficiencyLevel("FORGE_MASTERY");
+        switch (level) {
+            case NHAP_MON: return 0;
+            case TIEU_THANH: return 1;
+            case DAI_THANH: return 2;
+            case VIEN_MAN: return 3;
+            case XUAT_THAN_NHAP_HOA: return 4;
+            case DANG_PHONG_TAO_CUC: return 5;
+            default: return 0;
+        }
+    }
+
+    /**
+     * Lấy tên hiển thị proficiency cho Luyện Khí Thuật
+     */
+    public String getForgeMasteryProficiencyName() {
+        return getProficiencyLevel("FORGE_MASTERY").getDisplayName();
+    }
+
+    // ==================== COOLDOWN ====================
+
     public boolean isOnCooldown(String skillId) {
         if (!cooldownMap.containsKey(skillId)) return false;
         long remaining = cooldownMap.get(skillId) - System.currentTimeMillis();
         return remaining > 0;
     }
 
-    /**
-     * Lấy thời gian cooldown còn lại (giây)
-     */
     public long getCooldownRemaining(String skillId) {
         if (!cooldownMap.containsKey(skillId)) return 0;
         long remaining = cooldownMap.get(skillId) - System.currentTimeMillis();
         return Math.max(0, remaining / 1000);
     }
 
-    /**
-     * Set cooldown cho skill (cooldownSeconds là cooldown gốc từ config)
-     * Proficiency sẽ giảm cooldown
-     */
     public void setCooldown(String skillId, int cooldownSeconds) {
         int reduction = getCooldownReduction(skillId);
         int actualCooldown = Math.max(1, cooldownSeconds - reduction);
         cooldownMap.put(skillId, System.currentTimeMillis() + (actualCooldown * 1000L));
     }
 
-    /**
-     * Lấy thời gian cooldown thực tế sau khi giảm (giây)
-     */
     public int getEffectiveCooldown(String skillId, int baseCooldown) {
         return Math.max(1, baseCooldown - getCooldownReduction(skillId));
     }
 
-    /**
-     * Lấy toàn bộ cooldown map (cho save)
-     */
     public Map<String, Long> getCooldownMap() {
         return cooldownMap;
     }
 
     // ==================== COOLDOWN BYPASS ====================
 
-    /**
-     * Kiểm tra cooldown bypass
-     */
     public boolean isCooldownBypass() {
         return cooldownBypass;
     }
 
-    /**
-     * Set cooldown bypass
-     */
     public void setCooldownBypass(boolean bypass) {
         this.cooldownBypass = bypass;
     }
@@ -213,7 +238,7 @@ public class PlayerSkillData {
 
         public final int requiredUsage;
         public final double multiplier;
-        public final int cooldownReduction; // giây
+        public final int cooldownReduction;
         public final double durationMultiplier;
 
         ProficiencyLevel(int requiredUsage, double multiplier, int cooldownReduction, double durationMultiplier) {
@@ -223,9 +248,6 @@ public class PlayerSkillData {
             this.durationMultiplier = durationMultiplier;
         }
 
-        /**
-         * Lấy cấp độ thành thục dựa vào số lần sử dụng
-         */
         public static ProficiencyLevel fromUsage(int usage) {
             ProficiencyLevel best = NHAP_MON;
             for (ProficiencyLevel level : values()) {
@@ -236,9 +258,6 @@ public class PlayerSkillData {
             return best;
         }
 
-        /**
-         * Lấy tên hiển thị
-         */
         public String getDisplayName() {
             switch (this) {
                 case NHAP_MON: return "&7Nhập Môn";

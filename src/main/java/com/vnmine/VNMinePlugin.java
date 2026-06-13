@@ -201,6 +201,7 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         getCommand("mount").setExecutor(mountCommand);
         getCommand("vnbalance").setExecutor(currencyCommand);
         getCommand("vnpay").setExecutor(currencyCommand);
+        getCommand("vnexchange").setExecutor(currencyCommand);
         getCommand("vnadmin").setExecutor(this);
 
         getLogger().info(ColorUtils.colorize("&aVNMine v2.1.0 da duoc bat! &7Big Update Tu Tien"));
@@ -734,71 +735,216 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         String cmd = command.getName().toLowerCase();
         List<String> completions = new ArrayList<>();
         if (cmd.equals("vnmine") || cmd.equals("vn")) {
-            if (args.length == 1) completions.addAll(Arrays.asList("menu", "start", "time", "perm", "world", "drop", "cultivate", "elite", "reload"));
+            if (args.length == 1) {
+                completions.addAll(Arrays.asList("menu", "start", "player", "time", "perm", "world", "drop", "cultivate", "elite", "reload"));
+            } else if (args.length == 2 && args[0].equalsIgnoreCase("player")) {
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    completions.add(p.getName());
+                }
+            } else if (args.length == 3 && args[0].equalsIgnoreCase("player")) {
+                completions.addAll(Arrays.asList("level", "exp", "mana", "skill"));
+            } else if (args.length == 4 && args[0].equalsIgnoreCase("player")) {
+                String type = args[2].toLowerCase();
+                switch (type) {
+                    case "level": completions.add("set"); break;
+                    case "exp": completions.addAll(Arrays.asList("give", "set")); break;
+                    case "mana": completions.add("set"); break;
+                    case "skill": completions.addAll(Arrays.asList("learn", "remove")); break;
+                }
+            } else if (args.length == 5 && args[0].equalsIgnoreCase("player")) {
+                String type = args[2].toLowerCase();
+                if (type.equals("skill")) {
+                    completions.addAll(Arrays.asList("BASIC_HEAL", "QI_SHIELD", "FIRE_BALL", "WIND_BLADE", "LIGHTNING_STRIKE", "SPEED_STEP", "TELEPORT", "METEOR_STORM", "FIRE_CONTROL", "FORGE_MASTERY"));
+                }
+            }
         }
         return completions;
     }
 
     // ==================== PLAYER COMMAND ====================
     /**
-     * Xử lý lệnh /vn player <name> setlevel <level>
+     * Xử lý lệnh /vnmine player <tên> <loại> <hành động> <giá trị>
+     * Ví dụ:
+     *   /vnmine player Steve level set 30
+     *   /vnmine player Steve exp give 1000
+     *   /vnmine player Steve exp set 500
+     *   /vnmine player Steve mana set 200
+     *   /vnmine player Steve skill learn FIRE_CONTROL
+     *   /vnmine player Steve skill remove FIRE_CONTROL
      * Yêu cầu quyền vnmine.command.admin
      */
     private boolean handlePlayerCommand(CommandSender sender, String[] args) {
         if (!sender.hasPermission("vnmine.command.admin")) {
-            sender.sendMessage("§cBạn không có quyền! (Cần vnmine.command.admin)");
+            MessageUtils.send(sender, "&cBạn không có quyền! (Cần vnmine.command.admin)");
             return true;
         }
-        if (args.length < 3) {
-            sender.sendMessage("§6=== VNMine Player Command ===");
-            sender.sendMessage("§e/vn player <player> setlevel <level> §f- Set cấp độ cho người chơi (bỏ qua độ kiếp)");
+        if (args.length < 2) {
+            sendPlayerHelp(sender);
             return true;
         }
 
         String playerName = args[1];
-        String action = args[2].toLowerCase();
-
-        if (!action.equals("setlevel")) {
-            sender.sendMessage("§cHành động không hợp lệ! Chỉ hỗ trợ: setlevel");
-            return true;
-        }
-        if (args.length < 4) {
-            sender.sendMessage("§cSử dụng: /vn player <player> setlevel <level>");
-            return true;
-        }
-
         Player target = Bukkit.getPlayer(playerName);
         if (target == null) {
-            sender.sendMessage("§cNgười chơi '" + playerName + "' không trực tuyến!");
+            MessageUtils.send(sender, "&cNgười chơi '" + playerName + "' không trực tuyến!");
             return true;
         }
 
+        if (args.length < 3) {
+            sendPlayerHelp(sender);
+            return true;
+        }
+
+        String type = args[2].toLowerCase();
+        String action = args.length >= 4 ? args[3].toLowerCase() : "";
+        String valueStr = args.length >= 5 ? args[4] : "";
+
+        PlayerCultivationData data = cultivationManager.getOrCreatePlayerData(target.getUniqueId(), target.getName());
+
+        switch (type) {
+            case "level":
+                return handlePlayerLevel(sender, target, data, action, valueStr);
+            case "exp":
+                return handlePlayerExp(sender, target, data, action, valueStr);
+            case "mana":
+                return handlePlayerMana(sender, target, data, action, valueStr);
+            case "skill":
+                return handlePlayerSkill(sender, target, data, action, valueStr);
+            case "help":
+                sendPlayerHelp(sender);
+                return true;
+            default:
+                sendPlayerHelp(sender);
+                return true;
+        }
+    }
+
+    private void sendPlayerHelp(CommandSender sender) {
+        MessageUtils.send(sender, "&6&l=== Quản Lý Người Chơi ===");
+        MessageUtils.send(sender, "&e/vn mine player <tên> level set <số> &f- Set cấp tu luyện");
+        MessageUtils.send(sender, "&e/vnmine player <tên> exp give <số> &f- Thêm EXP");
+        MessageUtils.send(sender, "&e/vnmine player <tên> exp set <số> &f- Set EXP");
+        MessageUtils.send(sender, "&e/vnmine player <tên> mana set <số> &f- Set linh lực");
+        MessageUtils.send(sender, "&e/vnmine player <tên> skill learn <id> &f- Học kỹ năng");
+        MessageUtils.send(sender, "&e/vnmine player <tên> skill remove <id> &f- Xóa kỹ năng");
+        MessageUtils.send(sender, "");
+        MessageUtils.send(sender, "&7Skill ID: FIRE_CONTROL, FORGE_MASTERY, BASIC_HEAL, QI_SHIELD, FIRE_BALL, WIND_BLADE, LIGHTNING_STRIKE, SPEED_STEP, TELEPORT, METEOR_STORM");
+    }
+
+    private boolean handlePlayerLevel(CommandSender sender, Player target, PlayerCultivationData data, String action, String valueStr) {
+        if (!action.equals("set")) {
+            MessageUtils.send(sender, "&cSử dụng: /vnmine player <tên> level set <số>");
+            return true;
+        }
         int level;
         try {
-            level = Integer.parseInt(args[3]);
+            level = Integer.parseInt(valueStr);
             if (level < 1 || level > 100) {
-                sender.sendMessage("§cLevel phải từ 1 đến 100!");
+                MessageUtils.send(sender, "&cCấp độ phải từ 1 đến 100!");
                 return true;
             }
         } catch (NumberFormatException e) {
-            sender.sendMessage("§cLevel phải là số nguyên!");
+            MessageUtils.send(sender, "&cCấp độ phải là số nguyên!");
             return true;
         }
 
-        PlayerCultivationData data = cultivationManager.getOrCreatePlayerData(target.getUniqueId(), target.getName());
         data.setLevel(level);
         data.setExperience(0);
-        data.setMaxMana(100 + (level * 10));
+        data.setMaxMana(cultivationManager.calculateMaxMana(level));
         data.setMana(data.getMaxMana());
-        // Bỏ qua trạng thái độ kiếp
         data.setWaitingForTribulation(false);
         data.setTribulationInProgress(false);
 
-        // Cập nhật name tag
         nameTagManager.updateNameTag(target);
 
-        MessageUtils.send(target, "&d✦ Admin đã set cấp độ của bạn thành &e" + level + " &d(bỏ qua độ kiếp)!");
-        sender.sendMessage("§aĐã set level " + target.getName() + " thành " + level + " (bỏ qua độ kiếp)");
+        MessageUtils.send(target, "&d✦ Admin đã set cấp độ tu luyện của bạn thành &e" + level + " &d(bỏ qua độ kiếp)!");
+        MessageUtils.send(sender, "&a✦ Đã set cấp " + target.getName() + " thành &e" + level + " &a(bỏ qua độ kiếp)");
+        return true;
+    }
+
+    private boolean handlePlayerExp(CommandSender sender, Player target, PlayerCultivationData data, String action, String valueStr) {
+        int amount;
+        try {
+            amount = Integer.parseInt(valueStr);
+            if (amount <= 0) {
+                MessageUtils.send(sender, "&cSố lượng phải lớn hơn 0!");
+                return true;
+            }
+        } catch (NumberFormatException e) {
+            MessageUtils.send(sender, "&cSố lượng phải là số nguyên!");
+            return true;
+        }
+
+        switch (action) {
+            case "give":
+                cultivationManager.addExperience(target, amount);
+                MessageUtils.send(target, "&a✦ Bạn nhận được &e" + amount + " &atu vi!");
+                MessageUtils.send(sender, "&a✦ Đã cộng &e" + amount + " &aEXP cho " + target.getName());
+                break;
+            case "set":
+                data.setExperience(amount);
+                MessageUtils.send(target, "&d✦ EXP của bạn đã được set thành &e" + amount);
+                MessageUtils.send(sender, "&a✦ Đã set EXP " + target.getName() + " thành &e" + amount);
+                break;
+            default:
+                MessageUtils.send(sender, "&cSử dụng: /vnmine player <tên> exp <give|set> <số>");
+                return true;
+        }
+        return true;
+    }
+
+    private boolean handlePlayerMana(CommandSender sender, Player target, PlayerCultivationData data, String action, String valueStr) {
+        if (!action.equals("set")) {
+            MessageUtils.send(sender, "&cSử dụng: /vnmine player <tên> mana set <số>");
+            return true;
+        }
+        int amount;
+        try {
+            amount = Integer.parseInt(valueStr);
+            if (amount < 0) {
+                MessageUtils.send(sender, "&cLinh lực không được âm!");
+                return true;
+            }
+        } catch (NumberFormatException e) {
+            MessageUtils.send(sender, "&cLinh lực phải là số nguyên!");
+            return true;
+        }
+
+        data.setMana(Math.min(amount, data.getMaxMana()));
+        MessageUtils.send(target, "&b✦ Linh lực của bạn đã được set thành &e" + data.getMana());
+        MessageUtils.send(sender, "&a✦ Đã set linh lực " + target.getName() + " thành &e" + data.getMana());
+        return true;
+    }
+
+    private boolean handlePlayerSkill(CommandSender sender, Player target, PlayerCultivationData data, String action, String skillId) {
+        if (skillId.isEmpty()) {
+            MessageUtils.send(sender, "&cSử dụng: /vnmine player <tên> skill <learn|remove> <skill_id>");
+            return true;
+        }
+
+        switch (action) {
+            case "learn":
+                if (data.hasLearnedSkill(skillId)) {
+                    MessageUtils.send(sender, "&c" + target.getName() + " đã học kỹ năng này rồi!");
+                    return true;
+                }
+                data.learnSkill(skillId);
+                MessageUtils.send(target, "&a✦ Admin đã dạy bạn kỹ năng: &e" + skillId);
+                MessageUtils.send(sender, "&a✦ Đã cho " + target.getName() + " học kỹ năng &e" + skillId);
+                break;
+            case "remove":
+                if (!data.hasLearnedSkill(skillId)) {
+                    MessageUtils.send(sender, "&c" + target.getName() + " chưa học kỹ năng này!");
+                    return true;
+                }
+                data.getLearnedSkills().remove(skillId);
+                MessageUtils.send(target, "&c✦ Admin đã xóa kỹ năng: &e" + skillId);
+                MessageUtils.send(sender, "&a✦ Đã xóa kỹ năng &e" + skillId + " &acủa " + target.getName());
+                break;
+            default:
+                MessageUtils.send(sender, "&cSử dụng: /vnmine player <tên> skill <learn|remove> <skill_id>");
+                return true;
+        }
         return true;
     }
 

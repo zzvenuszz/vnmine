@@ -253,6 +253,37 @@ cultivation:
 skills:
   enabled: true
   skills:
+    FIRE_CONTROL:
+      enabled: true
+      name: "&c&lKhống Hỏa Thuật"
+      description:
+        - "&7Kiểm soát hỏa hầu luyện đan"
+        - "&7Giảm thời gian luyện đan theo độ thuần thục"
+        - "&7Tăng phẩm cấp đan dược thành phẩm"
+        - "&7Yêu cầu cấp 21+ (Trúc Cơ)"
+      type: "PASSIVE"
+      required-level: 21
+      exp-cost: 200
+      mana-cost: 0
+      cooldown-seconds: 0
+      icon: "FIRE_CHARGE"
+      executor: "FIRE_CONTROL"
+      executor-config: {}
+    FORGE_MASTERY:
+      enabled: true
+      name: "&6&lLuyện Khí Thuật"
+      description:
+        - "&7Thuật luyện khí đỉnh cao"
+        - "&7Giảm tiêu hao linh lực pháp bảo"
+        - "&7Tăng phẩm cấp pháp khí chế tạo"
+      type: "PASSIVE"
+      required-level: 15
+      exp-cost: 150
+      mana-cost: 0
+      cooldown-seconds: 0
+      icon: "ANVIL"
+      executor: "FORGE_MASTERY"
+      executor-config: {}
     BASIC_HEAL:
       enabled: true
       name: "&aTrúc Cơ Liệu Thương"
@@ -750,12 +781,32 @@ npc-shop:
 # =============================================
 currency:
   enabled: true
-  item:
-    material: "PRISMARINE_SHARD"
-    name: "&bLinh Thạch"
-    lore:
-      - "&7Tiền tệ tu tiên"
-      - "&7Dùng để mua vật phẩm từ NPC"
+  # Tỉ lệ khấu trừ khi đổi xuống đơn vị nhỏ hơn (phần trăm)
+  exchange-downgrade-loss-percent: 5
+  tiers:
+    HA:
+      material: "PRISMARINE_SHARD"
+      name: "&bLinh Thạch Hạ Phẩm"
+      lore:
+        - "&7Linh thạch cấp thấp nhất"
+        - "&7Dùng trong giao dịch hàng ngày"
+      value: 1
+    TRUNG:
+      material: "DARK_PRISMARINE"
+      name: "&dLinh Thạch Trung Phẩm"
+      lore:
+        - "&7Linh thạch trung cấp"
+        - "&71 Trung Phẩm = 100 Hạ Phẩm"
+        - "&71 Trung Phẩm ↔ 95 Hạ Phẩm (khi hạ cấp)"
+      value: 100
+    THUONG:
+      material: "HEART_OF_THE_SEA"
+      name: "&6&lLinh Thạch Thượng Phẩm"
+      lore:
+        - "&7Linh thạch quý hiếm"
+        - "&71 Thượng Phẩm = 100 Trung Phẩm = 10,000 Hạ Phẩm"
+        - "&71 Thượng Phẩm ↔ 95 Trung Phẩm (khi hạ cấp)"
+      value: 10000
   drops:
     kill-mob:
       enabled: true
@@ -773,6 +824,108 @@ currency:
       enabled: true
       chance: 5.0
       amount: 1
+
+# =============================================
+# XIIb. HỆ THỐNG PHẨM CẤP NGUYÊN LIỆU
+# =============================================
+ingredient-grades:
+  # Thứ tự từ thấp đến cao (index 0 = thấp nhất)
+  grades:
+    - id: "HOANG_HA"
+      name: "Hoàng cấp Hạ phẩm"
+      name-color: "&7&oHoàng cấp &fHạ phẩm"
+      tier-color: "&7"
+      sub-color: "&f"
+    - id: "HOANG_TRUNG"
+      name: "Hoàng cấp Trung phẩm"
+      name-color: "&7&oHoàng cấp &eTrung phẩm"
+      tier-color: "&7"
+      sub-color: "&e"
+    - id: "HOANG_THUONG"
+      name: "Hoàng cấp Thượng phẩm"
+      name-color: "&7&oHoàng cấp &aThượng phẩm"
+      tier-color: "&7"
+      sub-color: "&a"
+    - id: "HUYEN_HA"
+      name: "Huyền cấp Hạ phẩm"
+      name-color: "&b&oHuyền cấp &fHạ phẩm"
+      tier-color: "&b"
+      sub-color: "&f"
+    - id: "HUYEN_TRUNG"
+      name: "Huyền cấp Trung phẩm"
+      name-color: "&b&oHuyền cấp &eTrung phẩm"
+      tier-color: "&b"
+      sub-color: "&e"
+    - id: "HUYEN_THUONG"
+      name: "Huyền cấp Thượng phẩm"
+      name-color: "&b&oHuyền cấp &aThượng phẩm"
+      tier-color: "&b"
+      sub-color: "&a"
+    - id: "DIA_HA"
+      name: "Địa cấp Hạ phẩm"
+      name-color: "&5&oĐịa cấp &fHạ phẩm"
+      tier-color: "&5"
+      sub-color: "&f"
+    - id: "DIA_TRUNG"
+      name: "Địa cấp Trung phẩm"
+      name-color: "&5&oĐịa cấp &eTrung phẩm"
+      tier-color: "&5"
+      sub-color: "&e"
+    - id: "DIA_THUONG"
+      name: "Địa cấp Thượng phẩm"
+      name-color: "&5&oĐịa cấp &aThượng phẩm"
+      tier-color: "&5"
+      sub-color: "&a"
+    - id: "THIEN_HA"
+      name: "Thiên cấp Hạ phẩm"
+      name-color: "&6&oThiên cấp &fHạ phẩm"
+      tier-color: "&6"
+      sub-color: "&f"
+    - id: "THIEN_TRUNG"
+      name: "Thiên cấp Trung phẩm"
+      name-color: "&6&oThiên cấp &eTrung phẩm"
+      tier-color: "&6"
+      sub-color: "&e"
+    - id: "THIEN_THUONG"
+      name: "Thiên cấp Thượng phẩm"
+      name-color: "&6&oThiên cấp &aThượng phẩm"
+      tier-color: "&6"
+      sub-color: "&a"
+
+# =============================================
+# XIIc. HỆ THỐNG PHẨM CẤP ĐAN DƯỢC
+# =============================================
+pill-grades:
+  # Bonus từ nguyên liệu cao nhất trong recipe (theo grade index)
+  ingredient-bonus:
+    HOANG: 0
+    HUYEN: 1
+    DIA: 2
+    THIEN: 3
+  # Bonus từ tu vi
+  cultivation-bonus:
+    - min-level: 1
+      max-level: 20
+      bonus: 0
+    - min-level: 21
+      max-level: 30
+      bonus: 0
+    - min-level: 31
+      max-level: 50
+      bonus: 1
+    - min-level: 51
+      max-level: 70
+      bonus: 2
+    - min-level: 71
+      max-level: 100
+      bonus: 3
+
+# =============================================
+# XIId. HỆ THỐNG NPC ĐỔI TIỀN
+# =============================================
+currency-exchange:
+  enabled: true
+  npc-name: "&e&l◆ Thương Nhân Đổi Tiền ◆"
 
 # =============================================
 # XIII. HỆ THỐNG TỌA KỴ (MOUNT)
