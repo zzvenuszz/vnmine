@@ -288,20 +288,18 @@ public class AlchemyCraftGUI implements Listener {
             return;
         }
 
-        // Input slots (19-21, 28-30): cho phép đặt/lấy nguyên liệu - KHÔNG chặn
+        // Input slots (19-21, 28-30): xử lý THỦ CÔNG để đảm bảo hoạt động
         if (isInputSlot(slot)) {
+            event.setCancelled(true);
+            handleInputSlotClick(event, player, gui, slot);
             return;
         }
 
-        // Result slot (24): cho phép lấy thành phẩm
+        // Result slot (24): cho phép lấy thành phẩm bằng cursor
         if (slot == SLOT_RESULT) {
-            event.setCancelled(true);
-            ItemStack clicked = event.getCurrentItem();
-            if (clicked != null && clicked.getType() != Material.AIR) {
-                player.getInventory().addItem(clicked);
-                gui.setItem(slot, null);
-                MessageUtils.playSound(player, Sound.ENTITY_ITEM_PICKUP);
-            }
+            ItemStack current = event.getCurrentItem();
+            if (current == null || current.getType() == Material.AIR) return;
+            // Để Bukkit xử lý tự nhiên: đặt item lên cursor
             return;
         }
 
@@ -333,6 +331,41 @@ public class AlchemyCraftGUI implements Listener {
                     break;
             }
         }
+    }
+
+    /**
+     * Xử lý THỦ CÔNG click trên input slot - đảm bảo hoạt động bất kể event system
+     */
+    private void handleInputSlotClick(InventoryClickEvent event, Player player, Inventory gui, int slot) {
+        ItemStack cursor = event.getCursor();
+        ItemStack current = gui.getItem(slot);
+        ClickType click = event.getClick();
+
+        if (click == ClickType.LEFT || click == ClickType.RIGHT) {
+            // Hoán đổi cursor và item trong slot
+            gui.setItem(slot, cursor);
+            player.setItemOnCursor(current);
+        } else if (click == ClickType.SHIFT_LEFT || click == ClickType.SHIFT_RIGHT) {
+            if (current != null && current.getType() != Material.AIR) {
+                // Chuyển item từ GUI về player inventory
+                HashMap<Integer, ItemStack> leftover = player.getInventory().addItem(current.clone());
+                if (leftover.isEmpty()) {
+                    gui.setItem(slot, null);
+                } else {
+                    gui.setItem(slot, leftover.get(0));
+                }
+            } else if (cursor != null && cursor.getType() != Material.AIR) {
+                // Đặt cursor item vào slot
+                gui.setItem(slot, cursor.clone());
+                player.setItemOnCursor(null);
+            }
+        } else if (click == ClickType.NUMBER_KEY) {
+            int hotbarSlot = event.getHotbarButton();
+            ItemStack hotbarItem = player.getInventory().getItem(hotbarSlot);
+            gui.setItem(slot, hotbarItem);
+            player.getInventory().setItem(hotbarSlot, current);
+        }
+        // Các click type khác: bỏ qua
     }
 
     /**
