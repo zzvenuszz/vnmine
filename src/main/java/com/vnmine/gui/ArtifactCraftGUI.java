@@ -9,7 +9,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -258,7 +257,6 @@ public class ArtifactCraftGUI implements Listener {
         ArtifactSession session = activeSessions.get(player.getUniqueId());
         if (session == null) {
             event.setCancelled(true);
-            event.setResult(Event.Result.DENY);
             return;
         }
 
@@ -273,23 +271,17 @@ public class ArtifactCraftGUI implements Listener {
         // Slot âm: chặn
         if (slot < 0) {
             event.setCancelled(true);
-            event.setResult(Event.Result.DENY);
             return;
         }
 
-        // === TẤT CẢ top inventory slots đều bị chặn ===
-        event.setCancelled(true);
-        event.setResult(Event.Result.DENY);
-
-        // Input slots: cho phép đặt/lấy vật liệu
+        // Input slots: cho phép đặt/lấy vật liệu - KHÔNG chặn
         if (isInputSlot(slot)) {
-            event.setCancelled(false);
-            event.setResult(Event.Result.DEFAULT);
             return;
         }
 
         // Result slot: cho phép lấy thành phẩm
         if (slot == SLOT_RESULT) {
+            event.setCancelled(true);
             ItemStack clicked = event.getCurrentItem();
             if (clicked != null && clicked.getType() != Material.AIR) {
                 player.getInventory().addItem(clicked);
@@ -299,7 +291,10 @@ public class ArtifactCraftGUI implements Listener {
             return;
         }
 
-        // Các nút chức năng: chặn click nhưng thực hiện chức năng
+        // Chặn tất cả các slot khác trong top inventory
+        event.setCancelled(true);
+
+        // Các nút chức năng
         ItemStack clicked = event.getCurrentItem();
         if (clicked == null || clicked.getType() == Material.AIR) return;
 

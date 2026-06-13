@@ -9,7 +9,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -271,9 +270,7 @@ public class AlchemyCraftGUI implements Listener {
         Player player = (Player) event.getWhoClicked();
         AlchemySession session = activeSessions.get(player.getUniqueId());
         if (session == null) {
-            // Không có session → vẫn chặn click để bảo vệ GUI
             event.setCancelled(true);
-            event.setResult(Event.Result.DENY);
             return;
         }
 
@@ -288,23 +285,17 @@ public class AlchemyCraftGUI implements Listener {
         // Slot âm: chặn
         if (slot < 0) {
             event.setCancelled(true);
-            event.setResult(Event.Result.DENY);
             return;
         }
 
-        // === TẤT CẢ top inventory slots đều bị chặn ===
-        event.setCancelled(true);
-        event.setResult(Event.Result.DENY);
-
-        // Input slots (19-21, 28-30): cho phép đặt/lấy nguyên liệu
+        // Input slots (19-21, 28-30): cho phép đặt/lấy nguyên liệu - KHÔNG chặn
         if (isInputSlot(slot)) {
-            event.setCancelled(false);
-            event.setResult(Event.Result.DEFAULT);
             return;
         }
 
         // Result slot (24): cho phép lấy thành phẩm
         if (slot == SLOT_RESULT) {
+            event.setCancelled(true);
             ItemStack clicked = event.getCurrentItem();
             if (clicked != null && clicked.getType() != Material.AIR) {
                 player.getInventory().addItem(clicked);
@@ -314,7 +305,10 @@ public class AlchemyCraftGUI implements Listener {
             return;
         }
 
-        // Các nút chức năng: chặn click nhưng thực hiện chức năng
+        // Chặn tất cả các slot khác trong top inventory
+        event.setCancelled(true);
+
+        // Các nút chức năng
         ItemStack clicked = event.getCurrentItem();
         if (clicked == null || clicked.getType() == Material.AIR) return;
 
