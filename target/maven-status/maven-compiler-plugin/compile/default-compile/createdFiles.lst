@@ -73,6 +73,7 @@ com/vnmine/VNMinePlugin$TimeManager$1.class
 com/vnmine/npc/NPCCommand.class
 com/vnmine/permission/Group.class
 com/vnmine/gui/AlchemyCraftGUI$7.class
+com/vnmine/gui/AlchemyCraftGUI$12.class
 com/vnmine/gui/AlchemyCraftGUI.class
 com/vnmine/item/artifacts/abilities/PhoenixRebirthListener.class
 com/vnmine/VNMinePlugin.class

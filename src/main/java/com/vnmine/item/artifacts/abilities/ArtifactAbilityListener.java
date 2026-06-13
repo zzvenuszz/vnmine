@@ -55,6 +55,10 @@ public class ArtifactAbilityListener implements Listener {
     // Soul Jade cooldown per player
     private final Map<UUID, Long> soulJadeCooldowns = new HashMap<>();
 
+    // Anti double-fire cooldown (Spigot fires RIGHT_CLICK_BLOCK + RIGHT_CLICK_AIR)
+    private final Map<UUID, Long> lastInteractTime = new HashMap<>();
+    private static final long INTERACT_COOLDOWN_MS = 300; // 300ms anti double-fire
+
     public ArtifactAbilityListener(VNMinePlugin plugin) {
         this.plugin = plugin;
         // Start Soul Jade check task
@@ -146,6 +150,15 @@ public class ArtifactAbilityListener implements Listener {
 
         String artifactId = getArtifactId(item);
         if (artifactId == null) return;
+
+        // Anti double-fire: Spigot fires both RIGHT_CLICK_BLOCK + RIGHT_CLICK_AIR
+        UUID uuid = player.getUniqueId();
+        long now = System.currentTimeMillis();
+        Long lastInteract = lastInteractTime.get(uuid);
+        if (lastInteract != null && (now - lastInteract) < INTERACT_COOLDOWN_MS) {
+            return; // Đã xử lý trong 300ms qua
+        }
+        lastInteractTime.put(uuid, now);
 
         event.setCancelled(true);
 

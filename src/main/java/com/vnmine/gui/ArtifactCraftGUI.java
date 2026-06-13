@@ -58,32 +58,32 @@ public class ArtifactCraftGUI implements Listener {
     private static final List<ArtifactRecipe> RECIPES = new ArrayList<>();
 
     static {
-        RECIPES.add(new ArtifactRecipe("FLYING_SWORD", "&b&lKiem Phi Hanh", Material.DIAMOND_SWORD,
-                "&7Click phai de ngu kien phi hanh, tieu hao linh luc",
+        RECIPES.add(new ArtifactRecipe("FLYING_SWORD", "&b&l◆ Kiếm Phi Hành ◆", Material.DIAMOND_SWORD,
+                "&7Click phải để ngự kiếm phi hành, tiêu hao linh lực",
                 new LinkedHashMap<Material, Integer>() {{ put(Material.DIAMOND_SWORD, 1); put(Material.DIAMOND, 8); put(Material.FEATHER, 4); }},
                 15, 30, 50.0, "FORGE_MASTERY", 3));
-        RECIPES.add(new ArtifactRecipe("SPIRIT_BELL", "&6&lLinh Chung", Material.BELL,
-                "&7Lam choang quai trong ban kinh, tieu hao linh luc",
+        RECIPES.add(new ArtifactRecipe("SPIRIT_BELL", "&6&l◆ Linh Chung ◆", Material.BELL,
+                "&7Làm choáng quái trong bán kính, tiêu hao linh lực",
                 new LinkedHashMap<Material, Integer>() {{ put(Material.BELL, 1); put(Material.GOLD_INGOT, 4); put(Material.DIAMOND, 2); }},
                 10, 20, 60.0, "FORGE_MASTERY", 2));
-        RECIPES.add(new ArtifactRecipe("BAGUA_MIRROR", "&5&lBat Quai Kinh", Material.SHIELD,
-                "&7Cam tren tay: Giam 30% sat thuong nhan vao",
+        RECIPES.add(new ArtifactRecipe("BAGUA_MIRROR", "&5&l◆ Bát Quái Kính ◆", Material.SHIELD,
+                "&7Cầm trên tay: Giảm 30% sát thương nhận vào",
                 new LinkedHashMap<Material, Integer>() {{ put(Material.SHIELD, 1); put(Material.OBSIDIAN, 4); put(Material.EMERALD, 4); }},
                 20, 40, 45.0, "FORGE_MASTERY", 4));
-        RECIPES.add(new ArtifactRecipe("SOUL_JADE", "&a&lHon Ngoc", Material.EMERALD,
-                "&7Tu dong: Hoi 50% mau khi HP<20%, CD 5 phut",
+        RECIPES.add(new ArtifactRecipe("SOUL_JADE", "&a&l◆ Hồn Ngọc ◆", Material.EMERALD,
+                "&7Tự động: Hồi 50% máu khi HP<20%, CD 5 phút",
                 new LinkedHashMap<Material, Integer>() {{ put(Material.EMERALD, 1); put(Material.GOLD_INGOT, 4); put(Material.ENDER_PEARL, 2); }},
                 25, 45, 40.0, "FORGE_MASTERY", 5));
-        RECIPES.add(new ArtifactRecipe("HEAVEN_SHIELD", "&4&lThien Linh Thuong", Material.NETHERITE_CHESTPLATE,
-                "&7Kich hoat: Bat tu 5 giay, CD 3 phut",
+        RECIPES.add(new ArtifactRecipe("HEAVEN_SHIELD", "&4&l◆ Thiên Linh Thuẫn ◆", Material.NETHERITE_CHESTPLATE,
+                "&7Kích hoạt: Bất tử 5 giây, CD 3 phút",
                 new LinkedHashMap<Material, Integer>() {{ put(Material.NETHERITE_CHESTPLATE, 1); put(Material.ENDER_EYE, 8); }},
                 40, 60, 25.0, "FORGE_MASTERY", 6));
-        RECIPES.add(new ArtifactRecipe("THUNDER_SEAL", "&e&lLoi An", Material.TRIDENT,
-                "&7Click vao quai: Goi set danh, tieu hao linh luc",
+        RECIPES.add(new ArtifactRecipe("THUNDER_SEAL", "&e&l◆ Lôi Ấn ◆", Material.TRIDENT,
+                "&7Click vào quái: Gọi sét đánh, tiêu hao linh lực",
                 new LinkedHashMap<Material, Integer>() {{ put(Material.TRIDENT, 1); put(Material.DIAMOND, 4); put(Material.DRAGON_BREATH, 2); }},
                 30, 35, 35.0, "FORGE_MASTERY", 5));
-        RECIPES.add(new ArtifactRecipe("PHOENIX_REBIRTH", "&6&lPhuong Hoang Lenh", Material.FEATHER,
-                "&7Tu dong: Hoi sinh 1 lan sau khi chet, CD 1 ngay",
+        RECIPES.add(new ArtifactRecipe("PHOENIX_REBIRTH", "&6&l◆ Phượng Hoàng Lệnh ◆", Material.FEATHER,
+                "&7Tự động: Hồi sinh 1 lần sau khi chết, CD 1 ngày",
                 new LinkedHashMap<Material, Integer>() {{ put(Material.FEATHER, 1); put(Material.GOLD_BLOCK, 8); put(Material.NETHERITE_INGOT, 4); put(Material.DRAGON_EGG, 1); }},
                 60, 120, 10.0, "FORGE_MASTERY", 8));
     }
@@ -101,20 +101,20 @@ public class ArtifactCraftGUI implements Listener {
     }
 
     public void open(Player player) {
-        Inventory gui = Bukkit.createInventory(null, 54, ColorUtils.colorize("&8✦ Luyen Che Phap Bao ✦"));
+        Inventory gui = Bukkit.createInventory(null, 54, ColorUtils.colorize("&8✦ Luyện Chế Pháp Bảo ✦"));
         for (int slot : new int[]{SLOT_INPUT_1, SLOT_INPUT_2, SLOT_INPUT_3, SLOT_INPUT_4, SLOT_INPUT_5, SLOT_INPUT_6}) gui.setItem(slot, null);
-        gui.setItem(SLOT_CRAFT, new ItemBuilder(Material.ANVIL).setGlow(true).setName("&6&l⚒ Che Tao Phap Bao")
-                .setLore("", "&7Dat vat lieu vao o ben trai", "&7Bam nut nay de luyen che", "", "&cYeu cau: Ky nang Luyen Ki Thuat").build());
+        gui.setItem(SLOT_CRAFT, new ItemBuilder(Material.ANVIL).setGlow(true).setName("&6&l⚒ Chế Tạo Pháp Bảo")
+                .setLore("", "&7Đặt vật liệu vào ô bên trái", "&7Bấm nút này để luyện chế", "", "&cYêu cầu: Kỹ Năng Luyện Kỹ Thuật").build());
         gui.setItem(SLOT_RESULT, null);
-        gui.setItem(SLOT_STATUS, new ItemBuilder(Material.PAPER).setName("&e&lTrang Thai").setLore("", "&7San sang che tao!").build());
-        gui.setItem(SLOT_GUIDE, new ItemBuilder(Material.KNOWLEDGE_BOOK).setName("&6&lCong Thuc Phap Bao")
-                .setLore("", "&bKiem Phi Hanh: &71 Kiem DC + 8 DC + 4 Long",
-                        "&6Linh Chung: &71 Chuong + 4 Vang + 2 DC",
-                        "&5Bat Quai Kinh: &71 Khien + 4 Obsidian + 4 Ngoc",
-                        "&aHon Ngoc: &71 Ngoc + 4 Vang + 2 Mat End",
-                        "&4Thien Linh Thuong: &71 Nguc Netherite + 8 Mat End",
-                        "&eLoi An: &71 Dinh ba + 4 DC + 2 Nuoc Rong",
-                        "&6Phuong Hoang Lenh: &71 Long + 8 Vang Khoi + 4 Netherite + 1 Trung Rong").build());
+        gui.setItem(SLOT_STATUS, new ItemBuilder(Material.PAPER).setName("&e&lTrạng Thái").setLore("", "&7Sẵn sàng chế tạo!").build());
+        gui.setItem(SLOT_GUIDE, new ItemBuilder(Material.KNOWLEDGE_BOOK).setName("&6&lCông Thức Pháp Bảo")
+                .setLore("", "&bKiếm Phi Hành: &71 Kiếm KC + 8 KC + 4 Lông",
+                        "&6Linh Chung: &71 Chuông + 4 Vàng + 2 KC",
+                        "&5Bát Quái Kính: &71 Khiên + 4 Obsidian + 4 Ngọc",
+                        "&aHồn Ngọc: &71 Ngọc + 4 Vàng + 2 Mắt End",
+                        "&4Thiên Linh Thuẫn: &71 Giáp Netherite + 8 Mắt End",
+                        "&eLôi Ấn: &71 Đinh Ba + 4 KC + 2 Hơi Rồng",
+                        "&6Phượng Hoàng Lệnh: &71 Lông + 8 Khối Vàng + 4 Netherite + 1 Trứng Rồng").build());
         ItemStack border = new ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).setName("&r").build();
         for (int i = 0; i < 54; i++) if (gui.getItem(i) == null && !isInputSlot(i) && i != SLOT_RESULT) gui.setItem(i, border);
         gui.setItem(SLOT_BACK, new ItemBuilder(Material.ARROW).setName("&e&l← Quay Lai").build());
@@ -126,7 +126,7 @@ public class ArtifactCraftGUI implements Listener {
     public void onInventoryDrag(InventoryDragEvent event) {
         if (!(event.getWhoClicked() instanceof Player)) return;
         String title = ColorUtils.stripColor(event.getView().getTitle());
-        if (!title.contains("Luyen Che Phap Bao")) return;
+        if (!title.contains("Luyện Chế Pháp Bảo")) return;
         for (Integer slot : event.getRawSlots()) { if (slot < 54 && !isInputSlot(slot)) { event.setCancelled(true); return; } }
     }
 
@@ -134,7 +134,7 @@ public class ArtifactCraftGUI implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player)) return;
         String title = ColorUtils.stripColor(event.getView().getTitle());
-        if (!title.contains("Luyen Che Phap Bao")) return;
+        if (!title.contains("Luyện Chế Pháp Bảo")) return;
         int slot = event.getRawSlot();
         if (slot >= 54) return;
         if (slot < 0) { event.setCancelled(true); return; }
@@ -231,6 +231,7 @@ public class ArtifactCraftGUI implements Listener {
                         "&7Luyen Ki Thuat: " + profName + " (+" + profBonus + " pham)",
                         "&7Thoi gian: &e" + finalRecipe.craftingTime + " giay",
                         "&7Ti le: &a" + finalRecipe.successChance + "%").build());
+        player.updateInventory();
 
         for (int slot : new int[]{SLOT_INPUT_1, SLOT_INPUT_2, SLOT_INPUT_3, SLOT_INPUT_4, SLOT_INPUT_5, SLOT_INPUT_6}) {
             ItemStack item = finalGui.getItem(slot);
@@ -243,6 +244,9 @@ public class ArtifactCraftGUI implements Listener {
                 }
             }
         }
+
+        // DONG BO INVENTORY SAU KHI TIEU HAO VAT LIEU
+        player.updateInventory();
 
         MessageUtils.playSound(player, Sound.BLOCK_ANVIL_USE);
 
@@ -277,6 +281,7 @@ public class ArtifactCraftGUI implements Listener {
                 inv.setItem(SLOT_RESULT, result);
                 inv.setItem(SLOT_STATUS, new ItemBuilder(Material.EMERALD).setName("&a&l✦ Che Tao Thanh Cong ✦")
                         .setLore("", "&7Phap bao: " + finalRecipe.displayName, "&7Pham cap: " + gradeDisplay).build());
+                p.updateInventory();
 
                 // TANG PROFICIENCY LUYEN KI THUAT
                 if (finalSkillData != null) {
@@ -294,6 +299,7 @@ public class ArtifactCraftGUI implements Listener {
                 MessageUtils.playSound(p, Sound.BLOCK_ANVIL_USE);
             } else {
                 inv.setItem(SLOT_STATUS, new ItemBuilder(Material.REDSTONE_BLOCK).setName("&c&lChe Tao That Bai").setLore("", "&7Mat het vat lieu! Hay thu lai!").build());
+                p.updateInventory();
                 MessageUtils.send(p, "&cChe tao phap bao that bai! Mat het vat lieu.");
                 MessageUtils.playSound(p, Sound.ENTITY_ITEM_BREAK);
             }

@@ -84,7 +84,8 @@ public class GiveCommand implements CommandExecutor {
         sender.sendMessage("§eBASIC_HEAL, QI_SHIELD, FIRE_BALL, WIND_BLADE, LIGHTNING_STRIKE, SPEED_STEP, TELEPORT, METEOR_STORM");
         sender.sendMessage("");
         sender.sendMessage("§6=== Danh sách Pill ID ===");
-        sender.sendMessage("§eHOI_LINH_DAN, DAI_HOI_LINH_DAN, CUONG_THE_DAN, THANH_TAM_DAN, TOC_THANH_DAN, TU_LUYEN_DAN, PHI_THANG_DAN");
+        sender.sendMessage("§eHOI_LINH_DAN, DAI_HOI_LINH_DAN, CUONG_THE_DAN, THANH_TAM_DAN, TOC_THANH_DAN");
+        sender.sendMessage("§eTU_LUYEN_DAN, PHI_THANG_DAN, BACH_DOC_DAN, THIEN_HOI_DAN, PHE_MA_DAN, TRUONG_THO_DAN");
         sender.sendMessage("");
         sender.sendMessage("§6=== Danh sách Artifact ID ===");
         sender.sendMessage("§eFLYING_SWORD, SPIRIT_BELL, BAGUA_MIRROR, SOUL_JADE, HEAVEN_SHIELD, THUNDER_SEAL, PHOENIX_REBIRTH");
@@ -185,7 +186,7 @@ public class GiveCommand implements CommandExecutor {
             case "DAI_HOI_LINH_DAN":
                 return tagItem(new ItemBuilder(Material.GLOWSTONE).setName("&bĐại Hồi Linh Đan")
                         .setAmount(amount).setGlow(true)
-                        .setLore("", "&7Hồi phục &b100 &7linh lực + 20% hồi phục 30s")).build();
+                        .setLore("", "&7Hồi phục &b100 &7linh lực + hồi phục 30s")).build();
             case "CUONG_THE_DAN":
                 return tagItem(new ItemBuilder(Material.REDSTONE_BLOCK).setName("&cCương Thể Đan")
                         .setAmount(amount).setGlow(true)
@@ -201,11 +202,27 @@ public class GiveCommand implements CommandExecutor {
             case "TU_LUYEN_DAN":
                 return tagItem(new ItemBuilder(Material.PURPLE_DYE).setName("&5Tu Luyện Đan")
                         .setAmount(amount).setGlow(true)
-                        .setLore("", "&7Tăng &5+50 EXP &7khi sử dụng")).build();
+                        .setLore("", "&7Tăng &5+50 EXP &7tu luyện khi sử dụng")).build();
             case "PHI_THANG_DAN":
                 return tagItem(new ItemBuilder(Material.NETHER_STAR).setName("&6&l◆ Phi Thăng Đan ◆")
                         .setAmount(amount).setGlow(true)
                         .setLore("", "&7+500 EXP (1 lần/đại cảnh giới)")).build();
+            case "BACH_DOC_DAN":
+                return tagItem(new ItemBuilder(Material.CYAN_DYE).setName("&9Bách Độc Đan")
+                        .setAmount(amount).setGlow(true)
+                        .setLore("", "&7Miễn nhiễm độc 5 phút")).build();
+            case "THIEN_HOI_DAN":
+                return tagItem(new ItemBuilder(Material.GOLDEN_APPLE).setName("&6Thiên Hồi Đan")
+                        .setAmount(amount).setGlow(true)
+                        .setLore("", "&7Hồi 50% HP + 50% linh lực")).build();
+            case "PHE_MA_DAN":
+                return tagItem(new ItemBuilder(Material.REDSTONE).setName("&8Phê Ma Đan")
+                        .setAmount(amount).setGlow(true)
+                        .setLore("", "&7Tăng 30% sát thương vs quái 2 phút")).build();
+            case "TRUONG_THO_DAN":
+                return tagItem(new ItemBuilder(Material.NETHER_STAR).setName("&6Trường Thọ Đan")
+                        .setAmount(amount).setGlow(true)
+                        .setLore("", "&7Tự động hồi sinh 1 lần (CD 1h)")).build();
             default:
                 return null;
         }
