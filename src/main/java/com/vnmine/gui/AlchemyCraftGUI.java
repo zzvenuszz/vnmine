@@ -125,6 +125,7 @@ public class AlchemyCraftGUI implements Listener {
     }
 
     public void open(Player player) {
+        plugin.getLogger().info("[AlchemyDebug] open() called for " + player.getName());
         Inventory gui = Bukkit.createInventory(null, 54, ColorUtils.colorize("&8✦ Luyện Đan - Khống Hỏa Thuật ✦"));
         ItemStack border = new ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).setName("&r").build();
         for (int slot : new int[]{19, 20, 21, 28, 29, 30}) gui.setItem(slot, null);
@@ -146,8 +147,8 @@ public class AlchemyCraftGUI implements Listener {
                         "&6Trường Thọ Đan: &75 VNLCT + 3 Ngân Sa + 2 Ngọc").build());
         for (int i = 0; i < 54; i++) if (gui.getItem(i) == null && !isInputSlot(i) && i != SLOT_RESULT) gui.setItem(i, border);
         gui.setItem(SLOT_BACK, new ItemBuilder(Material.ARROW).setName("&e&l← Quay Lai").build());
-        activeSessions.put(player.getUniqueId(), new AlchemySession(player.getUniqueId()));
         player.openInventory(gui);
+        activeSessions.put(player.getUniqueId(), new AlchemySession(player.getUniqueId()));
     }
 
     private boolean isInputSlot(int slot) {
@@ -506,6 +507,8 @@ public class AlchemyCraftGUI implements Listener {
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
         if (!(event.getPlayer() instanceof Player)) return;
+        String title = ColorUtils.stripColor(event.getView().getTitle());
+        if (!title.contains("Luyện Đan")) return;
         Player player = (Player) event.getPlayer();
         AlchemySession session = activeSessions.get(player.getUniqueId());
         if (session == null) return;

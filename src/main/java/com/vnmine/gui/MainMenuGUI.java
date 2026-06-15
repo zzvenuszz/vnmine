@@ -61,6 +61,7 @@ public class MainMenuGUI implements Listener {
     }
 
     public void openMainMenu(Player player) {
+        plugin.getLogger().info("[MenuDebug] openMainMenu called for " + player.getName());
         Inventory gui = Bukkit.createInventory(null, 54, 
                 ColorUtils.colorize("&8✦ " + TITLE_MAIN + " ✦"));
 
@@ -184,6 +185,7 @@ public class MainMenuGUI implements Listener {
     }
 
     public void handleMainMenuClick(Player player, int slot) {
+        plugin.getLogger().info("[MenuDebug] handleMainMenuClick slot=" + slot + " player=" + player.getName());
         switch (slot) {
             case 10: openCultivationInfo(player); break;
             case 12:
@@ -194,6 +196,7 @@ public class MainMenuGUI implements Listener {
                 }
                 break;
             case 14:
+                MessageUtils.send(player, "&a✦ Đang mở lò luyện đan...");
                 openAlchemyMenu(player);
                 break;
             case 16:
@@ -440,6 +443,7 @@ public class MainMenuGUI implements Listener {
         if (clicked == null || clicked.getType() == Material.AIR) return;
 
         String title = ColorUtils.stripColor(event.getView().getTitle());
+        plugin.getLogger().info("[MenuDebug] onInventoryClick title='" + title + "' slot=" + slot + " player=" + player.getName());
 
         if (title.contains(TITLE_MAIN)) {
             handleMainMenuClick(player, slot);
@@ -458,6 +462,8 @@ public class MainMenuGUI implements Listener {
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
         if (!(event.getPlayer() instanceof Player)) return;
+        String title = ColorUtils.stripColor(event.getView().getTitle());
+        plugin.getLogger().info("[MenuDebug] onInventoryClose player=" + event.getPlayer().getName() + " title='" + title + "'");
         cleanupPlayer(event.getPlayer().getUniqueId());
     }
 
