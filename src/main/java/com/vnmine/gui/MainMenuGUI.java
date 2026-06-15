@@ -361,20 +361,20 @@ public class MainMenuGUI implements Listener {
                 .setName("&a&lCông Thức Luyện Đan")
                 .setLore(
                         "",
-                        "&aHồi Linh Đan: &73 Linh Thảo + 1 Nước → Hồi 30 mana",
-                        "&bĐại Hồi Linh Đan: &72 Hồi Linh Đan + 2 Huyết LT + 5 LT",
-                        "&cCương Thể Đan: &73 Huyết LT + 5 LT + 1 Blaze",
-                        "&5Tu Luyện Đan: &710 LT + 5 Huyết LT + 2 Long Huyết + 1 Vàng"
+                        "&a◆ Hồi Linh Đan ◆: &73 Linh Thảo + 1 Nước Tinh Khiết → Hồi 30 linh lực",
+                        "&b◆ Đại Hồi Linh Đan ◆: &72 Hồi Linh Đan + 2 Huyết LT + 5 LT → Hồi 100 linh lực",
+                        "&c◆ Cương Thể Đan ◆: &73 Huyết LT + 5 LT + 1 Bột Blaze → Tăng 20% DMG 60s",
+                        "&5◆ Tu Luyện Đan ◆: &710 LT + 5 HLT + 2 LHT + 1 Vàng → +50 EXP"
                 ).build());
 
         gui.setItem(16, new ItemBuilder(Material.ANVIL)
                 .setName("&6&lCông Thức Pháp Bảo")
                 .setLore(
                         "",
-                        "&bKiếm Phi Hành: &71 Kiếm DC + 8 DC + 4 Lông",
-                        "&6Linh Chung: &71 Chuông + 4 Vàng + 2 DC",
-                        "&5Bát Quái Kính: &71 Khiên + 4 Obsidian + 4 Ngọc",
-                        "&6Phượng Hoàng Lệnh: &71 Lông + 8 Vàng + 4 Netherite + 1 Trứng Rồng"
+                        "&b◆ Kiếm Phi Hành ◆: &71 Kiếm Kim Cương + 8 Kim Cương + 4 Lông Vũ",
+                        "&6◆ Linh Chung ◆: &71 Chuông + 4 Vàng + 2 Kim Cương",
+                        "&5◆ Bát Quái Kính ◆: &71 Khiên + 4 Đá Obsidian + 4 Ngọc Lục Bảo",
+                        "&6◆ Phượng Hoàng Lệnh ◆: &71 Lông + 8 Khối Vàng + 4 Netherite + 1 Trứng Rồng"
                 ).build());
 
         gui.setItem(18, new ItemBuilder(Material.CREEPER_HEAD)

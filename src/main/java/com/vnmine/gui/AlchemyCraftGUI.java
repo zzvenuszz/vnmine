@@ -134,17 +134,17 @@ public class AlchemyCraftGUI implements Listener {
         gui.setItem(SLOT_RESULT, null);
         gui.setItem(SLOT_STATUS, new ItemBuilder(Material.PAPER).setName("&e&lTrạng Thái").setLore("", "&7Sẵn sàng luyện đan!").build());
         gui.setItem(SLOT_GUIDE, new ItemBuilder(Material.KNOWLEDGE_BOOK).setName("&6&lCông Thức Luyện Đan")
-                .setLore("", "&aHồi Linh Đan: &73 Linh Thảo + 1 Nước Tinh Khiết",
-                        "&bĐại Hồi Linh Đan: &72 HLD + 2 HLT + 5 LT",
-                        "&cCương Thể Đan: &73 HLT + 5 LT + 1 Blaze Powder",
-                        "&aThanh Tâm Đan: &75 LT + 1 Nước Tinh Khiết",
-                        "&bTốc Thánh Đan: &73 LT + 2 Đường + 1 Lông vũ",
-                        "&5Tu Luyện Đan: &710 LT + 5 HLT + 2 LHT + 1 Vàng",
-                        "&6Phi Thăng Đan: &73 TLD + 10 LHT + 1 Hơi Rồng + 2 Thạch Anh Hắc",
-                        "&9Bách Độc Đan: &73 Binh LT + 2 Huyết Thạch + 1 Blaze Powder",
-                        "&6Thiên Hồi Đan: &75 Thùy LT + 3 Hoa LT + 1 Long Lân",
-                        "&8Phê Ma Đan: &73 Lôi LT + 2 Huyền Kim + 1 Thiên Thạch",
-                        "&6Trường Thọ Đan: &75 VNLCT + 3 Ngân Sa + 2 Ngọc").build());
+                .setLore("", "&a◆ Hồi Linh Đan ◆: &73 Linh Thảo + 1 Nước Tinh Khiết → Hồi 30 linh lực",
+                        "&b◆ Đại Hồi Linh Đan ◆: &72 Hồi Linh Đan + 2 Huyết Linh Thảo + 5 Linh Thảo → Hồi 100 linh lực + hồi phục 30s",
+                        "&c◆ Cương Thể Đan ◆: &73 Huyết Linh Thảo + 5 Linh Thảo + 1 Bột Blaze → Tăng 20% sát thương 60s",
+                        "&a◆ Thanh Tâm Đan ◆: &75 Linh Thảo + 1 Nước Tinh Khiết → Giải trừ mọi trạng thái xấu",
+                        "&b◆ Tốc Thánh Đan ◆: &73 Linh Thảo + 2 Đường + 1 Lông Vũ → Tăng 50% tốc độ 30s",
+                        "&5◆ Tu Luyện Đan ◆: &710 Linh Thảo + 5 Huyết Linh Thảo + 2 Long Huyết Thảo + 1 Vàng Thanh → +50 EXP tu luyện",
+                        "&6◆ Phi Thăng Đan ◆: &73 Tu Luyện Đan + 10 Linh Thảo + 1 Hơi Rồng + 2 Thiên Thạch → +500 EXP",
+                        "&9◆ Bách Độc Đan ◆: &73 Bình Linh Thảo + 2 Huyết Thạch + 1 Bột Blaze → Miễn nhiễm độc 5 phút",
+                        "&6◆ Thiên Hồi Đan ◆: &75 Thiên Linh Thảo + 3 Hoa Linh Thảo + 1 Long Lân → Hồi 50% HP + 50% Linh lực",
+                        "&8◆ Phê Ma Đan ◆: &73 Lôi Linh Thảo + 2 Huyền Kim + 1 Thiên Thạch → Tăng 30% sát thương 2 phút",
+                        "&6◆ Trường Thọ Đan ◆: &75 Vạn Niên Linh Chi + 3 Ngân Sa + 2 Ngọc Lục Bảo → Hồi sinh 1 lần (CD 1h)").build());
         for (int i = 0; i < 54; i++) if (gui.getItem(i) == null && !isInputSlot(i) && i != SLOT_RESULT) gui.setItem(i, border);
         gui.setItem(SLOT_BACK, new ItemBuilder(Material.ARROW).setName("&e&l← Quay Lai").build());
         player.openInventory(gui);
@@ -173,7 +173,15 @@ public class AlchemyCraftGUI implements Listener {
         int slot = event.getRawSlot();
         if (slot >= 54) return;
         if (slot < 0) { event.setCancelled(true); return; }
-        if (isInputSlot(slot) || slot == SLOT_RESULT) return;
+        if (isInputSlot(slot)) return;
+        if (slot == SLOT_RESULT) {
+            // Only allow taking items from result slot, prevent placing
+            ItemStack cursorPlace = event.getCursor();
+            if (cursorPlace != null && cursorPlace.getType() != Material.AIR) {
+                event.setCancelled(true);
+            }
+            return;
+        }
         event.setCancelled(true);
         Player player = (Player) event.getWhoClicked();
         AlchemySession session = activeSessions.get(player.getUniqueId());
@@ -201,18 +209,18 @@ public class AlchemyCraftGUI implements Listener {
                     break;
                 case SLOT_BACK: mainMenu.openMainMenu(player); break;
                 case SLOT_GUIDE:
-                    MessageUtils.send(player, "&6&l=== Công Thức Luyện Đan ===");
-                    MessageUtils.send(player, "&aHồi Linh Đan: &73 LT + 1 Nước → Hồi 30 linh lực");
-                    MessageUtils.send(player, "&bĐại Hồi Linh Đan: &72 HLD + 2 HLT + 5 LT → Hồi 100 linh lực");
-                    MessageUtils.send(player, "&cCương Thể Đan: &73 HLT + 5 LT + 1 Blaze → +20% DMG 60s");
-                    MessageUtils.send(player, "&aThanh Tâm Đan: &75 LT + 1 Nước → Giải trừ debuff");
-                    MessageUtils.send(player, "&bTốc Thánh Đan: &73 LT + 2 Đường + 1 Lông → +50% tốc độ 30s");
-                    MessageUtils.send(player, "&5Tu Luyện Đan: &710 LT + 5 HLT + 2 LHT + 1 Vàng → +50 EXP");
-                    MessageUtils.send(player, "&6Phi Thăng Đan: &73 TLD + 10 LHT + 1 HR + 2 Thạch Anh → +500 EXP");
-                    MessageUtils.send(player, "&9Bách Độc Đan: &73 Binh LT + 2 Huyết Thạch + 1 Blaze → Miễn độc 5p");
-                    MessageUtils.send(player, "&6Thiên Hồi Đan: &75 Thùy LT + 3 Hoa LT + 1 Long Lân → Hồi 50% HP+Mana");
-                    MessageUtils.send(player, "&8Phê Ma Đan: &73 Lôi LT + 2 Huyền Kim + 1 Thiên Thạch → +30% DMG quái");
-                    MessageUtils.send(player, "&6Trường Thọ Đan: &75 VNLCT + 3 Ngân Sa + 2 Ngọc → Hồi sinh 1 lần");
+                    MessageUtils.send(player, "&6&l══════ Công Thức Luyện Đan ══════");
+                    MessageUtils.send(player, "&a◆ Hồi Linh Đan ◆: &73 Linh Thảo + 1 Nước Tinh Khiết → Hồi 30 linh lực");
+                    MessageUtils.send(player, "&b◆ Đại Hồi Linh Đan ◆: &72 Hồi Linh Đan + 2 Huyết Linh Thảo + 5 Linh Thảo → Hồi 100 linh lực + hồi phục 30s");
+                    MessageUtils.send(player, "&c◆ Cương Thể Đan ◆: &73 Huyết Linh Thảo + 5 Linh Thảo + 1 Bột Blaze → Tăng 20% sát thương 60s");
+                    MessageUtils.send(player, "&a◆ Thanh Tâm Đan ◆: &75 Linh Thảo + 1 Nước Tinh Khiết → Giải trừ mọi trạng thái xấu");
+                    MessageUtils.send(player, "&b◆ Tốc Thánh Đan ◆: &73 Linh Thảo + 2 Đường + 1 Lông Vũ → Tăng 50% tốc độ 30s");
+                    MessageUtils.send(player, "&5◆ Tu Luyện Đan ◆: &710 Linh Thảo + 5 Huyết Linh Thảo + 2 Long Huyết Thảo + 1 Vàng Thanh → +50 EXP tu luyện");
+                    MessageUtils.send(player, "&6◆ Phi Thăng Đan ◆: &73 Tu Luyện Đan + 10 Linh Thảo + 1 Hơi Rồng + 2 Thiên Thạch → +500 EXP");
+                    MessageUtils.send(player, "&9◆ Bách Độc Đan ◆: &73 Bình Linh Thảo + 2 Huyết Thạch + 1 Bột Blaze → Miễn nhiễm độc 5 phút");
+                    MessageUtils.send(player, "&6◆ Thiên Hồi Đan ◆: &75 Thiên Linh Thảo + 3 Hoa Linh Thảo + 1 Long Lân → Hồi 50% HP + 50% Linh lực");
+                    MessageUtils.send(player, "&8◆ Phê Ma Đan ◆: &73 Lôi Linh Thảo + 2 Huyền Kim + 1 Thiên Thạch → Tăng 30% sát thương 2 phút");
+                    MessageUtils.send(player, "&6◆ Trường Thọ Đan ◆: &75 Vạn Niên Linh Chi + 3 Ngân Sa + 2 Ngọc Lục Bảo → Hồi sinh 1 lần (CD 1h)");
                     break;
             }
         }
@@ -329,14 +337,20 @@ public class AlchemyCraftGUI implements Listener {
                         "&7Tỷ lệ: &a" + matchedRecipe.successChance + "%").build());
         player.updateInventory();
 
-        // TIÊU HAO NGUYÊN LIỆU
+        // TIÊU HAO NGUYÊN LIỆU - Tracks remaining needed per material
+        Map<Material, Integer> remainingNeeded = new HashMap<>(matchedRecipe.ingredients);
         for (int slot : new int[]{SLOT_INPUT_1, SLOT_INPUT_2, SLOT_INPUT_3, SLOT_INPUT_4, SLOT_INPUT_5, SLOT_INPUT_6}) {
             ItemStack item = gui.getItem(slot);
             if (item != null && item.getType() != Material.AIR) {
-                int needed = matchedRecipe.ingredients.getOrDefault(item.getType(), 0);
-                if (needed > 0) {
+                Integer needed = remainingNeeded.get(item.getType());
+                if (needed != null && needed > 0) {
                     int surplus = item.getAmount() - needed;
-                    if (surplus > 0) { ItemStack returnItem = item.clone(); returnItem.setAmount(surplus); player.getInventory().addItem(returnItem); }
+                    if (surplus > 0) {
+                        ItemStack returnItem = item.clone();
+                        returnItem.setAmount(surplus);
+                        player.getInventory().addItem(returnItem);
+                    }
+                    remainingNeeded.put(item.getType(), Math.max(0, needed - item.getAmount()));
                     gui.setItem(slot, null);
                 }
             }
@@ -359,8 +373,8 @@ public class AlchemyCraftGUI implements Listener {
         final String finalGradeDisplay = pillGradeDisplay;
 
         BossBar bossBar = Bukkit.createBossBar(
-                ColorUtils.colorize("&c🔥 Đang luyện " + stripColor(matchedRecipe.displayName) + "..."),
-                BarColor.RED, BarStyle.SEGMENTED_10, BarFlag.CREATE_FOG);
+                ColorUtils.colorize("&a🔥 Đang luyện " + stripColor(matchedRecipe.displayName) + "..."),
+                BarColor.GREEN, BarStyle.SEGMENTED_10);
         bossBar.addPlayer(player);
         session.activeBossBar = bossBar;
 
@@ -395,7 +409,7 @@ public class AlchemyCraftGUI implements Listener {
 
                 // Cập nhật title trên BossBar
                 int percent = (int) (progress * 100);
-                String barText = String.format("§c🔥 [%d%%] Đang luyện %s...", percent, stripColor(finalRecipe.displayName));
+                String barText = String.format("§a🔥 [%d%%] Đang luyện %s...", percent, stripColor(finalRecipe.displayName));
                 bossBar.setTitle(barText);
 
                 // Cập nhật status slot
