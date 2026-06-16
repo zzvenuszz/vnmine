@@ -165,23 +165,80 @@ public class ArtifactCraftGUI implements Listener {
         String title = ColorUtils.stripColor(event.getView().getTitle());
         if (!title.contains("Luyện Chế Pháp Bảo")) return;
         int slot = event.getRawSlot();
-        if (slot >= 54) return;
         if (slot < 0) { event.setCancelled(true); return; }
-        if (isInputSlot(slot)) return;
 
-        // BLOCK OUTPUT SLOT - prevent placing items into result slot
-        if (slot == SLOT_RESULT) {
-            event.setCancelled(true);
-            event.setCancelled(true);
-            // If player is trying to place (has item on cursor), block it
-            if (event.getCursor() != null && event.getCursor().getType() != Material.AIR) {
+        // === Player inventory clicks (slot >= 54) ===
+        if (slot >= 54) {
+            // Handle shift-click from player inventory: place into input slots ONLY (not result)
+            if (event.getClick() == ClickType.SHIFT_LEFT || event.getClick() == ClickType.SHIFT_RIGHT) {
                 event.setCancelled(true);
-                return;
+                Player player = (Player) event.getWhoClicked();
+                Inventory gui = player.getOpenInventory().getTopInventory();
+                ItemStack clickedItem = event.getCurrentItem();
+                if (clickedItem == null || clickedItem.getType() == Material.AIR) return;
+
+                for (int inputSlot : new int[]{SLOT_INPUT_1, SLOT_INPUT_2, SLOT_INPUT_3, SLOT_INPUT_4, SLOT_INPUT_5, SLOT_INPUT_6}) {
+                    ItemStack inputItem = gui.getItem(inputSlot);
+                    if (inputItem == null || inputItem.getType() == Material.AIR) {
+                        gui.setItem(inputSlot, clickedItem.clone());
+                        player.getInventory().setItem(event.getSlot(), null);
+                        player.updateInventory();
+                        return;
+                    } else if (inputItem.isSimilar(clickedItem) && inputItem.getAmount() < inputItem.getMaxStackSize()) {
+                        int canAdd = inputItem.getMaxStackSize() - inputItem.getAmount();
+                        int toAdd = Math.min(canAdd, clickedItem.getAmount());
+                        inputItem.setAmount(inputItem.getAmount() + toAdd);
+                        clickedItem.setAmount(clickedItem.getAmount() - toAdd);
+                        if (clickedItem.getAmount() <= 0) {
+                            player.getInventory().setItem(event.getSlot(), null);
+                        }
+                        player.updateInventory();
+                        return;
+                    }
+                }
             }
-            // If result has an item, let them pick it up (don't cancel pickup)
             return;
         }
 
+        // === Input slots: allow default placement/removal ===
+        if (isInputSlot(slot)) return;
+
+        // === Result slot (OUTPUT): allow picking up, block placing ===
+        if (slot == SLOT_RESULT) {
+            ItemStack currentItem = event.getCurrentItem();
+            ItemStack cursor = event.getCursor();
+            boolean cursorHasItem = cursor != null && cursor.getType() != Material.AIR;
+            boolean slotHasItem = currentItem != null && currentItem.getType() != Material.AIR;
+
+            if (cursorHasItem) {
+                // Player is trying to place/swap an item into result slot → BLOCK
+                event.setCancelled(true);
+                return;
+            }
+
+            if (slotHasItem) {
+                // Player wants to pick up the result item
+                Player player = (Player) event.getWhoClicked();
+                if (event.getClick() == ClickType.SHIFT_LEFT || event.getClick() == ClickType.SHIFT_RIGHT) {
+                    // Shift+click: move result directly to player inventory
+                    event.setCancelled(true);
+                    Map<Integer, ItemStack> leftover = player.getInventory().addItem(currentItem.clone());
+                    if (leftover.isEmpty()) {
+                        event.getView().getTopInventory().setItem(SLOT_RESULT, null);
+                    }
+                    player.updateInventory();
+                    return;
+                }
+                // Normal click: don't cancel, let Bukkit handle pickup (item goes to cursor)
+                return;
+            }
+
+            // Both empty → nothing to do, just block
+            event.setCancelled(true);
+            return;
+        }
+
+        // === All other GUI slots (borders, etc): block interaction ===
         event.setCancelled(true);
         Player player = (Player) event.getWhoClicked();
         ArtifactSession session = activeSessions.get(player.getUniqueId());
