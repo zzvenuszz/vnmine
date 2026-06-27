@@ -36,6 +36,11 @@ import com.vnmine.skill.SkillBookManager;
 import com.vnmine.util.ColorUtils;
 import com.vnmine.util.MessageUtils;
 import com.vnmine.util.NameTagManager;
+import com.vnmine.cultivation.MeditationManager;
+import com.vnmine.cultivation.MeditationListener;
+import com.vnmine.cultivation.MeditationCommand;
+import com.vnmine.cultivation.MeditationConfig;
+import com.vnmine.biome.BiomeQiManager;
 import com.vnmine.world.WorldManager;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
@@ -88,6 +93,11 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
     private MountManager mountManager;
     private MountCommand mountCommand;
     private GiveCommand giveCommand;
+    private MeditationManager meditationManager;
+    private MeditationListener meditationListener;
+    private MeditationConfig meditationConfig;
+
+    private BiomeQiManager biomeQiManager;
 
     // === GETTERS ===
     public CultivationManager getCultivationManager() { return cultivationManager; }
@@ -100,6 +110,9 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
     public CurrencyManager getCurrencyManager() { return currencyManager; }
     public NPCManager getNPCManager() { return npcManager; }
     public MountManager getMountManager() { return mountManager; }
+    public MeditationManager getMeditationManager() { return meditationManager; }
+    public MeditationConfig getMeditationConfig() { return meditationConfig; }
+    public BiomeQiManager getBiomeQiManager() { return biomeQiManager; }
 
     @Override
     public void onEnable() {
@@ -142,6 +155,11 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
 
         giveCommand = new GiveCommand(this);
 
+        meditationManager = new MeditationManager(this);
+        meditationConfig = new MeditationConfig(this);
+        biomeQiManager = new BiomeQiManager(this);
+        meditationListener = new MeditationListener(this, meditationManager);
+
         // Load configs
         permissionManager.load();
         worldManager.load();
@@ -182,9 +200,11 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         getServer().getPluginManager().registerEvents(new QuickMenuListener(this), this);
         getServer().getPluginManager().registerEvents(mountItemListener, this);
         getServer().getPluginManager().registerEvents(phoenixRebirthListener, this);
+        getServer().getPluginManager().registerEvents(meditationListener, this);
 
         // Register commands
         getCommand("vnmine").setExecutor(this);
+        getCommand("vnmeditate").setExecutor(new MeditationCommand(this, meditationManager));
         getCommand("vnmine").setTabCompleter(this);
         getCommand("vn").setExecutor(this);
         getCommand("vn").setTabCompleter(this);
@@ -246,6 +266,11 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
             case "vnalchemy":
                 if (sender instanceof Player && mainMenuGUI != null) {
                     mainMenuGUI.openAlchemyMenu((Player) sender);
+                }
+                return true;
+            case "vnmeditate":
+                if (meditationManager != null && sender instanceof Player) {
+                    meditationManager.handleSneakChange((Player) sender, true);
                 }
                 return true;
             case "vnfarm":

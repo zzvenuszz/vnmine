@@ -106,3 +106,181 @@ tribulation:
   fail:
     message:
       - "&4☠ &l{player} &r&4đã độ kiếp thất bại! Tu vi giảm sút!"
+
+# =============================================
+# TỌA THIỀN (MEDITATION)
+# =============================================
+meditation:
+  enabled: true
+  passive-exp: 8
+  exp-interval-ticks: 100
+  sneak-duration-ticks: 200
+  cancel-on-damage: true
+  cancel-on-move: true
+  cancel-on-interact: true
+  activation-gui-title: "&6&l✧ Tọa Thiền ✧"
+  activation-gui-confirm: "&a[XÁC NHẬN] Bước vào trạng thái Tọa Thiền"
+  activation-gui-cancel: "&c[HỦY BỎ] Không muốn ngồi thiền"
+  message:
+    start: "&d✧ Bạn bắt đầu tọa thiền... Hít thở sâu, tâm như gương nước. &7(Shift lần nữa hoặc nhảy để thoát)"
+    stop: "&7Bạn đã dừng tọa thiền."
+    already-meditating: "&cBạn đang trong trạng thái tọa thiền rồi!"
+    permission: "&cBạn chưa đủ tu vi để tọa thiền."
+  particles:
+    "1":
+      type: SPELL_WITCH
+      count: 5
+      offset: 0.3
+      speed: 0.02
+    "11":
+      type: SPELL_WITCH
+      count: 8
+      offset: 0.5
+      speed: 0.03
+    "21":
+      type: END_ROD
+      count: 12
+      offset: 0.8
+      speed: 0.04
+    "31":
+      type: ENCHANTMENT_TABLE
+      count: 16
+      offset: 1.0
+      speed: 0.05
+    "41":
+      type: SOUL_FIRE_FLAME
+      count: 20
+      offset: 1.2
+      speed: 0.06
+    "51":
+      type: REVERSE_PORTAL
+      count: 25
+      offset: 1.5
+      speed: 0.08
+    "61":
+      type: TRIAL_SPAWNER_DETECTION
+      count: 30
+      offset: 1.8
+      speed: 0.1
+    "71":
+      type: ELECTRIC_SPARK
+      count: 40
+      offset: 2.0
+      speed: 0.15
+    "81":
+      type: DRAGON_BREATH
+      count: 50
+      offset: 2.5
+      speed: 0.2
+    "91":
+      type: TRIAL_OMEN
+      count: 60
+      offset: 3.0
+      speed: 0.3
+
+# =============================================
+# LINH KHÍ BIOME (BIOME QI)
+# =============================================
+biome-qi:
+  enabled: true
+  check-interval-ticks: 100
+  mana-regen-bonus:
+    CHERRY_GROVE: 1.5
+    JAGGED_PEAKS: 1.5
+    SUNFLOWER_PLAINS: 1.5
+  mana-drain-penalty:
+    NETHER: 2.0
+    DEEP_DARK: 2.0
+    BASALT_DELTAS: 2.0
+  messages:
+    enter-bonus: "&bLinh khí nơi đây dồi dào! Hồi mana tăng %bonus%%"
+    enter-penalty: "&cNơi này linh khí độc hại! Linh lực bị suy giảm!"
+
+# =============================================
+# TỌA THIỀN (MEDITATION)
+# =============================================
+meditation:
+  enabled: true
+  passive-exp: 8
+  exp-interval-ticks: 100
+  sneak-duration-ticks: 200
+  cancel-on-damage: true
+  cancel-on-move: true
+  cancel-on-interact: true
+  activation-gui-title: "&6&l✧ Tọa Thiền ✧"
+  activation-gui-confirm: "&a[XÁC NHẬN] Bước vào trạng thái Tọa Thiền"
+  activation-gui-cancel: "&c[HỦY BỎ] Không muốn ngồi thiền"
+  message:
+    start: "&d✧ Bạn bắt đầu tọa thiền... Hít thở sâu, tâm như gương nước. &7(Shift lần nữa hoặc nhảy để thoát)"
+    stop: "&7Bạn đã dừng tọa thiền."
+    already-meditating: "&cBạn đang trong trạng thái tọa thiền rồi!"
+    permission: "&cBạn chưa đủ tu vi để tọa thiền."
+  particles:
+    "1":
+      type: SPELL_WITCH
+      count: 5
+      offset: 0.3
+      speed: 0.02
+    "11":
+      type: SPELL_WITCH
+      count: 8
+      offset: 0.5
+      speed: 0.03
+    "21":
+      type: END_ROD
+      count: 12
+      offset: 0.8
+      speed: 0.04
+    "31":
+      type: ENCHANTMENT_TABLE
+      count: 16
+      offset: 1.0
+      speed: 0.05
+    "41":
+      type: SOUL_FIRE_FLAME
+      count: 20
+      offset: 1.2
+      speed: 0.06
+    "51":
+      type: REVERSE_PORTAL
+      count: 25
+      offset: 1.5
+      speed: 0.08
+    "61":
+      type: TRIAL_SPAWNER_DETECTION
+      count: 30
+      offset: 1.8
+      speed: 0.1
+    "71":
+      type: ELECTRIC_SPARK
+      count: 40
+      offset: 2.0
+      speed: 0.15
+    "81":
+      type: DRAGON_BREATH
+      count: 50
+      offset: 2.5
+      speed: 0.2
+    "91":
+      type: TRIAL_OMEN
+      count: 60
+      offset: 3.0
+      speed: 0.3
+
+# =============================================
+# LINH KHÍ BIOME (BIOME QI)
+# =============================================
+biome-qi:
+  enabled: true
+  check-interval-ticks: 100
+  mana-regen-bonus:
+    CHERRY_GROVE: 1.5
+    JAGGED_PEAKS: 1.5
+    SUNFLOWER_PLAINS: 1.5
+  mana-drain-penalty:
+    NETHER: 2.0
+    DEEP_DARK: 2.0
+    BASALT_DELTAS: 2.0
+  messages:
+    enter-bonus: "&bLinh khí nơi đây dồi dào! Hồi mana tăng %bonus%%"
+    enter-penalty: "&cNơi này linh khí độc hại! Linh lực bị suy giảm!"

@@ -36,6 +36,10 @@ commands:
     description: Luyện đan
     usage: /vnalchemy
     permission: vnmine.command.vnmine
+  vnmeditate:
+    description: Tọa thiền & hấp thụ linh khí
+    usage: /vnmeditate
+    permission: vnmine.command.vnmine
   vnfarm:
     description: Hệ thống linh điền
     usage: /vnfarm
