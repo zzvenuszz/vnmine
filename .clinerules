@@ -1,0 +1,338 @@
+# CLINE RULES
+
+## General Rules
+
+* Luôn trả lời bằng tiếng Việt.
+* Không được đoán.
+* Không được sửa mã theo kiểu thử sai ngẫu nhiên.
+* Luôn phân tích nguyên nhân gốc rễ trước khi sửa.
+* Luôn giải thích lý do của phương án được chọn.
+
+---
+
+## Plan Mode
+
+Trước khi sửa mã phải cung cấp:
+
+### Root Cause Analysis
+
+* Nguyên nhân lỗi.
+* File liên quan.
+* Thành phần liên quan.
+
+### Proposed Solution
+
+* Các phương án khả thi.
+* Ưu nhược điểm.
+* Phương án được chọn.
+
+### Impact Assessment
+
+* File sẽ thay đổi.
+* Module bị ảnh hưởng.
+* Hành vi có thể thay đổi.
+
+Không được sửa mã trước khi hoàn thành phần phân tích.
+
+---
+
+## Paper Source Rules
+
+Dự án hiện tại là plugin chạy trên Paper.
+
+Mã nguồn tham chiếu:
+
+```text
+/home/admin/projects/Paper
+```
+
+Nếu vấn đề liên quan đến:
+
+* Paper
+* Bukkit
+* Spigot
+* Event
+* Scheduler
+* Entity
+* Player
+* World
+* Chunk
+* Block
+* Inventory
+* Command
+* Packet
+* NMS
+* Async
+* Tick
+* Performance
+
+thì bắt buộc:
+
+1. Tìm kiếm trong `/home/admin/projects/Paper`
+2. Đọc class liên quan
+3. Đọc method liên quan
+4. Đối chiếu với plugin hiện tại
+5. Kết luận dựa trên source thực tế
+
+Không được:
+
+* Đoán hành vi của Paper
+* Chỉ dựa vào trí nhớ
+* Chỉ dựa vào dữ liệu huấn luyện
+
+Ưu tiên:
+
+1. Source tại `/home/admin/projects/Paper`
+2. Source plugin hiện tại
+3. Tài liệu chính thức
+4. Kiến thức huấn luyện
+
+Khi sử dụng source Paper phải báo cáo:
+
+```text
+Paper References Used
+
+Files:
+- ...
+
+Classes:
+- ...
+
+Methods:
+- ...
+```
+
+Không được sửa plugin Paper nếu chưa đọc source liên quan trong `/home/admin/projects/Paper`.
+
+---
+
+## Act Mode
+
+### Code Changes
+
+* Chỉ sửa file cần thiết.
+* Không thay đổi hành vi không liên quan.
+* Không thêm workaround tạm thời nếu có giải pháp chính thức.
+* Giữ nguyên coding style hiện có.
+
+---
+
+## Maven Build Rules
+
+Sau khi sửa mã phải build.
+
+Chỉ được sử dụng:
+
+```bash
+timeout 15m mvn clean package
+```
+
+hoặc:
+
+```bash
+timeout 15m mvn clean install
+```
+
+Không được sử dụng:
+
+```bash
+mvn package
+mvn install
+mvn compile
+```
+
+làm bước xác minh cuối cùng.
+
+---
+
+## Build Failure Rules
+
+Nếu build lỗi:
+
+1. Đọc log.
+2. Phân tích lỗi.
+3. Sửa lỗi.
+4. Build lại.
+
+Lặp lại cho tới khi:
+
+* Build thành công.
+* Hoặc gặp blocker thực sự.
+
+Không được kết thúc khi build còn lỗi.
+
+---
+
+## Artifact Verification
+
+Sau khi build thành công phải thực hiện:
+
+```bash
+ls -lh target/*.jar
+```
+
+```bash
+sha256sum target/*.jar
+```
+
+```bash
+date -u "+%Y-%m-%d %H:%M:%S UTC"
+```
+
+---
+
+## Final Report
+
+Bắt buộc báo cáo:
+
+### Build Status
+
+SUCCESS hoặc FAILED
+
+### Build Time
+
+Thời gian build thành công.
+
+### Artifact
+
+Đường dẫn file JAR.
+
+### Artifact Size
+
+Kích thước file.
+
+### SHA256
+
+SHA256 của file JAR mới nhất.
+
+### Paper References Used
+
+* Files
+* Classes
+* Methods
+
+### Modified Files
+
+Danh sách file đã sửa.
+
+### Change Summary
+
+Tóm tắt thay đổi.
+
+---
+
+## Completion Rules
+
+Không được tuyên bố hoàn thành nếu chưa:
+
+* Phân tích nguyên nhân.
+* Sửa lỗi.
+* Build thành công.
+* Sinh file JAR mới.
+* Tính SHA256.
+* Báo cáo đầy đủ.
+
+---
+
+## Anti-Hang Rules
+
+Mọi lệnh phải có timeout.
+
+Ví dụ:
+
+```bash
+timeout 15m mvn clean package
+```
+
+```bash
+timeout 10m mvn test
+```
+
+Không được chạy vô thời hạn:
+
+```bash
+mvn spring-boot:run
+npm run dev
+npm start
+java -jar app.jar
+docker compose up
+```
+
+Nếu cần chạy để kiểm tra:
+
+```bash
+timeout 30s java -jar target/app.jar
+```
+
+Không sử dụng:
+
+```bash
+tail -f
+docker logs -f
+journalctl -f
+```
+
+Chỉ sử dụng:
+
+```bash
+tail -n 200 logfile.log
+```
+
+Không chạy:
+
+```bash
+mysql
+psql
+ssh
+vim
+nano
+top
+htop
+```
+
+---
+
+## Agent Recovery Rules
+
+Nếu shell prompt đã xuất hiện trở lại:
+
+* Xem command là đã hoàn thành.
+* Không được tiếp tục chờ output.
+
+Nếu command không có output mới trong 30 giây:
+
+* Dừng chờ.
+* Phân tích trạng thái hiện tại.
+* Đề xuất bước tiếp theo.
+
+Nếu command kết thúc nhưng không đọc được output:
+
+* Báo cáo lỗi agent.
+* Đề xuất command thay thế.
+
+Không được Thinking vô thời hạn.
+
+---
+
+## Strict Validation
+
+Không được sử dụng các cụm từ:
+
+* Đã sửa xong
+* Có vẻ đã sửa được
+* Nên hoạt động
+* Có thể build được
+
+trừ khi đã có kết quả thực tế từ:
+
+```bash
+timeout 15m mvn clean package
+```
+
+hoặc:
+
+```bash
+timeout 15m mvn clean install
+```
+
+trong phiên làm việc hiện tại.

@@ -12,22 +12,84 @@
 
 ### ✨ Tính năng nổi bật
 
-- **🧘 Hệ thống Tu Luyện** — Level, cảnh giới (12 đại cảnh giới), exp, lôi kiếp (Tribulation) với hiệu ứng sét và broadcast
-- **💎 Linh Lực (Mana)** — Thanh năng lượng hiển thị ActionBar, hồi phục tự động, dùng để thi triển kỹ năng
-- **📚 Công Pháp & Kỹ Năng** — 8 kỹ năng ACTIVE (hồi máu, khiên, hỏa cầu, lôi kích, thuấn di, v.v.), hệ thống thành thục (Proficiency)
-- **🎮 Skill Bar** — Thanh kỹ năng nhanh 9 slot, gán kỹ năng qua GUI, thi triển bằng phím Q
-- **🔬 Luyện Đan (Alchemy)** — GUI luyện 7 loại đan dược từ nguyên liệu thu thập trong game
-- **⚔️ Pháp Bảo (Artifacts)** — Chế tạo 7 loại pháp bảo với hiệu ứng đặc biệt (bay trên kiếm, bất tử, hồi sinh...)
-- **🌱 Linh Thảo & Linh Điền** — Trồng trọt, thu hoạch linh thảo trên vùng đất linh điền 7×7
-- **👹 Quái Tinh Anh & Boss** — Elite mob (HP×5, DMG×3), 10% hóa Boss (HP×20, DMG×8, kỹ năng đặc biệt)
-- **🤖 NPC Shop** — Tạo NPC mua bán vật phẩm trực tiếp trong game
-- **💰 Linh Thạch (Currency)** — Tiền tệ tu tiên, rơi từ quái/quặng, giao dịch giữa người chơi
-- **🐉 Tọa Kỵ (Mount)** — Cưỡi Phượng Hoàng, Bạch Hổ, Thanh Long bay lượn
-- **🔐 Hệ Thống Phân Quyền** — LuckPerms-like với Group hierarchy, inheritance, prefix/suffix
-- **🌍 World Generation** — Tạo world tuỳ chỉnh với tỉ lệ quặng/cấu trúc/quái
-- **⛏️ Block Drop Advanced** — Cơ chế đập vỡ công cụ, phát nổ khối, thay thế drop ngẫu nhiên
-- **🖥️ Menu GUI Trực Quan** — Tất cả chức năng quản lý trong inventory, phím tắt F (Swap Hand)
-- **🎨 ColorUtils** — Hỗ trợ mã màu `&` và tên màu (`&red`, `&blue`, `&gold`...), Hex Color
+#### 🧘 Hệ thống Tu Luyện (Cultivation)
+- **12 Cảnh Giới** — Từ Khí Động đến Luyện Khí, mỗi cảnh giới có 9 tầng (nhất trọng → cửu trọng)
+- **Level 1–100** — EXP cần để lên cấp tăng theo công thức `level × 100`
+- **EXP Sources** — Giết quái (+10), quái tinh anh (+50), Boss (+200), đập quặng (+5), câu cá (+15)
+- **Lôi Kiếp (Tribulation)** — 3 đợt kiếp (3 giây/đợt, nghỉ 5 giây giữa các đợt), sét đánh người chơi, broadcast khi thành công/thất bại, tụt level khi thất bại
+
+#### 💎 Linh Lực (Mana)
+- **Thanh năng lượng BossBar** — Hiển thị trên màn hình người chơi
+- **Hồi phục tự động** — Hồi 2 mana mỗi 2 giây (sau 5 giây không combat)
+- **Tiêu hao** — Dùng để thi triển kỹ năng và cưỡi tọa kỵ (3 mana/giây)
+
+#### 📚 Công Pháp & Kỹ Năng (Skills)
+- **8 Kỹ Năng ACTIVE** — Trúc Cơ Liệu Thương (hồi máu), Khí Thuẫn (khiên), Hỏa Cầu, Phong Nhận, Lôi Kích, Thuấn Địa, Thuấn Di, Thiên Thạch
+- **Skill Book System** — Sách công pháp phẩm cấp Thiên/Địa/Huyền/Hoàng × Thượng/Trung/Hạ, tỉ lệ học thành công 20%–90%
+- **Skill Bar** — 9 slot kỹ năng, gán qua GUI, thi triển bằng phím Q
+
+#### 🔬 Luyện Đan (Alchemy)
+- **7 Loại Đan Dược** — Hồi Linh Đan, Đại Hồi Linh Đan, Thanh Tâm Đan, Tốc Thánh Đan, Cương Thể Đan, Tu Luyện Đan, Thiên Hồi Đan, Phi Thăng Đan, Bách Độc Đan, Phệ Ma Đan, Trường Thọ Đan
+- **12 Phẩm cấp** — Hoàng/Huyền/Địa/Thiên × Hạ/Trung/Thượng, tỉ lệ thành công và số lượng đan khác nhau
+- **GUI Luyện Đan** — Đặt 6 nguyên liệu, chọn công thức, chế tạo mất 60 giây
+
+#### ⚔️ Pháp Bảo (Artifacts)
+- **7 Pháp Bảo** với khả năng đặc biệt:
+  - **Kiếm Phi Hành** — Ngự kiếm bay lượn tự do, tiêu hao mana
+  - **Linh Chung** — Làm choáng quái trong bán kính
+  - **Bát Quái Kính** — Giảm 30% sát thương khi cầm trên tay
+  - **Hồn Ngọc** — Tự động hồi 50% máu khi HP < 20% (CD 5 phút)
+  - **Thiên Linh Thuẫn** — Bất tử 5 giây khi bị đánh (CD 3 phút)
+  - **Lôi Ấn** — Click vào quái gọi sét đánh, tiêu hao mana
+  - **Phượng Hoàng Lệnh** — Tự động hồi sinh 1 lần sau khi chết (CD 1 ngày)
+- **21 Cấp Phẩm** — Phàm/Linh/Vương/Thánh/Đế/Tiên/Thần/Chí Tôn × các cấp con
+- **Click phải kích hoạt** — Có niệm khẩu quyết và cooldown
+
+#### 👹 Quái Tinh Anh & Boss
+- **Elite Mob** — HP ×5, DMG ×3, thanh máu cam, rơi nguyên liệu linh thảo
+- **Boss (10% từ Elite)** — HP ×20, DMG ×8, kỹ năng đặc biệt, thanh máu đỏ, rơi nhiều linh thạch/EXP
+
+#### 🤖 NPC Shop
+- **4 Loại NPC** — Đại Sư Công Pháp, Luyện Khí Đại Sư, Luyện Đan Sư, Linh Thạch Thương
+- **Mua bán trực tiếp** — Mua sách kỹ năng, pháp bảo, đan dược, linh thạch từ NPC
+- **Quản lý đầy đủ** — Tạo/xóa/dịch chuyển/đổi tên/đổi skin NPC
+- **ProtocolLib** — Tùy biến skin NPC theo player bất kỳ
+
+#### 💰 Linh Thạch (Currency)
+- **3 Cấp Tiền Tệ** — Hạ Phẩm (giá trị 1), Trung Phẩm (giá trị 100), Thượng Phẩm (giá trị 10,000)
+- **Drop tự động** — Rơi từ quái (10% cơ hội), quái tinh anh (100%), Boss (100%), đập quặng (5%)
+- **Giao dịch P2P** — `/vnpay` chuyển tiền, `/vnexchange` đổi cấp tiền tệ
+
+#### 🐉 Tọa Kỵ (Mount)
+- **3 Loại Tọa Kỵ** — Phượng Hoàng (cấp 30), Bạch Hổ (cấp 40), Thanh Long (cấp 50)
+- **Bay lượn** — Chế độ bay tự do, tốc độ 0.8–1.0 tùy loại
+- **Tiêu hao mana** — 3 mana/giây, tự hạ cánh khi hết mana
+
+#### 🔐 Hệ Thống Phân Quyền (Permission)
+- **LuckPerms-like** — Group hierarchy, inheritance, wildcard permissions
+- **Quản lý Group** — Tạo/xóa nhóm, thêm quyền, thêm nhóm cha, đặt prefix/suffix
+- **Quản lý Player** — Set group, thêm quyền riêng, kiểm tra quyền chi tiết
+
+#### 🌍 World Generation
+- **Tạo world tuỳ chỉnh** — Seed, type (NORMAL/FLAT/AMPLIFIED), environment
+- **Tỉ lệ tuỳ chỉnh** — ore-rates (tỉ lệ quặng), structure-rates (cấu trúc), mob-rates (quái)
+- **Tự động tạo** — Generate world khi chưa tồn tại
+
+#### ⛏️ Block Drop Advanced
+- **Tool-break** — Cơ chế đập vỡ công cụ khi dùng sai loại tool
+- **Exploaded** — Block phát nổ khi bị đập
+- **Drop-replace** — Thay thế drop mặc định bằng block khác với tỉ lệ chance
+
+#### 🖥️ Menu GUI Trực Quan
+- **Menu Chính** — Xem thống kê tu vi, mở các hệ thống con
+- **Admin Menu** — Test item (đan, pháp bảo, nguyên liệu) chỉ 1 click
+- **Phím tắt F** — Mở menu nhanh (Swap Hand) thay vì gõ `/vn`
+
+#### 🎨 Tiện Ích (Utilities)
+- **ColorUtils** — Hỗ trợ `&` color code, tên màu (`&red`, `&blue`, `&gold`), Hex Color
+- **NameTag Manager** — Hiển thị prefix cảnh giới trên tab list, chat, đỉnh đầu
+- **ItemBuilder** — Tạo item đặc biệt với NBT tag, lore, glow effect, skull owner
+- **Quick Menu (F key)** — Mở menu nhanh bằng Swap Hand
 
 ---
 
