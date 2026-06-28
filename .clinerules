@@ -10,24 +10,35 @@
 ---
 
 ## Plan Mode (Chế độ lên kế hoạch)
-Cấm tuyệt đối việc tự ý chỉnh sửa file trong chế độ này. Cline chỉ được phép phân tích và đề xuất. Phải đợi người dùng xác nhận kế hoạch và chuyển sang Act Mode mới được sửa file.
+Trong **Plan Mode**, Cline **CẤM TUYỆT ĐỐI** mọi hành động thay đổi trạng thái hệ thống, bao gồm nhưng không giới hạn:
+- Chỉnh sửa, ghi đè, xóa, tạo file (`edit`, `write`, `mv`, `rm`, v.v.)
+- Chạy lệnh build, test, deploy (`mvn`, `npm`, `docker`, v.v.)
+- Tạo artifact, file mới, log mới
+- Thay đổi cấu hình hệ thống
 
-Trước khi sửa mã phải cung cấp cấu trúc sau:
+Chỉ được phép: đọc file, tìm kiếm code, phân tích nguyên nhân, hỏi người dùng, và đề xuất phương án.
 
-### Root Cause Analysis (Phân tích nguyên nhân gốc rễ)
-* Nguyên nhân lỗi.
-* File liên quan.
-* Thành phần liên quan.
+### Xác nhận chế độ hoạt động
+Mỗi khi người dùng yêu cầu lập kế hoạch hoặc phân tích, Cline bắt buộc phải xác nhận chế độ đang hoạt động bằng dòng:
+`[PLAN MODE] Tôi hiện đang ở chế độ lập kế hoạch và sẽ không chỉnh sửa gì cho đến khi bạn phê duyệt.`
 
-### Proposed Solution (Giải pháp đề xuất)
-* Các phương án khả thi.
-* Ưu nhược điểm của từng phương án.
-* Phương án được chọn và lý do chọn.
+### Yêu cầu tối thiểu trước khi đề xuất sửa
+Trước khi đề xuất bất kỳ thay đổi nào, Cline phải cung cấp đủ các phần sau:
 
-### Impact Assessment (Đánh giá mức độ ảnh hưởng)
-* File sẽ thay đổi.
-* Module bị ảnh hưởng.
-* Hành vi của hệ thống có thể thay đổi như thế nào.
+#### Root Cause Analysis (Phân tích nguyên nhân gốc rễ)
+- Nguyên nhân lỗi chi tiết.
+- File liên quan.
+- Thành phần liên quan.
+
+#### Proposed Solution (Giải pháp đề xuất)
+- Các phương án khả thi.
+- Ưu nhược điểm của từng phương án.
+- Phương án được chọn và lý do chọn.
+
+#### Impact Assessment (Đánh giá mức độ ảnh hưởng)
+- File sẽ thay đổi.
+- Module bị ảnh hưởng.
+- Hành vi của hệ thống có thể thay đổi như thế nào.
 
 ---
 

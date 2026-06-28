@@ -1,9 +1,8 @@
 package com.vnmine.cultivation;
 
 import org.bukkit.Location;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Player;
-import org.bukkit.Particle;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class ActiveMeditationSession {
@@ -12,12 +11,16 @@ public class ActiveMeditationSession {
     private final UUID armorStandId;
     private final long startTicks;
     private final Location sitLocation;
+    private final Location originalLocation; // Vị trí đứng ban đầu (trước khi ngồi)
     private int ticksSinceLastExp;
+    private final List<UUID> displayItemIds = new ArrayList<>();
+    private float rotationAngle = 0f; // Góc xoay cho hiệu ứng
 
-    public ActiveMeditationSession(UUID playerId, UUID armorStandId, Location sitLocation) {
+    public ActiveMeditationSession(UUID playerId, UUID armorStandId, Location sitLocation, Location originalLocation) {
         this.playerId = playerId;
         this.armorStandId = armorStandId;
         this.sitLocation = sitLocation.clone();
+        this.originalLocation = originalLocation.clone();
         this.startTicks = getCurrentTicks();
         this.ticksSinceLastExp = 0;
     }
@@ -34,6 +37,10 @@ public class ActiveMeditationSession {
         return sitLocation;
     }
 
+    public Location getOriginalLocation() {
+        return originalLocation;
+    }
+
     public long getStartTicks() {
         return startTicks;
     }
@@ -48,6 +55,26 @@ public class ActiveMeditationSession {
 
     public void incrementTicksSinceLastExp() {
         this.ticksSinceLastExp++;
+    }
+
+    public List<UUID> getDisplayItemIds() {
+        return displayItemIds;
+    }
+
+    public void addDisplayItemId(UUID id) {
+        displayItemIds.add(id);
+    }
+
+    public float getRotationAngle() {
+        return rotationAngle;
+    }
+
+    public void setRotationAngle(float angle) {
+        this.rotationAngle = angle;
+    }
+
+    public void incrementRotationAngle(float delta) {
+        this.rotationAngle += delta;
     }
 
     private long getCurrentTicks() {

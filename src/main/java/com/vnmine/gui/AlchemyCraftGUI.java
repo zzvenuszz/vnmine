@@ -159,6 +159,7 @@ public class AlchemyCraftGUI implements Listener {
     public void onInventoryDrag(InventoryDragEvent event) {
         if (!(event.getWhoClicked() instanceof Player)) return;
         String title = ColorUtils.stripColor(event.getView().getTitle());
+        plugin.getLogger().info("[AlchemyDebug] Title mismatch for meditation menu, passing event.");
         if (!title.contains("Luyện Đan")) return;
         for (Integer slot : event.getRawSlots()) { if (slot < 54 && !isInputSlot(slot)) { event.setCancelled(true); return; } }
     }
@@ -169,6 +170,7 @@ public class AlchemyCraftGUI implements Listener {
         String rawTitle = event.getView().getTitle();
         String title = ColorUtils.stripColor(rawTitle);
         plugin.getLogger().info("[AlchemyDebug] Click detected! title='" + title + "' rawSlot=" + event.getRawSlot() + " click=" + event.getClick() + " clickedItem=" + event.getCurrentItem());
+        plugin.getLogger().info("[AlchemyDebug] Title mismatch for meditation menu, passing event.");
         if (!title.contains("Luyện Đan")) return;
         int slot = event.getRawSlot();
         if (slot >= 54) return;
@@ -522,6 +524,7 @@ public class AlchemyCraftGUI implements Listener {
     public void onInventoryClose(InventoryCloseEvent event) {
         if (!(event.getPlayer() instanceof Player)) return;
         String title = ColorUtils.stripColor(event.getView().getTitle());
+        plugin.getLogger().info("[AlchemyDebug] Title mismatch for meditation menu, passing event.");
         if (!title.contains("Luyện Đan")) return;
         Player player = (Player) event.getPlayer();
         AlchemySession session = activeSessions.get(player.getUniqueId());

@@ -117,6 +117,7 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
     @Override
     public void onEnable() {
         saveDefaultConfig();
+        saveResource("cultivation.yml", false);
         loadConfig();
 
         timeManager = new TimeManager();
