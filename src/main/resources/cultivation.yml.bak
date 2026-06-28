@@ -1,0 +1,220 @@
+# =============================================
+# VNMine - Hệ Thống Tu Luyện & Lôi Kiếp
+# =============================================
+
+# Bật/tắt hệ thống tu luyện
+enabled: true
+
+# EXP cần cho mỗi level = level * exp-per-level-multiplier
+# Giảm từ 100 xuống 50 để cân bằng tốc độ tu luyện
+exp-per-level-multiplier: 50
+
+# =============================================
+# CẢNH GIỚI (REALMS)
+# Mỗi 10 level = 1 đại cảnh giới
+# =============================================
+realms:
+  1:
+    name: "Khí Động"
+    prefix: "&7[Khí Động"
+  11:
+    name: "Luyện Khí"
+    prefix: "&a[Luyện Khí"
+  21:
+    name: "Trúc Cơ"
+    prefix: "&b[Trúc Cơ"
+  31:
+    name: "Kim Đan"
+    prefix: "&e[Kim Đan"
+  41:
+    name: "Nguyên Anh"
+    prefix: "&6[Nguyên Anh"
+  51:
+    name: "Hóa Thần"
+    prefix: "&c[Hóa Thần"
+  61:
+    name: "Hợp Thể"
+    prefix: "&5[Hợp Thể"
+  71:
+    name: "Độ Kiếp"
+    prefix: "&4[Độ Kiếp"
+  81:
+    name: "Đại Thừa"
+    prefix: "&d[Đại Thừa"
+  91:
+    name: "Phi Thăng"
+    prefix: "&6&l[Phi Thăng"
+
+# =============================================
+# NGUỒN EXP (EXP SOURCES)
+# =============================================
+exp-sources:
+  kill-mob:
+    enabled: true
+    amount: 15 # Tăng từ 10 lên 15
+  kill-elite:
+    enabled: true
+    amount: 75 # Tăng từ 50 lên 75
+  kill-boss:
+    enabled: true
+    amount: 300 # Tăng từ 200 lên 300
+  break-ore:
+    enabled: true
+    amount: 8 # Tăng từ 5 lên 8
+  fishing:
+    enabled: true
+    amount: 20 # Tăng từ 15 lên 20
+
+# =============================================
+# LINH LỰC (MANA)
+# =============================================
+mana:
+  base-max-mana: 100
+  mana-per-level: 10
+  regen:
+    base-amount: 5 # Tăng từ 2 lên 5 để hồi nhanh hơn
+    regen-interval-ticks: 40 # 2 giây
+    combat-delay-ticks: 100 # 5 giây không combat mới hồi
+  display:
+    bossbar-enabled: true
+
+# =============================================
+# LÔI KIẾP (TRIBULATION)
+# =============================================
+tribulation:
+  enabled: true
+  # Config sát thương
+  damage:
+    base: 2.0 # Giảm từ 3.0 xuống 2.0
+    per-strike-multiplier: 1.2
+    damage-per-level: 0.5 # Giảm từ 0.8 xuống 0.5
+    armor-reduction: 0.6
+  countdown-seconds: 5
+  strike-interval-ticks: 20
+  immunity-duration-seconds: 60
+  radius-per-level: 1.5
+  exp-for-others: 50.0
+  level-drop-on-fail: 1
+  broadcast:
+    - "&6⚡ &l{player} &r&6đang độ {strikes} lần lôi kiếp!"
+    - "&eCửu thiên thần lôi giáng lâm! Tránh xa khu vực nguy hiểm!"
+  success:
+    message:
+      - "&d&l✦ THIÊN ĐẠO CHỨNG NHẬN ✦"
+      - "&d&l{player} &r&dđã độ kiếp thành công!"
+      - "&dBước vào &e&l{realm} &r&d!"
+  fail:
+    message:
+      - "&4☠ &l{player} &r&4đã độ kiếp thất bại! Tu vi giảm sút!"
+
+# =============================================
+# TỌA THIỀN (MEDITATION)
+# =============================================
+meditation:
+  enabled: true
+  passive-exp: 8
+  exp-interval-ticks: 100
+  sneak-duration-ticks: 200
+  sit-offset: 0.4
+  cancel-on-damage: true
+  cancel-on-move: true
+  cancel-on-interact: true
+  activation-gui-title: "&6&l\u2707 T\u1ecda Thi\u1ec1n \u2707"
+  activation-gui-confirm: "&a[XAC NHAN] Buoc vao trang thai Toa Thien"
+  activation-gui-cancel: "&c[HUY BO] Khong muon ngoi thien"
+  message:
+    start: "&d\u2707 Ban bat dau toa thien... Hit tho sau, tam nhu guong nuoc. &7(Shift lan nua hoac nhay de thoat)"
+    stop: "&7Ban da dung toa thien."
+    already-meditating: "&cBan dang trong trang thai toa thien roi!"
+    permission: "&cBan chua du tu vi de toa thien."
+  particles:
+    "1":
+      type: SPELL_WITCH
+      count: 5
+      offset: 0.3
+      speed: 0.02
+    "11":
+      type: SPELL_WITCH
+      count: 8
+      offset: 0.5
+      speed: 0.03
+    "21":
+      type: END_ROD
+      count: 8
+      offset: 0.8
+      speed: 0.04
+    "31":
+      type: ENCHANTMENT_TABLE
+      count: 16
+      offset: 1.0
+      speed: 0.05
+    "41":
+      type: SOUL_FIRE_FLAME
+      count: 20
+      offset: 1.2
+      speed: 0.06
+    "51":
+      type: REVERSE_PORTAL
+      count: 25
+      offset: 1.5
+      speed: 0.08
+    "61":
+      type: TRIAL_SPAWNER_DETECTION
+      count: 30
+      offset: 1.8
+      speed: 0.1
+    "71":
+      type: ELECTRIC_SPARK
+      count: 40
+      offset: 2.0
+      speed: 0.15
+    "81":
+      type: DRAGON_BREATH
+      count: 50
+      offset: 2.5
+      speed: 0.2
+    "91":
+      type: TRIAL_OMEN
+      count: 60
+      offset: 3.0
+      speed: 0.3
+  # Hiệu ứng hình ảnh khi tọa thiền
+  visuals:
+    fire-rings:
+      enabled: true
+      particle: FLAME
+      radius: 0.8
+      count: 8
+      speed: 0.02
+      y-offset: 0.2
+    flying-items:
+      enabled: true
+      y-offset: 1.7
+      radius: 1.2
+      by-level:
+        "1":
+          material: BLAZE_ROD
+        "41":
+          material: NETHER_STAR
+        "71":
+          material: END_CRYSTAL
+        "91":
+          material: DIAMOND_SWORD
+
+# =============================================
+# LINH KH\u00cd BIOME (BIOME QI)
+# =============================================
+biome-qi:
+  enabled: true
+  check-interval-ticks: 100
+  mana-regen-bonus:
+    CHERRY_GROVE: 1.5
+    JAGGED_PEAKS: 1.5
+    SUNFLOWER_PLAINS: 1.5
+  mana-drain-penalty:
+    NETHER: 2.0
+    DEEP_DARK: 2.0
+    BASALT_DELTAS: 2.0
+  messages:
+    enter-bonus: "&bLinh khi noi day doi dao! Hoi mana tang %bonus%%"
+    enter-penalty: "&cNoi nay linh khi doc hai! Linh luc bi suy giam!"
