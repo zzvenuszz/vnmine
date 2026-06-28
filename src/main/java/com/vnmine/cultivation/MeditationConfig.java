@@ -22,6 +22,7 @@ public class MeditationConfig {
     private int passiveExp;
     private int expIntervalTicks;
     private int sneakDurationTicks;
+    private int biomeCheckIntervalTicks;
     private boolean cancelOnDamage;
     private boolean cancelOnMove;
     private boolean cancelOnInteract;
@@ -37,16 +38,12 @@ public class MeditationConfig {
     private final Map<Integer, ParticleConfig> particleByLevelStart = new LinkedHashMap<>();
 
     private boolean fireRingEnabled;
-    private Particle fireRingParticle;
-    private double fireRingRadius;
-    private int fireRingCount;
-    private double fireRingSpeed;
-    private double fireRingYOffset;
+    private final Map<Integer, FireRingConfig> fireRingByLevel = new LinkedHashMap<>();
 
     private boolean flyingItemsEnabled;
-    private double flyingItemsYOffset;
-    private double flyingItemsRadius;
-    private final Map<Integer, Material> flyingItemsByLevel = new LinkedHashMap<>();
+    private final Map<Integer, FlyingItemConfig> flyingItemsByLevel = new LinkedHashMap<>();
+
+    // ==================== INNER CLASSES ====================
 
     private static class ParticleConfig {
         final Particle type;
@@ -62,10 +59,44 @@ public class MeditationConfig {
         }
     }
 
+    private static class FireRingConfig {
+        final Particle particle;
+        final double radius;
+        final int count;
+        final double speed;
+        final double yOffset;
+
+        FireRingConfig(Particle particle, double radius, int count, double speed, double yOffset) {
+            this.particle = particle;
+            this.radius = radius;
+            this.count = count;
+            this.speed = speed;
+            this.yOffset = yOffset;
+        }
+    }
+
+    private static class FlyingItemConfig {
+        final Material material;
+        final int count;
+        final double radius;
+        final double yOffset;
+
+        FlyingItemConfig(Material material, int count, double radius, double yOffset) {
+            this.material = material;
+            this.count = count;
+            this.radius = radius;
+            this.yOffset = yOffset;
+        }
+    }
+
+    // ==================== CONSTRUCTOR ====================
+
     public MeditationConfig(VNMinePlugin plugin) {
         this.plugin = plugin;
         load();
     }
+
+    // ==================== LOAD ====================
 
     public void load() {
         cultivationFile = new File(plugin.getDataFolder(), "cultivation.yml");
@@ -105,6 +136,7 @@ public class MeditationConfig {
             messagePermission = ColorUtils.colorize("&cBạn chưa đủ tu vi để tọa thiền.");
         }
 
+        // Load particles by level
         particleByLevelStart.clear();
         ConfigurationSection particles = section.getConfigurationSection("particles");
         if (particles != null) {
@@ -129,75 +161,107 @@ public class MeditationConfig {
             }
         }
 
+        // Load biome qi config
+        ConfigurationSection biomeSection = cultivationConfig.getConfigurationSection("biome-qi");
+        biomeCheckIntervalTicks = (biomeSection != null) ? biomeSection.getInt("check-interval-ticks", 100) : 100;
+
+        // Load visuals
         ConfigurationSection visuals = section.getConfigurationSection("visuals");
         if (visuals != null) {
-            ConfigurationSection fr = visuals.getConfigurationSection("fire-rings");
-            if (fr != null) {
-                fireRingEnabled = fr.getBoolean("enabled", true);
-                String frTypeName = fr.getString("particle", "FLAME");
-                try {
-                    fireRingParticle = Particle.valueOf(frTypeName);
-                } catch (IllegalArgumentException ex) {
-                    fireRingParticle = Particle.FLAME;
+            loadFireRings(visuals);
+            loadFlyingItems(visuals);
+        } else {
+            fireRingEnabled = false;
+            setFireRingDefaults();
+            flyingItemsEnabled = false;
+            setFlyingItemDefaults();
+        }
+    }
+
+    private void loadFireRings(ConfigurationSection visuals) {
+        fireRingByLevel.clear();
+        ConfigurationSection fr = visuals.getConfigurationSection("fire-rings");
+        if (fr != null) {
+            fireRingEnabled = fr.getBoolean("enabled", true);
+            ConfigurationSection byLevel = fr.getConfigurationSection("by-level");
+            if (byLevel != null) {
+                for (String key : byLevel.getKeys(false)) {
+                    try {
+                        int level = Integer.parseInt(key);
+                        ConfigurationSection cfg = byLevel.getConfigurationSection(key);
+                        if (cfg == null) continue;
+                        String typeName = cfg.getString("particle", "FLAME");
+                        Particle particle;
+                        try {
+                            particle = Particle.valueOf(typeName);
+                        } catch (IllegalArgumentException ex) {
+                            particle = Particle.FLAME;
+                        }
+                        double radius = cfg.getDouble("radius", 0.8);
+                        int count = cfg.getInt("count", 8);
+                        double speed = cfg.getDouble("speed", 0.02);
+                        double yOffset = cfg.getDouble("y-offset", 0.2);
+                        fireRingByLevel.put(level, new FireRingConfig(particle, radius, count, speed, yOffset));
+                    } catch (NumberFormatException ignored) {}
                 }
-                fireRingRadius = fr.getDouble("radius", 0.8);
-                fireRingCount = fr.getInt("count", 8);
-                fireRingSpeed = fr.getDouble("speed", 0.02);
-                fireRingYOffset = fr.getDouble("y-offset", 0.2);
-            } else {
+            }
+            if (fireRingByLevel.isEmpty()) {
                 setFireRingDefaults();
             }
-
-            ConfigurationSection fi = visuals.getConfigurationSection("flying-items");
-            if (fi != null) {
-                flyingItemsEnabled = fi.getBoolean("enabled", true);
-                flyingItemsYOffset = fi.getDouble("y-offset", 1.7);
-                flyingItemsRadius = fi.getDouble("radius", 1.2);
-                flyingItemsByLevel.clear();
-                ConfigurationSection byLevel = fi.getConfigurationSection("by-level");
-                if (byLevel != null) {
-                    for (String key : byLevel.getKeys(false)) {
-                        try {
-                            int level = Integer.parseInt(key);
-                            ConfigurationSection itemCfg = byLevel.getConfigurationSection(key);
-                            if (itemCfg == null) continue;
-                            String matName = itemCfg.getString("material", "BLAZE_ROD");
-                            Material mat = Material.getMaterial(matName);
-                            if (mat != null) flyingItemsByLevel.put(level, mat);
-                        } catch (NumberFormatException ignored) {}
-                    }
-                }
-                if (flyingItemsByLevel.isEmpty()) setFlyingItemDefaults();
-            } else { flyingItemsEnabled = false; setFlyingItemDefaults(); }
         } else {
-            fireRingEnabled = false; setFireRingDefaults();
-            flyingItemsEnabled = false; setFlyingItemDefaults();
+            fireRingEnabled = false;
+            setFireRingDefaults();
+        }
+    }
+
+    private void loadFlyingItems(ConfigurationSection visuals) {
+        flyingItemsByLevel.clear();
+        ConfigurationSection fi = visuals.getConfigurationSection("flying-items");
+        if (fi != null) {
+            flyingItemsEnabled = fi.getBoolean("enabled", true);
+            ConfigurationSection byLevel = fi.getConfigurationSection("by-level");
+            if (byLevel != null) {
+                for (String key : byLevel.getKeys(false)) {
+                    try {
+                        int level = Integer.parseInt(key);
+                        ConfigurationSection cfg = byLevel.getConfigurationSection(key);
+                        if (cfg == null) continue;
+                        String matName = cfg.getString("material", "BLAZE_ROD");
+                        Material mat = Material.getMaterial(matName);
+                        if (mat == null) mat = Material.BLAZE_ROD;
+                        int count = cfg.getInt("count", 3);
+                        double radius = cfg.getDouble("radius", 1.2);
+                        double yOffset = cfg.getDouble("y-offset", 1.7);
+                        flyingItemsByLevel.put(level, new FlyingItemConfig(mat, count, radius, yOffset));
+                    } catch (NumberFormatException ignored) {}
+                }
+            }
+            if (flyingItemsByLevel.isEmpty()) {
+                setFlyingItemDefaults();
+            }
+        } else {
+            flyingItemsEnabled = false;
+            setFlyingItemDefaults();
         }
     }
 
     private void setFireRingDefaults() {
-        fireRingEnabled = true;
-        fireRingParticle = Particle.FLAME;
-        fireRingRadius = 0.8;
-        fireRingCount = 8;
-        fireRingSpeed = 0.02;
-        fireRingYOffset = 0.2;
+        fireRingByLevel.clear();
+        fireRingByLevel.put(1, new FireRingConfig(Particle.FLAME, 0.8, 8, 0.02, 0.2));
     }
 
     private void setFlyingItemDefaults() {
         flyingItemsByLevel.clear();
-        flyingItemsByLevel.put(1, Material.BLAZE_ROD);
-        flyingItemsByLevel.put(41, Material.NETHER_STAR);
-        flyingItemsByLevel.put(71, Material.END_CRYSTAL);
-        flyingItemsByLevel.put(91, Material.DIAMOND_SWORD);
+        flyingItemsByLevel.put(1, new FlyingItemConfig(Material.BLAZE_ROD, 3, 1.2, 1.7));
     }
 
-    // ==================== GETTERS ====================
+    // ==================== GETTERS (GENERAL) ====================
 
     public boolean isEnabled() { return enabled; }
     public int getPassiveExp() { return passiveExp; }
     public int getExpIntervalTicks() { return expIntervalTicks; }
     public int getSneakDurationTicks() { return sneakDurationTicks; }
+    public int getBiomeCheckIntervalTicks() { return biomeCheckIntervalTicks; }
     public boolean isCancelOnDamage() { return cancelOnDamage; }
     public boolean isCancelOnMove() { return cancelOnMove; }
     public boolean isCancelOnInteract() { return cancelOnInteract; }
@@ -210,7 +274,9 @@ public class MeditationConfig {
     public String getMessageAlreadyMeditating() { return messageAlreadyMeditating; }
     public String getMessagePermission() { return messagePermission; }
 
-    private ParticleConfig getConfig(int level) {
+    // ==================== GETTERS (PARTICLES) ====================
+
+    private ParticleConfig getParticleConfig(int level) {
         int best = Integer.MAX_VALUE;
         ParticleConfig cfg = null;
         for (Map.Entry<Integer, ParticleConfig> entry : particleByLevelStart.entrySet()) {
@@ -223,45 +289,99 @@ public class MeditationConfig {
     }
 
     public Particle getParticleType(int level) {
-        ParticleConfig cfg = getConfig(level);
+        ParticleConfig cfg = getParticleConfig(level);
         return cfg != null ? cfg.type : Particle.WITCH;
     }
 
     public int getParticleCount(int level) {
-        ParticleConfig cfg = getConfig(level);
+        ParticleConfig cfg = getParticleConfig(level);
         return cfg != null ? cfg.count : 5;
     }
 
     public double getParticleOffset(int level) {
-        ParticleConfig cfg = getConfig(level);
+        ParticleConfig cfg = getParticleConfig(level);
         return cfg != null ? cfg.offset : 0.3;
     }
 
     public double getParticleSpeed(int level) {
-        ParticleConfig cfg = getConfig(level);
+        ParticleConfig cfg = getParticleConfig(level);
         return cfg != null ? cfg.speed : 0.02;
     }
 
+    // ==================== GETTERS (FIRE RINGS) ====================
+
     public boolean isFireRingEnabled() { return fireRingEnabled; }
-    public Particle getFireRingParticle() { return fireRingParticle; }
-    public double getFireRingRadius() { return fireRingRadius; }
-    public int getFireRingCount() { return fireRingCount; }
-    public double getFireRingSpeed() { return fireRingSpeed; }
-    public double getFireRingYOffset() { return fireRingYOffset; }
 
-    public boolean isFlyingItemsEnabled() { return flyingItemsEnabled; }
-    public double getFlyingItemsYOffset() { return flyingItemsYOffset; }
-    public double getFlyingItemsRadius() { return flyingItemsRadius; }
-
-    public Material getFlyingItemMaterial(int level) {
+    private FireRingConfig getFireRingConfig(int level) {
         int best = Integer.MAX_VALUE;
-        Material mat = Material.BLAZE_ROD;
-        for (Map.Entry<Integer, Material> entry : flyingItemsByLevel.entrySet()) {
+        FireRingConfig cfg = null;
+        for (Map.Entry<Integer, FireRingConfig> entry : fireRingByLevel.entrySet()) {
             if (entry.getKey() <= level && entry.getKey() < best) {
                 best = entry.getKey();
-                mat = entry.getValue();
+                cfg = entry.getValue();
             }
         }
-        return mat;
+        return cfg;
+    }
+
+    public Particle getFireRingParticle(int level) {
+        FireRingConfig cfg = getFireRingConfig(level);
+        return cfg != null ? cfg.particle : Particle.FLAME;
+    }
+
+    public double getFireRingRadius(int level) {
+        FireRingConfig cfg = getFireRingConfig(level);
+        return cfg != null ? cfg.radius : 0.8;
+    }
+
+    public int getFireRingCount(int level) {
+        FireRingConfig cfg = getFireRingConfig(level);
+        return cfg != null ? cfg.count : 8;
+    }
+
+    public double getFireRingSpeed(int level) {
+        FireRingConfig cfg = getFireRingConfig(level);
+        return cfg != null ? cfg.speed : 0.02;
+    }
+
+    public double getFireRingYOffset(int level) {
+        FireRingConfig cfg = getFireRingConfig(level);
+        return cfg != null ? cfg.yOffset : 0.2;
+    }
+
+    // ==================== GETTERS (FLYING ITEMS) ====================
+
+    public boolean isFlyingItemsEnabled() { return flyingItemsEnabled; }
+
+    private FlyingItemConfig getFlyingItemConfig(int level) {
+        int best = Integer.MAX_VALUE;
+        FlyingItemConfig cfg = null;
+        for (Map.Entry<Integer, FlyingItemConfig> entry : flyingItemsByLevel.entrySet()) {
+            if (entry.getKey() <= level && entry.getKey() < best) {
+                best = entry.getKey();
+                cfg = entry.getValue();
+            }
+        }
+        return cfg;
+    }
+
+    public Material getFlyingItemMaterial(int level) {
+        FlyingItemConfig cfg = getFlyingItemConfig(level);
+        return cfg != null ? cfg.material : Material.BLAZE_ROD;
+    }
+
+    public int getFlyingItemCount(int level) {
+        FlyingItemConfig cfg = getFlyingItemConfig(level);
+        return cfg != null ? cfg.count : 3;
+    }
+
+    public double getFlyingItemRadius(int level) {
+        FlyingItemConfig cfg = getFlyingItemConfig(level);
+        return cfg != null ? cfg.radius : 1.2;
+    }
+
+    public double getFlyingItemYOffset(int level) {
+        FlyingItemConfig cfg = getFlyingItemConfig(level);
+        return cfg != null ? cfg.yOffset : 1.7;
     }
 }

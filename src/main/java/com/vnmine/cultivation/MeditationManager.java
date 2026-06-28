@@ -112,12 +112,12 @@ public class MeditationManager {
 
                     // Fire rings effect - 2 vong lua doi xung qua nguoi choi
                     if (config.isFireRingEnabled()) {
-                        Location origin = session.getOriginalLocation().clone().add(0, config.getFireRingYOffset(), 0);
+                        Location origin = session.getOriginalLocation().clone().add(0, config.getFireRingYOffset(level), 0);
                         float angle = session.getRotationAngle();
-                        double r = config.getFireRingRadius();
-                        int pCount = config.getFireRingCount();
-                        Particle fParticle = config.getFireRingParticle();
-                        double pSpeed = config.getFireRingSpeed();
+                        double r = config.getFireRingRadius(level);
+                        int pCount = config.getFireRingCount(level);
+                        Particle fParticle = config.getFireRingParticle(level);
+                        double pSpeed = config.getFireRingSpeed(level);
                         // Ring 1
                         for (int i = 0; i < pCount; i++) {
                             double a = (Math.PI * 2 / pCount) * i;
@@ -136,9 +136,9 @@ public class MeditationManager {
 
                     // Update flying items rotation
                     if (config.isFlyingItemsEnabled()) {
-                        Location origin = session.getOriginalLocation().clone().add(0, config.getFlyingItemsYOffset(), 0);
+                        Location origin = session.getOriginalLocation().clone().add(0, config.getFlyingItemYOffset(level), 0);
                         float angle = session.getRotationAngle();
-                        double fr = config.getFlyingItemsRadius();
+                        double fr = config.getFlyingItemRadius(level);
                         int idx = 0;
                         for (UUID displayId : session.getDisplayItemIds()) {
                             org.bukkit.entity.Entity ent = player.getWorld().getEntity(displayId);
@@ -182,21 +182,15 @@ public class MeditationManager {
     }
 
     private int getConfigExpIntervalTicks() {
-        return plugin.getConfig().getConfigurationSection("cultivation.meditation") != null
-                ? plugin.getConfig().getConfigurationSection("cultivation.meditation").getInt("exp-interval-ticks", 100)
-                : 100;
+        return getMeditationConfig().getExpIntervalTicks();
     }
 
     private int getConfigPassiveExp() {
-        return plugin.getConfig().getConfigurationSection("cultivation.meditation") != null
-                ? plugin.getConfig().getConfigurationSection("cultivation.meditation").getInt("passive-exp", 8)
-                : 8;
+        return getMeditationConfig().getPassiveExp();
     }
 
     private int getConfigBiomeCheckTicks() {
-        return plugin.getConfig().getConfigurationSection("cultivation.biome-qi") != null
-                ? plugin.getConfig().getConfigurationSection("cultivation.biome-qi").getInt("check-interval-ticks", 100)
-                : 100;
+        return getMeditationConfig().getBiomeCheckIntervalTicks();
     }
 
     public void handleSneakChange(Player player, boolean isSneaking) {
@@ -221,24 +215,14 @@ public class MeditationManager {
     }
 
     private int getConfigSneakDurationTicks() {
-        return plugin.getConfig().getConfigurationSection("cultivation.meditation") != null
-                ? plugin.getConfig().getConfigurationSection("cultivation.meditation").getInt("sneak-duration-ticks", 200)
-                : 200;
+        return getMeditationConfig().getSneakDurationTicks();
     }
 
     private void openConfirmGUI(Player player) {
-        var cfgSection = plugin.getConfig().getConfigurationSection("cultivation.meditation");
-        String title = "&6&l✧ Tọa Thiền ✧";
-        String confirm = "&a[XÁC NHẬN] Bước vào trạng thái Tọa Thiền";
-        String cancel = "&c[HỦY BỎ] Không muốn ngồi thiền";
-        if (cfgSection != null) {
-            title = cfgSection.getString("activation-gui-title", title);
-            confirm = cfgSection.getString("activation-gui-confirm", confirm);
-            cancel = cfgSection.getString("activation-gui-cancel", cancel);
-        }
-        title = ColorUtils.colorize(title);
-        confirm = ColorUtils.colorize(confirm);
-        cancel = ColorUtils.colorize(cancel);
+        MeditationConfig config = getMeditationConfig();
+        String title = ColorUtils.colorize(config.getActivationGuiTitle());
+        String confirm = ColorUtils.colorize(config.getActivationGuiConfirm());
+        String cancel = ColorUtils.colorize(config.getActivationGuiCancel());
         var inv = org.bukkit.Bukkit.createInventory(null, 9, title);
         var confirmItem = new org.bukkit.inventory.ItemStack(org.bukkit.Material.LIME_STAINED_GLASS_PANE);
         var confirmMeta = confirmItem.getItemMeta();
@@ -345,11 +329,12 @@ public class MeditationManager {
         org.bukkit.Material mat = getMeditationConfig().getFlyingItemMaterial(level);
         ItemStack itemStack = new ItemStack(mat);
 
-        Location origin = session.getOriginalLocation().clone().add(0, getMeditationConfig().getFlyingItemsYOffset(), 0);
-        double fr = getMeditationConfig().getFlyingItemsRadius();
+        Location origin = session.getOriginalLocation().clone().add(0, getMeditationConfig().getFlyingItemYOffset(level), 0);
+        double fr = getMeditationConfig().getFlyingItemRadius(level);
+        int itemCount = getMeditationConfig().getFlyingItemCount(level);
 
-        for (int i = 0; i < 3; i++) {
-            double angle = (Math.PI * 2 / 3) * i;
+        for (int i = 0; i < itemCount; i++) {
+            double angle = (Math.PI * 2 / itemCount) * i;
             double ix = fr * Math.cos(angle);
             double iz = fr * Math.sin(angle);
             Location spawnLoc = origin.clone().add(ix, 0, iz);

@@ -72,9 +72,9 @@ mana:
   base-max-mana: 100
   mana-per-level: 10
   regen:
-    base-amount: 5 # Tăng từ 2 lên 5 để hồi nhanh hơn
-    regen-interval-ticks: 40 # 2 giây
-    combat-delay-ticks: 100 # 5 giây không combat mới hồi
+    base-amount: 5
+    regen-interval-ticks: 40
+    combat-delay-ticks: 100
   display:
     bossbar-enabled: true
 
@@ -83,11 +83,10 @@ mana:
 # =============================================
 tribulation:
   enabled: true
-  # Config sát thương
   damage:
-    base: 2.0 # Giảm từ 3.0 xuống 2.0
+    base: 2.0
     per-strike-multiplier: 1.2
-    damage-per-level: 0.5 # Giảm từ 0.8 xuống 0.5
+    damage-per-level: 0.5
     armor-reduction: 0.6
   countdown-seconds: 5
   strike-interval-ticks: 20
@@ -119,14 +118,15 @@ meditation:
   cancel-on-damage: true
   cancel-on-move: true
   cancel-on-interact: true
-  activation-gui-title: "&6&l\u2707 T\u1ecda Thi\u1ec1n \u2707"
-  activation-gui-confirm: "&a[XAC NHAN] Buoc vao trang thai Toa Thien"
-  activation-gui-cancel: "&c[HUY BO] Khong muon ngoi thien"
+  activation-gui-title: "&6&l✧ Tọa Thiền ✧"
+  activation-gui-confirm: "&a[XÁC NHẬN] Bước vào trạng thái Tọa Thiền"
+  activation-gui-cancel: "&c[HỦY BỎ] Không muốn ngồi thiền"
   message:
-    start: "&d\u2707 Ban bat dau toa thien... Hit tho sau, tam nhu guong nuoc. &7(Shift lan nua hoac nhay de thoat)"
-    stop: "&7Ban da dung toa thien."
-    already-meditating: "&cBan dang trong trang thai toa thien roi!"
-    permission: "&cBan chua du tu vi de toa thien."
+    start: "&d✧ Bạn bắt đầu tọa thiền... Hít thở sâu, tâm như gương nước. &7(Shift lần nữa hoặc nhảy để thoát)"
+    stop: "&7Bạn đã dừng tọa thiền."
+    already-meditating: "&cBạn đang trong trạng thái tọa thiền rồi!"
+    permission: "&cBạn chưa đủ tu vi để tọa thiền."
+  # Hiệu ứng hạt xoay quanh người chơi theo cấp độ
   particles:
     "1":
       type: SPELL_WITCH
@@ -180,29 +180,127 @@ meditation:
       speed: 0.3
   # Hiệu ứng hình ảnh khi tọa thiền
   visuals:
+    # Vòng lửa xoay quanh người chơi - cấu hình cho từng cảnh giới
     fire-rings:
       enabled: true
-      particle: FLAME
-      radius: 0.8
-      count: 8
-      speed: 0.02
-      y-offset: 0.2
+      by-level:
+        "1":
+          particle: FLAME
+          radius: 0.8
+          count: 8
+          speed: 0.02
+          y-offset: 0.2
+        "11":
+          particle: SOUL_FIRE_FLAME
+          radius: 1.0
+          count: 10
+          speed: 0.03
+          y-offset: 0.3
+        "21":
+          particle: FLAME
+          radius: 1.2
+          count: 12
+          speed: 0.04
+          y-offset: 0.4
+        "31":
+          particle: SOUL_FIRE_FLAME
+          radius: 1.4
+          count: 16
+          speed: 0.05
+          y-offset: 0.5
+        "41":
+          particle: SOUL_FIRE_FLAME
+          radius: 1.6
+          count: 20
+          speed: 0.06
+          y-offset: 0.6
+        "51":
+          particle: WAX_ON
+          radius: 1.8
+          count: 24
+          speed: 0.08
+          y-offset: 0.7
+        "61":
+          particle: ELECTRIC_SPARK
+          radius: 2.0
+          count: 28
+          speed: 0.10
+          y-offset: 0.8
+        "71":
+          particle: ELECTRIC_SPARK
+          radius: 2.2
+          count: 34
+          speed: 0.12
+          y-offset: 0.9
+        "81":
+          particle: DRAGON_BREATH
+          radius: 2.5
+          count: 40
+          speed: 0.15
+          y-offset: 1.0
+        "91":
+          particle: DRAGON_BREATH
+          radius: 3.0
+          count: 50
+          speed: 0.20
+          y-offset: 1.2
+    # Item bay xoay quanh người chơi - cấu hình cho từng cảnh giới
     flying-items:
       enabled: true
-      y-offset: 1.7
-      radius: 1.2
       by-level:
         "1":
           material: BLAZE_ROD
+          count: 3
+          radius: 1.2
+          y-offset: 1.7
+        "11":
+          material: BLAZE_ROD
+          count: 3
+          radius: 1.4
+          y-offset: 1.8
+        "21":
+          material: END_ROD
+          count: 4
+          radius: 1.6
+          y-offset: 1.9
+        "31":
+          material: NETHER_STAR
+          count: 4
+          radius: 1.8
+          y-offset: 2.0
         "41":
           material: NETHER_STAR
+          count: 5
+          radius: 2.0
+          y-offset: 2.1
+        "51":
+          material: END_CRYSTAL
+          count: 5
+          radius: 2.2
+          y-offset: 2.2
+        "61":
+          material: END_CRYSTAL
+          count: 6
+          radius: 2.4
+          y-offset: 2.3
         "71":
           material: END_CRYSTAL
+          count: 6
+          radius: 2.6
+          y-offset: 2.4
+        "81":
+          material: DIAMOND_SWORD
+          count: 7
+          radius: 2.8
+          y-offset: 2.5
         "91":
           material: DIAMOND_SWORD
+          count: 8
+          radius: 3.0
+          y-offset: 2.6
 
 # =============================================
-# LINH KH\u00cd BIOME (BIOME QI)
+# LINH KHÍ BIOME (BIOME QI)
 # =============================================
 biome-qi:
   enabled: true
@@ -216,5 +314,5 @@ biome-qi:
     DEEP_DARK: 2.0
     BASALT_DELTAS: 2.0
   messages:
-    enter-bonus: "&bLinh khi noi day doi dao! Hoi mana tang %bonus%%"
-    enter-penalty: "&cNoi nay linh khi doc hai! Linh luc bi suy giam!"
+    enter-bonus: "&bLinh khí nơi đây dồi dào! Hồi mana tăng %bonus%%"
+    enter-penalty: "&cNơi này linh khí độc hại! Linh lực bị suy giảm!"

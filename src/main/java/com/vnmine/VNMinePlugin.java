@@ -156,8 +156,8 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
 
         giveCommand = new GiveCommand(this);
 
-        meditationManager = new MeditationManager(this);
         meditationConfig = new MeditationConfig(this);
+        meditationManager = new MeditationManager(this);
         biomeQiManager = new BiomeQiManager(this);
         meditationListener = new MeditationListener(this, meditationManager);
 
