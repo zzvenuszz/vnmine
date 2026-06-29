@@ -112,34 +112,41 @@ public class AdminMenuGUI implements Listener {
         }
     }
 
-    // ==================== PILL DEFINITIONS (12 grades) ====================
+    // ==================== PILL DEFINITIONS (12 grades) - dùng POTION + charge system ====================
     private static final List<AdminItemDef> ALL_PILLS = new ArrayList<>();
     static {
         String[][] pillTypes = {
-            {"Hồi Linh Đan", "GLOWSTONE_DUST", "Hồi phục linh lực"},
-            {"Đại Hồi Linh Đan", "GLOWSTONE", "Hồi phục lớn linh lực + hồi phục"},
-            {"Cương Thể Đan", "REDSTONE_BLOCK", "Tăng sát thương"},
-            {"Thanh Tâm Đan", "SUGAR", "Giải trừ trạng thái xấu"},
-            {"Tốc Thánh Đan", "FEATHER", "Tăng tốc độ di chuyển"},
-            {"Tu Luyện Đan", "PURPLE_DYE", "Tăng EXP tu luyện"},
-            {"Phi Thăng Đan", "NETHER_STAR", "EXP lớn (1 lần/đại cảnh giới)"},
-            {"Bách Độc Đan", "CYAN_DYE", "Miễn nhiễm độc"},
-            {"Thiên Hồi Đan", "GOLDEN_APPLE", "Hồi HP + Linh lực lớn"},
-            {"Phê Ma Đan", "REDSTONE", "Tăng sát thương vs quái"},
-            {"Trường Thọ Đan", "NETHER_STAR", "Hồi sinh sau khi chết"}
+            {"Hồi Linh Đan", "POTION", "Hồi phục linh lực"},
+            {"Đại Hồi Linh Đan", "POTION", "Hồi phục lớn linh lực + hồi phục"},
+            {"Cương Thể Đan", "POTION", "Tăng sát thương"},
+            {"Thanh Tâm Đan", "POTION", "Giải trừ trạng thái xấu"},
+            {"Tốc Thánh Đan", "POTION", "Tăng tốc độ di chuyển"},
+            {"Tu Luyện Đan", "POTION", "Tăng EXP tu luyện"},
+            {"Phi Thăng Đan", "POTION", "EXP lớn (1 lần/đại cảnh giới)"},
+            {"Bách Độc Đan", "POTION", "Miễn nhiễm độc"},
+            {"Thiên Hồi Đan", "POTION", "Hồi HP + Linh lực lớn"},
+            {"Phê Ma Đan", "POTION", "Tăng sát thương vs quái"},
+            {"Trường Thọ Đan", "POTION", "Hồi sinh sau khi chết"}
         };
         double[] manaMultipliers = {1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.3, 2.6, 3.0, 3.5, 4.0, 5.0};
         int[] cooldowns = {60, 55, 50, 45, 40, 35, 30, 25, 20, 15, 10, 5};
+        // Màu sắc theo phẩm cấp (đồng bộ với AlchemyCraftGUI)
+        org.bukkit.Color[] colors = {
+            org.bukkit.Color.WHITE, org.bukkit.Color.YELLOW, org.bukkit.Color.LIME,
+            org.bukkit.Color.AQUA, org.bukkit.Color.ORANGE, org.bukkit.Color.GREEN,
+            org.bukkit.Color.PURPLE, org.bukkit.Color.fromRGB(0xFF00FF), org.bukkit.Color.RED,
+            org.bukkit.Color.fromRGB(0xFFD700), org.bukkit.Color.fromRGB(0x00FFFF), org.bukkit.Color.fromRGB(0x8B00FF)
+        };
 
         for (String[] pill : pillTypes) {
-            Material mat = Material.valueOf(pill[1]);
+            Material mat = Material.POTION;
             for (int g = 0; g < 4; g++) {
                 for (int s = 0; s < 3; s++) {
                     int idx = g * 3 + s;
                     String dn = skillName(pill[0], g, s);
                     String lore = "&7" + pill[2] + "\n&7Hiệu quả: x" + String.format("%.1f", manaMultipliers[idx])
-                        + "\n&7CD: " + cooldowns[idx] + "s";
-                    ALL_PILLS.add(new AdminItemDef(dn, mat, lore, true));
+                        + "\n&7CD: " + cooldowns[idx] + "s\n&7Lượng dùng: 10 lần";
+                    ALL_PILLS.add(new AdminItemDef(dn, mat, lore, false));
                 }
             }
         }

@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import org.bukkit.potion.PotionType;
+import org.bukkit.inventory.meta.PotionMeta;
 
 /**
  * ItemBuilder - Xây dựng item với &color, lore, enchants
@@ -184,6 +186,18 @@ public class ItemBuilder {
     public ItemBuilder setCustomModelData(int data) {
         if (meta != null) {
             meta.setCustomModelData(data);
+        }
+        return this;
+    }
+
+    // ==================== POTION COLOR ====================
+
+    /**
+     * Set màu cho lọ thuốc (Potion)
+     */
+    public ItemBuilder setPotionColor(org.bukkit.Color color) {
+        if (meta instanceof PotionMeta && color != null) {
+            ((PotionMeta) meta).setColor(color);
         }
         return this;
     }

@@ -126,14 +126,28 @@ public class MainMenuGUI implements Listener {
                         "&eClick để mở lò luyện chế!"
                 ).build());
 
-        gui.setItem(28, new ItemBuilder(Material.FARMLAND)
-                .setName("&a&l◆ Linh Điền ◆")
-                .setLore("", "&7Quản lý linh điền trồng linh thảo", "", "&eClick để mở!")
+        // Slot 28, 30, 32 đã được thay thế bởi NPC Linh Điền
+        gui.setItem(28, new ItemBuilder(Material.EMERALD)
+                .setName("&a&l◆ Linh Điền NPC ◆")
+                .setLore("",
+                        "&7Hãy tìm &aNPC Linh Điền &7trong thế giới",
+                        "&7để mua linh điền, hạt giống và vật phẩm",
+                        "&7liên quan đến trồng trọt.",
+                        "",
+                        "&7Dùng lệnh &e/vnfarm &7để xem hướng dẫn!")
                 .build());
 
-        gui.setItem(30, new ItemBuilder(Material.OAK_SAPLING)
-                .setName("&2&l◆ Linh Thảo & Hạt Giống ◆")
-                .setLore("", "&7Xem kho linh thảo và hạt giống", "", "&eClick để mở!")
+        gui.setItem(30, new ItemBuilder(Material.COMPASS)
+                .setName("&6&l◆ Tìm NPC ◆")
+                .setLore("",
+                        "&7Các NPC trong thế giới:",
+                        "&b- Đại Sư Công Pháp &7(Học kỹ năng)",
+                        "&6- Luyện Khí Đại Sư &7(Pháp bảo)",
+                        "&a- Luyện Đan Sư &7(Đan dược)",
+                        "&e- Linh Thạch Thương &7(Đổi tiền)",
+                        "&2- Linh Điền Sư &7(Trồng trọt & Mua bán)",
+                        "",
+                        "&eDùng /vnnpc list để xem danh sách NPC!")
                 .build());
 
         gui.setItem(32, new ItemBuilder(Material.POTION)

@@ -7,10 +7,10 @@ import com.vnmine.skill.PlayerSkillData;
 import com.vnmine.util.ColorUtils;
 import com.vnmine.util.MessageUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.boss.BarColor;
-import org.bukkit.boss.BarFlag;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
@@ -23,6 +23,8 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
@@ -51,67 +53,87 @@ public class AlchemyCraftGUI implements Listener {
         "&5&oĐịa cấp &fHạ phẩm", "&5&oĐịa cấp &eTrung phẩm", "&5&oĐịa cấp &aThượng phẩm",
         "&6&oThiên cấp &fHạ phẩm", "&6&oThiên cấp &eTrung phẩm", "&6&oThiên cấp &aThượng phẩm"
     };
+
+    // Màu sắc lọ thuốc theo phẩm cấp (12 màu)
+    private static final Color[] GRADE_COLORS = {
+        Color.WHITE,      // Hoàng Hạ
+        Color.YELLOW,     // Hoàng Trung
+        Color.LIME,       // Hoàng Thượng
+        Color.AQUA,       // Huyền Hạ
+        Color.ORANGE,     // Huyền Trung
+        Color.GREEN,      // Huyền Thượng
+        Color.PURPLE,     // Địa Hạ
+        Color.fromRGB(0xFF00FF), // Địa Trung (magenta)
+        Color.RED,        // Địa Thượng
+        Color.fromRGB(0xFFD700), // Thiên Hạ (vàng gold)
+        Color.fromRGB(0x00FFFF), // Thiên Trung (cyan)
+        Color.fromRGB(0x8B00FF)  // Thiên Thượng (tím đậm)
+    };
+
     private static final double[] GRADE_MULTIPLIERS = {
         1.0, 1.3, 1.6, 2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 6.0, 7.5, 10.0
     };
     private static final int[] GRADE_YIELDS = { 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 5, 5 };
 
+    // Số lần sử dụng mặc định cho mỗi lọ đan dược
+    private static final int DEFAULT_CHARGES = 10;
+
     // Danh sách công thức đan dược (tất cả tên phải có dấu, đồng bộ với PillUseListener)
     private static final List<AlchemyRecipe> RECIPES = new ArrayList<>();
 
     static {
-        // === Đan dược cơ bản ===
-        RECIPES.add(new AlchemyRecipe("HOI_LINH_DAN", "&aHồi Linh Đan", Material.GLOWSTONE_DUST,
+        // === Đan dược cơ bản (dùng Material.POTION làm base) ===
+        RECIPES.add(new AlchemyRecipe("HOI_LINH_DAN", "&aHồi Linh Đan", Material.POTION,
                 "&7Hồi phục &b30 &7linh lực",
                 new LinkedHashMap<Material, Integer>() {{ put(Material.GREEN_DYE, 3); put(Material.POTION, 1); }},
                 3, 10, 80.0, 2));
 
-        RECIPES.add(new AlchemyRecipe("DAI_HOI_LINH_DAN", "&bĐại Hồi Linh Đan", Material.GLOWSTONE,
+        RECIPES.add(new AlchemyRecipe("DAI_HOI_LINH_DAN", "&bĐại Hồi Linh Đan", Material.POTION,
                 "&7Hồi phục &b100 &7linh lực &7+ hồi phục 30s",
                 new LinkedHashMap<Material, Integer>() {{ put(Material.GLOWSTONE_DUST, 2); put(Material.RED_DYE, 2); put(Material.GREEN_DYE, 5); }},
                 10, 30, 60.0, 1));
 
-        RECIPES.add(new AlchemyRecipe("THANH_TAM_DAN", "&aThanh Tâm Đan", Material.SUGAR,
+        RECIPES.add(new AlchemyRecipe("THANH_TAM_DAN", "&aThanh Tâm Đan", Material.POTION,
                 "&7Giải trừ mọi trạng thái xấu",
                 new LinkedHashMap<Material, Integer>() {{ put(Material.GREEN_DYE, 5); put(Material.POTION, 1); }},
                 5, 15, 85.0, 2));
 
-        RECIPES.add(new AlchemyRecipe("TOC_THANH_DAN", "&bTốc Thánh Đan", Material.FEATHER,
+        RECIPES.add(new AlchemyRecipe("TOC_THANH_DAN", "&bTốc Thánh Đan", Material.POTION,
                 "&7Tăng &b50% tốc độ &7trong 30 giây",
                 new LinkedHashMap<Material, Integer>() {{ put(Material.GREEN_DYE, 3); put(Material.SUGAR, 2); put(Material.FEATHER, 1); }},
                 8, 15, 70.0, 2));
 
-        RECIPES.add(new AlchemyRecipe("CUONG_THE_DAN", "&cCương Thể Đan", Material.REDSTONE_BLOCK,
+        RECIPES.add(new AlchemyRecipe("CUONG_THE_DAN", "&cCương Thể Đan", Material.POTION,
                 "&7Tăng &c20% sát thương &7trong 60 giây",
                 new LinkedHashMap<Material, Integer>() {{ put(Material.RED_DYE, 3); put(Material.GREEN_DYE, 5); put(Material.BLAZE_POWDER, 1); }},
                 15, 20, 55.0, 1));
 
-        RECIPES.add(new AlchemyRecipe("BACH_DOC_DAN", "&9Bách Độc Đan", Material.CYAN_DYE,
+        RECIPES.add(new AlchemyRecipe("BACH_DOC_DAN", "&9Bách Độc Đan", Material.POTION,
                 "&7Miễn nhiễm độc &95 &7phút",
                 new LinkedHashMap<Material, Integer>() {{ put(Material.LIGHT_BLUE_DYE, 3); put(Material.REDSTONE, 2); put(Material.BLAZE_POWDER, 1); }},
                 25, 25, 50.0, 1));
 
-        RECIPES.add(new AlchemyRecipe("TU_LUYEN_DAN", "&5Tu Luyện Đan", Material.PURPLE_DYE,
+        RECIPES.add(new AlchemyRecipe("TU_LUYEN_DAN", "&5Tu Luyện Đan", Material.POTION,
                 "&7Tăng &5+50 EXP &7tu luyện khi sử dụng",
                 new LinkedHashMap<Material, Integer>() {{ put(Material.GREEN_DYE, 10); put(Material.RED_DYE, 5); put(Material.ORANGE_DYE, 2); put(Material.GOLD_INGOT, 1); }},
                 20, 45, 40.0, 1));
 
-        RECIPES.add(new AlchemyRecipe("THIEN_HOI_DAN", "&6Thiên Hồi Đan", Material.GOLDEN_APPLE,
+        RECIPES.add(new AlchemyRecipe("THIEN_HOI_DAN", "&6Thiên Hồi Đan", Material.POTION,
                 "&7Hồi &a50% HP &7+ &b50% Linh lực",
                 new LinkedHashMap<Material, Integer>() {{ put(Material.CYAN_DYE, 5); put(Material.MAGENTA_DYE, 3); put(Material.PRISMARINE_SHARD, 1); }},
                 35, 40, 45.0, 1));
 
-        RECIPES.add(new AlchemyRecipe("PHE_MA_DAN", "&8Phê Ma Đan", Material.REDSTONE,
+        RECIPES.add(new AlchemyRecipe("PHE_MA_DAN", "&8Phê Ma Đan", Material.POTION,
                 "&7Tăng &c30% sát thương &7vs quái 2 phút",
                 new LinkedHashMap<Material, Integer>() {{ put(Material.YELLOW_DYE, 3); put(Material.IRON_INGOT, 2); put(Material.END_STONE, 1); }},
                 40, 30, 40.0, 1));
 
-        RECIPES.add(new AlchemyRecipe("TRUONG_THO_DAN", "&6Trường Thọ Đan", Material.NETHER_STAR,
+        RECIPES.add(new AlchemyRecipe("TRUONG_THO_DAN", "&6Trường Thọ Đan", Material.POTION,
                 "&7Tự động hồi sinh 1 lần &7(CD 1h)",
                 new LinkedHashMap<Material, Integer>() {{ put(Material.PURPLE_DYE, 5); put(Material.IRON_NUGGET, 3); put(Material.EMERALD, 2); }},
                 45, 60, 25.0, 1));
 
-        RECIPES.add(new AlchemyRecipe("PHI_THANG_DAN", "&6&l◆ Phi Thăng Đan ◆", Material.NETHER_STAR,
+        RECIPES.add(new AlchemyRecipe("PHI_THANG_DAN", "&6&l◆ Phi Thăng Đan ◆", Material.POTION,
                 "&7+500 EXP &7(1 lần/đại cảnh giới)",
                 new LinkedHashMap<Material, Integer>() {{ put(Material.PURPLE_DYE, 3); put(Material.ORANGE_DYE, 10); put(Material.DRAGON_BREATH, 1); put(Material.NETHERITE_INGOT, 2); }},
                 50, 120, 15.0, 1));
@@ -149,6 +171,7 @@ public class AlchemyCraftGUI implements Listener {
         gui.setItem(SLOT_BACK, new ItemBuilder(Material.ARROW).setName("&e&l← Quay Lai").build());
         player.openInventory(gui);
         activeSessions.put(player.getUniqueId(), new AlchemySession(player.getUniqueId()));
+        plugin.getLogger().info("[AlchemyDebug] Session created for " + player.getName() + " - total sessions: " + activeSessions.size());
     }
 
     private boolean isInputSlot(int slot) {
@@ -159,48 +182,71 @@ public class AlchemyCraftGUI implements Listener {
     public void onInventoryDrag(InventoryDragEvent event) {
         if (!(event.getWhoClicked() instanceof Player)) return;
         String title = ColorUtils.stripColor(event.getView().getTitle());
-        plugin.getLogger().info("[AlchemyDebug] Title mismatch for meditation menu, passing event.");
         if (!title.contains("Luyện Đan")) return;
-        for (Integer slot : event.getRawSlots()) { if (slot < 54 && !isInputSlot(slot)) { event.setCancelled(true); return; } }
+        plugin.getLogger().info("[AlchemyDebug] Drag event in alchemy menu, cancelling if outside input slots.");
+        for (Integer slot : event.getRawSlots()) {
+            if (slot < 54 && !isInputSlot(slot)) {
+                event.setCancelled(true);
+                return;
+            }
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player)) return;
+
+        Player player = (Player) event.getWhoClicked();
         String rawTitle = event.getView().getTitle();
         String title = ColorUtils.stripColor(rawTitle);
-        plugin.getLogger().info("[AlchemyDebug] Click detected! title='" + title + "' rawSlot=" + event.getRawSlot() + " click=" + event.getClick() + " clickedItem=" + event.getCurrentItem());
-        plugin.getLogger().info("[AlchemyDebug] Title mismatch for meditation menu, passing event.");
+
+        // ONLY process if this is the alchemy menu
         if (!title.contains("Luyện Đan")) return;
+
+        plugin.getLogger().info("[AlchemyDebug] Click detected! player=" + player.getName()
+            + " title='" + title + "' rawSlot=" + event.getRawSlot()
+            + " click=" + event.getClick() + " slotType=" + event.getSlotType());
+
         int slot = event.getRawSlot();
         if (slot >= 54) return;
         if (slot < 0) { event.setCancelled(true); return; }
+
+        // Allow placing items into input slots
         if (isInputSlot(slot)) return;
+
+        // For result slot, only allow taking items out, not placing
         if (slot == SLOT_RESULT) {
-            // Only allow taking items from result slot, prevent placing
             ItemStack cursorPlace = event.getCursor();
             if (cursorPlace != null && cursorPlace.getType() != Material.AIR) {
                 event.setCancelled(true);
             }
             return;
         }
+
+        // Cancel all other clicks
         event.setCancelled(true);
-        Player player = (Player) event.getWhoClicked();
+
         AlchemySession session = activeSessions.get(player.getUniqueId());
         if (session == null) {
-            plugin.getLogger().info("[AlchemyDebug] Session is NULL for " + player.getName());
-            return;
+            plugin.getLogger().info("[AlchemyDebug] Session is NULL for " + player.getName() + " - creating new session");
+            activeSessions.put(player.getUniqueId(), new AlchemySession(player.getUniqueId()));
+            session = activeSessions.get(player.getUniqueId());
         }
-        plugin.getLogger().info("[AlchemyDebug] Slot=" + slot + " CRAFT_SLOT=" + SLOT_CRAFT + " " + (slot == SLOT_CRAFT ? "CRAFT CLICKED" : "other"));
+
+        plugin.getLogger().info("[AlchemyDebug] Slot=" + slot + " CRAFT_SLOT=" + SLOT_CRAFT + " BACK_SLOT=" + SLOT_BACK
+            + " session.isCrafting=" + (session != null ? session.isCrafting : "null"));
+
         if (session.isCrafting) {
             MessageUtils.send(player, "&cĐang trong quá trình luyện đan, vui lòng chờ!");
             return;
         }
+
         ItemStack clicked = event.getCurrentItem();
         if (clicked == null || clicked.getType() == Material.AIR) {
             plugin.getLogger().info("[AlchemyDebug] Clicked item is NULL or AIR! slot=" + slot);
             return;
         }
+
         ClickType clickType = event.getClick();
         if (clickType == ClickType.LEFT || clickType == ClickType.RIGHT) {
             switch (slot) {
@@ -209,20 +255,9 @@ public class AlchemyCraftGUI implements Listener {
                     MessageUtils.send(player, "&a✦ Đang bắt đầu quá trình luyện đan...");
                     attemptCraft(player, session);
                     break;
-                case SLOT_BACK: mainMenu.openMainMenu(player); break;
-                case SLOT_GUIDE:
-                    MessageUtils.send(player, "&6&l══════ Công Thức Luyện Đan ══════");
-                    MessageUtils.send(player, "&a◆ Hồi Linh Đan ◆: &73 Linh Thảo + 1 Nước Tinh Khiết → Hồi 30 linh lực");
-                    MessageUtils.send(player, "&b◆ Đại Hồi Linh Đan ◆: &72 Hồi Linh Đan + 2 Huyết Linh Thảo + 5 Linh Thảo → Hồi 100 linh lực + hồi phục 30s");
-                    MessageUtils.send(player, "&c◆ Cương Thể Đan ◆: &73 Huyết Linh Thảo + 5 Linh Thảo + 1 Bột Blaze → Tăng 20% sát thương 60s");
-                    MessageUtils.send(player, "&a◆ Thanh Tâm Đan ◆: &75 Linh Thảo + 1 Nước Tinh Khiết → Giải trừ mọi trạng thái xấu");
-                    MessageUtils.send(player, "&b◆ Tốc Thánh Đan ◆: &73 Linh Thảo + 2 Đường + 1 Lông Vũ → Tăng 50% tốc độ 30s");
-                    MessageUtils.send(player, "&5◆ Tu Luyện Đan ◆: &710 Linh Thảo + 5 Huyết Linh Thảo + 2 Long Huyết Thảo + 1 Vàng Thanh → +50 EXP tu luyện");
-                    MessageUtils.send(player, "&6◆ Phi Thăng Đan ◆: &73 Tu Luyện Đan + 10 Linh Thảo + 1 Hơi Rồng + 2 Thiên Thạch → +500 EXP");
-                    MessageUtils.send(player, "&9◆ Bách Độc Đan ◆: &73 Bình Linh Thảo + 2 Huyết Thạch + 1 Bột Blaze → Miễn nhiễm độc 5 phút");
-                    MessageUtils.send(player, "&6◆ Thiên Hồi Đan ◆: &75 Thiên Linh Thảo + 3 Hoa Linh Thảo + 1 Long Lân → Hồi 50% HP + 50% Linh lực");
-                    MessageUtils.send(player, "&8◆ Phê Ma Đan ◆: &73 Lôi Linh Thảo + 2 Huyền Kim + 1 Thiên Thạch → Tăng 30% sát thương 2 phút");
-                    MessageUtils.send(player, "&6◆ Trường Thọ Đan ◆: &75 Vạn Niên Linh Chi + 3 Ngân Sa + 2 Ngọc Lục Bảo → Hồi sinh 1 lần (CD 1h)");
+                case SLOT_BACK:
+                    plugin.getLogger().info("[AlchemyDebug] BACK BUTTON PRESSED by " + player.getName());
+                    mainMenu.openMainMenu(player);
                     break;
             }
         }
@@ -262,15 +297,50 @@ public class AlchemyCraftGUI implements Listener {
     }
 
     /**
+     * Tạo item đan dược dạng lọ thuốc với màu sắc theo phẩm cấp
+     * Có 10 charges (lần sử dụng)
+     */
+    private ItemStack createPotionItem(AlchemyRecipe recipe, int gradeIndex, String gradeDisplay, int amount) {
+        Color potionColor = GRADE_COLORS[gradeIndex];
+
+        ItemBuilder builder = new ItemBuilder(Material.POTION)
+                .setName(recipe.displayName)
+                .setAmount(Math.min(amount, 64))
+                .setGlow(true)
+                .setPotionColor(potionColor)
+                .setPersistentData("vnmine_pill_type", recipe.id)
+                .setPersistentData("vnmine_pill_charges", String.valueOf(DEFAULT_CHARGES))
+                .setPersistentData("vnmine_pill_grade", String.valueOf(gradeIndex))
+                .setLore("",
+                        recipe.lore,
+                        "",
+                        "&7Phẩm cấp: " + gradeDisplay,
+                        "&7Lượng dùng: &e" + DEFAULT_CHARGES + " &7lần",
+                        "&a✦ Click phải để sử dụng!");
+
+        // Ẩn potion effect mặc định
+        builder.hideAll();
+
+        return builder.build();
+    }
+
+    /**
      * Bắt đầu quá trình luyện đan với BossBar progress
      */
     private void attemptCraft(Player player, AlchemySession session) {
+        long startTime = System.currentTimeMillis();
+        plugin.getLogger().info("[AlchemyDebug] attemptCraft START for " + player.getName());
+
         Inventory gui = player.getOpenInventory().getTopInventory();
         PlayerCultivationData playerData = plugin.getCultivationManager().getPlayerData(player.getUniqueId());
         PlayerSkillData skillData = plugin.getCultivationManager().getPlayerSkillData(player.getUniqueId());
 
+        plugin.getLogger().info("[AlchemyDebug] playerData=" + (playerData != null ? "OK" : "NULL")
+            + " skillData=" + (skillData != null ? "OK" : "NULL"));
+
         // KIỂM TRA SKILL KHỐNG HỎA THUẬT
         if (playerData == null || !playerData.hasLearnedSkill("FIRE_CONTROL")) {
+            plugin.getLogger().info("[AlchemyDebug] FAIL: FIRE_CONTROL skill not learned!");
             gui.setItem(SLOT_STATUS, new ItemBuilder(Material.BARRIER)
                     .setName("&c&lChưa Học Khống Hỏa Thuật!")
                     .setLore("", "&7Bạn cần học kỹ năng &cKhống Hỏa Thuật",
@@ -290,8 +360,11 @@ public class AlchemyCraftGUI implements Listener {
                 ingredients.put(item.getType(), ingredients.getOrDefault(item.getType(), 0) + item.getAmount());
             }
         }
+        plugin.getLogger().info("[AlchemyDebug] Ingredients found: " + ingredients);
+        plugin.getLogger().info("[AlchemyDebug] Ingredient count: " + ingredients.size());
 
         if (ingredients.isEmpty()) {
+            plugin.getLogger().info("[AlchemyDebug] FAIL: No ingredients!");
             gui.setItem(SLOT_STATUS, new ItemBuilder(Material.REDSTONE).setName("&c&lKhông Có Nguyên Liệu").setLore("", "&7Hãy đặt nguyên liệu vào ô bên trái!").build());
             MessageUtils.playSound(player, Sound.BLOCK_NOTE_BLOCK_BASS);
             return;
@@ -300,10 +373,15 @@ public class AlchemyCraftGUI implements Listener {
         // TÌM CÔNG THỨC PHÙ HỢP
         AlchemyRecipe matchedRecipe = null;
         for (AlchemyRecipe recipe : RECIPES) {
-            if (matchesRecipe(recipe, ingredients)) { matchedRecipe = recipe; break; }
+            if (matchesRecipe(recipe, ingredients)) {
+                matchedRecipe = recipe;
+                plugin.getLogger().info("[AlchemyDebug] Matched recipe: " + recipe.id);
+                break;
+            }
         }
 
         if (matchedRecipe == null) {
+            plugin.getLogger().info("[AlchemyDebug] FAIL: No matching recipe!");
             gui.setItem(SLOT_STATUS, new ItemBuilder(Material.REDSTONE).setName("&c&lKhông Có Công Thức Phù Hợp").setLore("", "&7Nguyên liệu không khớp với bất kỳ công thức nào!").build());
             MessageUtils.playSound(player, Sound.BLOCK_NOTE_BLOCK_BASS);
             return;
@@ -311,6 +389,7 @@ public class AlchemyCraftGUI implements Listener {
 
         // KIỂM TRA LEVEL
         if (playerData != null && playerData.getLevel() < matchedRecipe.requiredLevel) {
+            plugin.getLogger().info("[AlchemyDebug] FAIL: Level too low. Required=" + matchedRecipe.requiredLevel + " Current=" + playerData.getLevel());
             gui.setItem(SLOT_STATUS, new ItemBuilder(Material.REDSTONE_BLOCK).setName("&c&lKhông Đủ Tu Vi")
                     .setLore("", "&7Yêu cầu: &cLevel " + matchedRecipe.requiredLevel, "&7Hiện tại: &eLevel " + playerData.getLevel()).build());
             MessageUtils.playSound(player, Sound.BLOCK_NOTE_BLOCK_BASS);
@@ -328,6 +407,7 @@ public class AlchemyCraftGUI implements Listener {
         String profName = (skillData != null) ? ColorUtils.colorize(skillData.getFireControlProficiencyName()) : "&7N/A";
         int profBonus = (skillData != null) ? skillData.getAlchemyGradeBonus() : 0;
         double timeReduction = (skillData != null) ? skillData.getAlchemyTimeReduction() : 0.0;
+        plugin.getLogger().info("[AlchemyDebug] Crafting: pillGrade=" + pillGradeIndex + " time=" + adjustedTime + "s profBonus=" + profBonus);
 
         // HIỂN THỊ THÔNG TRƯỚC KHI LUYỆN
         gui.setItem(SLOT_STATUS, new ItemBuilder(Material.FURNACE).setName("&6&lĐang Luyện Đan...")
@@ -339,8 +419,9 @@ public class AlchemyCraftGUI implements Listener {
                         "&7Tỷ lệ: &a" + matchedRecipe.successChance + "%").build());
         player.updateInventory();
 
-        // TIÊU HAO NGUYÊN LIỆU - Tracks remaining needed per material
+        // TIÊU HAO NGUYÊN LIỆU
         Map<Material, Integer> remainingNeeded = new HashMap<>(matchedRecipe.ingredients);
+        plugin.getLogger().info("[AlchemyDebug] Consuming ingredients. Recipe needs: " + matchedRecipe.ingredients);
         for (int slot : new int[]{SLOT_INPUT_1, SLOT_INPUT_2, SLOT_INPUT_3, SLOT_INPUT_4, SLOT_INPUT_5, SLOT_INPUT_6}) {
             ItemStack item = gui.getItem(slot);
             if (item != null && item.getType() != Material.AIR) {
@@ -374,6 +455,8 @@ public class AlchemyCraftGUI implements Listener {
         final int finalGradeIndex = pillGradeIndex;
         final String finalGradeDisplay = pillGradeDisplay;
 
+        plugin.getLogger().info("[AlchemyDebug] Creating BossBar for " + player.getName() + " with time=" + adjustedTime + "s");
+
         BossBar bossBar = Bukkit.createBossBar(
                 ColorUtils.colorize("&a🔥 Đang luyện " + stripColor(matchedRecipe.displayName) + "..."),
                 BarColor.GREEN, BarStyle.SEGMENTED_10);
@@ -385,6 +468,8 @@ public class AlchemyCraftGUI implements Listener {
         final long intervalTicks = 10L; // 0.5 giây mỗi lần cập nhật
         final long totalSteps = totalTicks / intervalTicks;
 
+        plugin.getLogger().info("[AlchemyDebug] totalTicks=" + totalTicks + " intervalTicks=" + intervalTicks + " totalSteps=" + totalSteps);
+
         new BukkitRunnable() {
             long currentStep = 0;
 
@@ -392,13 +477,7 @@ public class AlchemyCraftGUI implements Listener {
             public void run() {
                 Player p = Bukkit.getPlayer(playerUUID);
                 if (p == null || !p.isOnline()) {
-                    bossBar.removeAll();
-                    session.isCrafting = false;
-                    cancel();
-                    return;
-                }
-                Inventory inv = p.getOpenInventory().getTopInventory();
-                if (!inv.equals(finalGui)) {
+                    plugin.getLogger().info("[AlchemyDebug] Player offline, cancelling craft task.");
                     bossBar.removeAll();
                     session.isCrafting = false;
                     cancel();
@@ -414,19 +493,18 @@ public class AlchemyCraftGUI implements Listener {
                 String barText = String.format("§a🔥 [%d%%] Đang luyện %s...", percent, stripColor(finalRecipe.displayName));
                 bossBar.setTitle(barText);
 
-                // Cập nhật status slot
-                String progressText = "§6§l" + "█".repeat(Math.max(0, percent / 5)) + "§7" + "░".repeat(Math.max(0, 20 - percent / 5));
-                inv.setItem(SLOT_STATUS, new ItemBuilder(Material.FURNACE).setName("&6&lĐang Luyện Đan... " + percent + "%")
-                        .setLore("", "&7Đan dược: " + finalRecipe.displayName,
-                                "&7Phẩm cấp dự kiến: " + finalGradeDisplay,
-                                "", progressText,
-                                "&7Thời gian còn lại: &e" + Math.max(0, (int)((totalTicks - currentStep * intervalTicks) / 20)) + "s").build());
-                p.updateInventory();
+                // Log every 10 steps
+                if (currentStep % 10 == 0) {
+                    plugin.getLogger().info("[AlchemyDebug] Progress: " + percent + "% for " + p.getName()
+                        + " step=" + currentStep + "/" + totalSteps);
+                }
 
                 if (currentStep >= totalSteps) {
+                    plugin.getLogger().info("[AlchemyDebug] Craft completed for " + p.getName() + " totalTime=" + (System.currentTimeMillis() - startTime) + "ms");
                     cancel();
                     bossBar.removeAll();
                     session.isCrafting = false;
+                    session.activeBossBar = null;
                     finishCraft(p, finalGui, finalRecipe, finalData, finalSkillData, finalGradeIndex, finalGradeDisplay);
                 }
             }
@@ -438,8 +516,12 @@ public class AlchemyCraftGUI implements Listener {
      */
     private void finishCraft(Player p, Inventory inv, AlchemyRecipe recipe, PlayerCultivationData data,
                              PlayerSkillData skillData, int gradeIndex, String gradeDisplay) {
-        if (p == null || !p.isOnline()) return;
-        if (!inv.equals(p.getOpenInventory().getTopInventory())) return;
+        if (p == null || !p.isOnline()) {
+            plugin.getLogger().info("[AlchemyDebug] finishCraft: Player offline, skipping.");
+            return;
+        }
+
+        plugin.getLogger().info("[AlchemyDebug] finishCraft called for " + p.getName() + " recipe=" + recipe.id + " grade=" + gradeIndex);
 
         // Tính tỷ lệ thành công
         double chance = recipe.successChance;
@@ -450,26 +532,21 @@ public class AlchemyCraftGUI implements Listener {
         Random random = new Random();
         boolean success = random.nextDouble() * 100 < chance;
 
+        plugin.getLogger().info("[AlchemyDebug] Success chance=" + chance + " result=" + (success ? "SUCCESS" : "FAIL"));
+
         if (success) {
             int baseYield = getGradeYield(gradeIndex);
             double gradeMultiplier = getGradeMultiplier(gradeIndex);
 
-            // Tạo item kết quả
-            ItemStack result = new ItemBuilder(recipe.resultMaterial)
-                    .setName(recipe.displayName)
-                    .setAmount(baseYield)
-                    .setGlow(true)
-                    .setLore("", recipe.lore, "",
-                            gradeDisplay,
-                            "&a✦ Luyện đan thành công! x" + baseYield,
-                            "&7Tăng hiệu quả: &6x" + String.format("%.1f", gradeMultiplier))
-                    .build();
+            // Tạo item kết quả (lọ thuốc với charge system)
+            ItemStack result = createPotionItem(recipe, gradeIndex, gradeDisplay, baseYield);
 
             inv.setItem(SLOT_RESULT, result);
             inv.setItem(SLOT_STATUS, new ItemBuilder(Material.EMERALD).setName("&a&l✦ Luyện Đan Thành Công ✦")
                     .setLore("", "&7Đan dược: " + recipe.displayName,
                             "&7Phẩm cấp: " + gradeDisplay,
-                            "&7Số lượng: &e" + baseYield,
+                            "&7Số lượng: &e" + baseYield + " lọ",
+                            "&7Lượng dùng: &e" + DEFAULT_CHARGES + " lần/lọ",
                             "&7Tỷ lệ: &a" + String.format("%.1f", chance) + "%").build());
             p.updateInventory();
 
@@ -524,16 +601,20 @@ public class AlchemyCraftGUI implements Listener {
     public void onInventoryClose(InventoryCloseEvent event) {
         if (!(event.getPlayer() instanceof Player)) return;
         String title = ColorUtils.stripColor(event.getView().getTitle());
-        plugin.getLogger().info("[AlchemyDebug] Title mismatch for meditation menu, passing event.");
         if (!title.contains("Luyện Đan")) return;
         Player player = (Player) event.getPlayer();
         AlchemySession session = activeSessions.get(player.getUniqueId());
         if (session == null) return;
         Inventory gui = event.getInventory();
 
-        // Trả lại BossBar nếu đang炼
+        plugin.getLogger().info("[AlchemyDebug] Inventory closed for " + player.getName()
+            + " wasCrafting=" + session.isCrafting
+            + " hasBossBar=" + (session.activeBossBar != null));
+
+        // Trả lại BossBar nếu đang luyện
         if (session.activeBossBar != null) {
             session.activeBossBar.removeAll();
+            session.activeBossBar = null;
         }
 
         for (int slot : new int[]{SLOT_INPUT_1, SLOT_INPUT_2, SLOT_INPUT_3, SLOT_INPUT_4, SLOT_INPUT_5, SLOT_INPUT_6, SLOT_RESULT}) {
@@ -541,6 +622,7 @@ public class AlchemyCraftGUI implements Listener {
             if (item != null && item.getType() != Material.AIR) player.getInventory().addItem(item);
         }
         activeSessions.remove(player.getUniqueId());
+        plugin.getLogger().info("[AlchemyDebug] Session removed for " + player.getName());
     }
 
     public static class AlchemyRecipe {
