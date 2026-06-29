@@ -3,7 +3,9 @@ package com.vnmine.cultivation;
 import com.vnmine.VNMinePlugin;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -25,7 +27,14 @@ public class PillConfig {
     }
 
     public void load() {
-        FileConfiguration config = plugin.getConfig();
+        // Đọc trực tiếp từ file cultivation.yml thay vì plugin.getConfig()
+        // Vì getConfig() chỉ đọc config.yml, không bao gồm cultivation.yml
+        File cultivationFile = new File(plugin.getDataFolder(), "cultivation.yml");
+        if (!cultivationFile.exists()) {
+            plugin.saveResource("cultivation.yml", false);
+            plugin.getLogger().info("[PillConfig] Đã tạo file cultivation.yml từ resources");
+        }
+        FileConfiguration config = YamlConfiguration.loadConfiguration(cultivationFile);
         
         // Load pill effects
         ConfigurationSection effectSection = config.getConfigurationSection("pill-effects");
@@ -52,7 +61,7 @@ public class PillConfig {
                     scaleWithGrade, scaleDuration
                 ));
             }
-            plugin.getLogger().info("[PillConfig] Đã load " + effects.size() + " loại đan dược effects");
+            plugin.getLogger().info("[PillConfig] Đã load " + effects.size() + " loại đan dược effects từ cultivation.yml");
         }
         
         // Load flavor texts
@@ -70,7 +79,7 @@ public class PillConfig {
                     flavorCount++;
                 }
             }
-            plugin.getLogger().info("[PillConfig] Đã load " + flavorCount + " loại đan dược flavor texts");
+            plugin.getLogger().info("[PillConfig] Đã load " + flavorCount + " loại đan dược flavor texts từ cultivation.yml");
             flavorsEnabled = true;
         }
     }
@@ -96,7 +105,6 @@ public class PillConfig {
     }
 
     public void reload() {
-        plugin.reloadConfig();
         load();
     }
 
