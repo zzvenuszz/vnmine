@@ -3,6 +3,7 @@ package com.vnmine;
 import com.vnmine.command.GiveCommand;
 import com.vnmine.cultivation.CultivationListener;
 import com.vnmine.cultivation.CultivationManager;
+import com.vnmine.cultivation.PillConfig;
 import com.vnmine.cultivation.PlayerCultivationData;
 import com.vnmine.currency.CurrencyCommand;
 import com.vnmine.currency.CurrencyListener;
@@ -98,6 +99,7 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
     private MeditationConfig meditationConfig;
 
     private BiomeQiManager biomeQiManager;
+    private PillConfig pillConfig;
 
     // === GETTERS ===
     public CultivationManager getCultivationManager() { return cultivationManager; }
@@ -113,6 +115,7 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
     public MeditationManager getMeditationManager() { return meditationManager; }
     public MeditationConfig getMeditationConfig() { return meditationConfig; }
     public BiomeQiManager getBiomeQiManager() { return biomeQiManager; }
+    public PillConfig getPillConfig() { return pillConfig; }
 
     @Override
     public void onEnable() {
@@ -158,6 +161,9 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
 
         meditationConfig = new MeditationConfig(this);
         meditationManager = new MeditationManager(this);
+        
+        pillConfig = new PillConfig(this);
+        pillConfig.load();
         biomeQiManager = new BiomeQiManager(this);
         meditationListener = new MeditationListener(this, meditationManager);
 

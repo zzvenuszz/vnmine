@@ -316,3 +316,108 @@ biome-qi:
   messages:
     enter-bonus: "&bLinh khí nơi đây dồi dào! Hồi mana tăng %bonus%%"
     enter-penalty: "&cNơi này linh khí độc hại! Linh lực bị suy giảm!"
+
+# =============================================
+# FLAVOR TEXTS CHO ĐAN DƯỢC (PILL FLAVOR TEXTS)
+# Config được dùng trong lore item
+# =============================================
+pill-flavor-texts:
+  HOI_LINH_DAN:
+    - "&7Tinh hoa linh thảo ngưng tụ thành đan"
+    - "&7Linh khí tinh thuần, hồi phục nhanh chóng"
+    - "&7Hơi thở đất trời, tái tạo nguyên khí"
+  DAI_HOI_LINH_DAN:
+    - "&7Đan hỏa rực rỡ, linh lực dồi dào"
+    - "&7Ngưng tụ thiên địa linh khí"
+    - "&7Hương thơm lan tỏa, hồi sinh khí huyết"
+  CUONG_THE_DAN:
+    - "&7Luyện hóa thiên địa, thân thể như sắt"
+    - "&7Đan dược mạnh mẽ, bùng nổ sức mạnh"
+    - "&7Ngưng kết chiến ý vào đan"
+  THANH_TAM_DAN:
+    - "&7Thanh tâm như tỉnh, trừ tà trừ ma"
+    - "&7Tẩy trừ phiền muộn, linh khí thông suốt"
+    - "&7Giải độc tẩy uế, thân thể nhẹ nhàng"
+  TOC_THANH_DAN:
+    - "&7Linh lực bùng nổ, bước chân như gió"
+    - "&7Tiên khí bảo vệ, hành tẩu nhanh nhẹn"
+  TU_LUYEN_DAN:
+    - "&7Ngưng tụ tu vi vào đan"
+    - "&7Linh đan thần kỳ, đột phá bình cảnh"
+    - "&7Hương thơm đạo vận, kinh mạch thông đạt"
+  PHI_THANG_DAN:
+    - "&7Linh đan do thiên địa ngưỡng mộ"
+    - "&7Vượt qua giới hạn, đột phá thăng tiến"
+    - "&7Được đại đạo thừa nhận, phi thăng thành tiên"
+  BACH_DOC_DAN:
+    - "&7Giải độc thần dược, vạn độc bất xâm"
+    - "&7Tinh lọc tạp chất, thân thể tinh khiết"
+  THIEN_HOI_DAN:
+    - "&7Thiên thần ban xuống, hồi sinh khí huyết"
+    - "&7Linh đan cứu mạng, kéo về từ cõi chết"
+    - "&7Hồi phục toàn diện, linh khí tràn đầy"
+  PHE_MA_DAN:
+    - "&7Phệ hồn ác ma, sát ý ngút trời"
+    - "&7Luyện hóa cấm thuật, ma đạo tăng công"
+    - "&7Hóa ma thành phật, sát kiếm vô hình"
+  TRUONG_THO_DAN:
+    - "&7Tiên dược trường sinh, mệnh hệ thiên địa"
+    - "&7PháToái hư không, trường thọ bất lão"
+    - "&7Được đạo tổ ban cho, một mạng trường sinh"
+
+# =============================================
+# HIỆU ỨNG CHO TỪNG LOẠI ĐAN DƯỢC (PILL EFFECTS)
+# Cấu hình lore template + giá trị cơ bản cho từng loại đan
+# Placeholder: {recover} = hồi linh lực, {heal} = hồi HP (%), {regen} = hồi máu/giây, {duration} = thời gian (giây), {dmg} = sát thương (%), {exp} = EXP tu luyện
+# scale-with-grade: true = nhân giá trị theo phẩm cấp
+# scale-duration: true = thời gian cũng nhân theo phẩm cấp
+# =============================================
+pill-effects:
+  HOI_LINH_DAN:
+    lore-template: "&7Hồi &b{recover} &7linh lực"
+    base-recover: 30
+    scale-with-grade: true
+  DAI_HOI_LINH_DAN:
+    lore-template: "&7Hồi &b{recover} &7linh lực + &a{regen} &7trong &a{duration}s"
+    base-recover: 100
+    base-regen: 1
+    base-duration: 30
+    scale-with-grade: true
+  CUONG_THE_DAN:
+    lore-template: "&7Tăng &c{dmg}% &7sát thương &7trong &c{duration}s"
+    base-dmg: 20
+    base-duration: 60
+    scale-with-grade: true
+    scale-duration: true
+  THANH_TAM_DAN:
+    lore-template: "&7Giải trừ mọi trạng thái xấu"
+  TOC_THANH_DAN:
+    lore-template: "&7Tăng &a{regen}% &7tốc độ &7trong &a{duration}s"
+    base-regen: 50
+    base-duration: 300
+    scale-duration: true
+  TU_LUYEN_DAN:
+    lore-template: "&7Tăng &5+{exp} EXP &7tu luyện"
+    base-exp: 50
+    scale-with-grade: true
+  PHI_THANG_DAN:
+    lore-template: "&7+{exp} EXP &7(1 lần/đại cảnh giới)"
+    base-exp: 500
+    scale-with-grade: true
+  BACH_DOC_DAN:
+    lore-template: "&7Miễn nhiễm độc &7trong &b{duration}s"
+    base-duration: 300
+    scale-duration: true
+  THIEN_HOI_DAN:
+    lore-template: "&7Hồi &a{heal}% HP &7+ &b{recover}% &7linh lực"
+    base-heal: 50
+    base-recover: 50
+    scale-with-grade: true
+  PHE_MA_DAN:
+    lore-template: "&7Tăng &c{dmg}% &7sát thương &7vs quái &7trong &c{duration}s"
+    base-dmg: 30
+    base-duration: 120
+    scale-with-grade: true
+    scale-duration: true
+  TRUONG_THO_DAN:
+    lore-template: "&7Tự động hồi sinh 1 lần"

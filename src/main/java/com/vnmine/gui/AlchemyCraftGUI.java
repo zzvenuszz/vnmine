@@ -1,6 +1,7 @@
 package com.vnmine.gui;
 
 import com.vnmine.VNMinePlugin;
+import com.vnmine.cultivation.PillConfig;
 import com.vnmine.cultivation.PlayerCultivationData;
 import com.vnmine.item.ItemBuilder;
 import com.vnmine.skill.PlayerSkillData;
@@ -24,6 +25,8 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -78,63 +81,79 @@ public class AlchemyCraftGUI implements Listener {
     // Số lần sử dụng mặc định cho mỗi lọ đan dược
     private static final int DEFAULT_CHARGES = 10;
 
+    // Material đa dạng cho từng loại đan dược (mỗi loại có hình dáng khác nhau)
+    private static final Map<String, Material> PILL_MATERIALS = new HashMap<>();
+    static {
+        PILL_MATERIALS.put("HOI_LINH_DAN", Material.POTION);
+        PILL_MATERIALS.put("DAI_HOI_LINH_DAN", Material.LINGERING_POTION);
+        PILL_MATERIALS.put("CUONG_THE_DAN", Material.SPLASH_POTION);
+        PILL_MATERIALS.put("THANH_TAM_DAN", Material.HONEY_BOTTLE);
+        PILL_MATERIALS.put("TOC_THANH_DAN", Material.POTION);
+        PILL_MATERIALS.put("TU_LUYEN_DAN", Material.EXPERIENCE_BOTTLE);
+        PILL_MATERIALS.put("PHI_THANG_DAN", Material.DRAGON_BREATH);
+        PILL_MATERIALS.put("BACH_DOC_DAN", Material.POTION);
+        PILL_MATERIALS.put("THIEN_HOI_DAN", Material.LINGERING_POTION);
+        PILL_MATERIALS.put("PHE_MA_DAN", Material.SPLASH_POTION);
+        PILL_MATERIALS.put("TRUONG_THO_DAN", Material.HONEY_BOTTLE);
+    }
+
     // Danh sách công thức đan dược (tất cả tên phải có dấu, đồng bộ với PillUseListener)
     private static final List<AlchemyRecipe> RECIPES = new ArrayList<>();
 
     static {
-        // === Đan dược cơ bản (dùng Material.POTION làm base) ===
+        // === Đan dược cơ bản (mỗi loại dùng Material khác nhau) ===
         RECIPES.add(new AlchemyRecipe("HOI_LINH_DAN", "&aHồi Linh Đan", Material.POTION,
-                "&7Hồi phục &b30 &7linh lực",
+                "&7Hồi phục &b30 &7linh lực (x phẩm cấp)",
                 new LinkedHashMap<Material, Integer>() {{ put(Material.GREEN_DYE, 3); put(Material.POTION, 1); }},
                 3, 10, 80.0, 2));
 
-        RECIPES.add(new AlchemyRecipe("DAI_HOI_LINH_DAN", "&bĐại Hồi Linh Đan", Material.POTION,
-                "&7Hồi phục &b100 &7linh lực &7+ hồi phục 30s",
+        RECIPES.add(new AlchemyRecipe("DAI_HOI_LINH_DAN", "&bĐại Hồi Linh Đan", Material.LINGERING_POTION,
+                "&7Hồi phục &b100 &7linh lực &7+ hồi phục (x phẩm cấp)",
                 new LinkedHashMap<Material, Integer>() {{ put(Material.GLOWSTONE_DUST, 2); put(Material.RED_DYE, 2); put(Material.GREEN_DYE, 5); }},
                 10, 30, 60.0, 1));
 
-        RECIPES.add(new AlchemyRecipe("THANH_TAM_DAN", "&aThanh Tâm Đan", Material.POTION,
+        RECIPES.add(new AlchemyRecipe("THANH_TAM_DAN", "&aThanh Tâm Đan", Material.HONEY_BOTTLE,
                 "&7Giải trừ mọi trạng thái xấu",
                 new LinkedHashMap<Material, Integer>() {{ put(Material.GREEN_DYE, 5); put(Material.POTION, 1); }},
                 5, 15, 85.0, 2));
 
         RECIPES.add(new AlchemyRecipe("TOC_THANH_DAN", "&bTốc Thánh Đan", Material.POTION,
-                "&7Tăng &b50% tốc độ &7trong 30 giây",
+                "&7Tăng &b50% tốc độ &7trong 30s (x phẩm cấp)",
                 new LinkedHashMap<Material, Integer>() {{ put(Material.GREEN_DYE, 3); put(Material.SUGAR, 2); put(Material.FEATHER, 1); }},
                 8, 15, 70.0, 2));
 
-        RECIPES.add(new AlchemyRecipe("CUONG_THE_DAN", "&cCương Thể Đan", Material.POTION,
-                "&7Tăng &c20% sát thương &7trong 60 giây",
+        RECIPES.add(new AlchemyRecipe("CUONG_THE_DAN", "&cCương Thể Đan", Material.SPLASH_POTION,
+                "&7Tăng &c20% sát thương &7trong 60s (x phẩm cấp)",
                 new LinkedHashMap<Material, Integer>() {{ put(Material.RED_DYE, 3); put(Material.GREEN_DYE, 5); put(Material.BLAZE_POWDER, 1); }},
                 15, 20, 55.0, 1));
 
         RECIPES.add(new AlchemyRecipe("BACH_DOC_DAN", "&9Bách Độc Đan", Material.POTION,
-                "&7Miễn nhiễm độc &95 &7phút",
+                "&7Miễn nhiễm độc &95 &7phút (x phẩm cấp)",
                 new LinkedHashMap<Material, Integer>() {{ put(Material.LIGHT_BLUE_DYE, 3); put(Material.REDSTONE, 2); put(Material.BLAZE_POWDER, 1); }},
                 25, 25, 50.0, 1));
 
-        RECIPES.add(new AlchemyRecipe("TU_LUYEN_DAN", "&5Tu Luyện Đan", Material.POTION,
-                "&7Tăng &5+50 EXP &7tu luyện khi sử dụng",
+        RECIPES.add(new AlchemyRecipe("TU_LUYEN_DAN", "&5Tu Luyện Đan", Material.EXPERIENCE_BOTTLE,
+                "&7Tăng &5+50 EXP &7tu luyện (x phẩm cấp)",
                 new LinkedHashMap<Material, Integer>() {{ put(Material.GREEN_DYE, 10); put(Material.RED_DYE, 5); put(Material.ORANGE_DYE, 2); put(Material.GOLD_INGOT, 1); }},
                 20, 45, 40.0, 1));
 
-        RECIPES.add(new AlchemyRecipe("THIEN_HOI_DAN", "&6Thiên Hồi Đan", Material.POTION,
-                "&7Hồi &a50% HP &7+ &b50% Linh lực",
+        RECIPES.add(new AlchemyRecipe("THIEN_HOI_DAN", "&6Thiên Hồi Đan", Material.LINGERING_POTION,
+                "&7Hồi &a50% HP &7+ &b50% Linh lực (x phẩm cấp)",
                 new LinkedHashMap<Material, Integer>() {{ put(Material.CYAN_DYE, 5); put(Material.MAGENTA_DYE, 3); put(Material.PRISMARINE_SHARD, 1); }},
                 35, 40, 45.0, 1));
 
-        RECIPES.add(new AlchemyRecipe("PHE_MA_DAN", "&8Phê Ma Đan", Material.POTION,
-                "&7Tăng &c30% sát thương &7vs quái 2 phút",
+        RECIPES.add(new AlchemyRecipe("PHE_MA_DAN", "&8Phê Ma Đan", Material.SPLASH_POTION,
+                "&7Tăng &c30% sát thương &7vs quái 2 phút (x phẩm cấp)",
                 new LinkedHashMap<Material, Integer>() {{ put(Material.YELLOW_DYE, 3); put(Material.IRON_INGOT, 2); put(Material.END_STONE, 1); }},
                 40, 30, 40.0, 1));
 
-        RECIPES.add(new AlchemyRecipe("TRUONG_THO_DAN", "&6Trường Thọ Đan", Material.POTION,
+        RECIPES.add(new AlchemyRecipe("TRUONG_THO_DAN", "&6Trường Thọ Đan", Material.HONEY_BOTTLE,
                 "&7Tự động hồi sinh 1 lần &7(CD 1h)",
                 new LinkedHashMap<Material, Integer>() {{ put(Material.PURPLE_DYE, 5); put(Material.IRON_NUGGET, 3); put(Material.EMERALD, 2); }},
                 45, 60, 25.0, 1));
 
-        RECIPES.add(new AlchemyRecipe("PHI_THANG_DAN", "&6&l◆ Phi Thăng Đan ◆", Material.POTION,
-                "&7+500 EXP &7(1 lần/đại cảnh giới)",
+        RECIPES.add(new AlchemyRecipe("PHI_THANG_DAN", "&6&l◆ Phi Thăng Đan ◆", Material.DRAGON_BREATH,
+                "&7+500 EXP &7(1 lần/đại cảnh giới) (x phẩm cấp)",
                 new LinkedHashMap<Material, Integer>() {{ put(Material.PURPLE_DYE, 3); put(Material.ORANGE_DYE, 10); put(Material.DRAGON_BREATH, 1); put(Material.NETHERITE_INGOT, 2); }},
                 50, 120, 15.0, 1));
     }
@@ -297,29 +316,64 @@ public class AlchemyCraftGUI implements Listener {
     }
 
     /**
+     * Tạo lore hiển thị tác dụng cụ thể của đan dược
+     */
+    private String getEffectLore(String pillId, double multiplier) {
+        PillConfig.PillEffect effect = plugin.getPillConfig().getEffect(pillId);
+        if (effect != null) {
+            return effect.getLore(multiplier);
+        }
+        // Fallback nếu config chưa có
+        return "&7Đan dược quý giá";
+    }
+
+    /**
      * Tạo item đan dược dạng lọ thuốc với màu sắc theo phẩm cấp
-     * Có 10 charges (lần sử dụng)
+     * Mỗi loại đan có Material riêng (POTION, SPLASH_POTION, LINGERING_POTION, HONEY_BOTTLE, ...)
+     * Có 10 charges (lần sử dụng), tác dụng scale theo grade
      */
     private ItemStack createPotionItem(AlchemyRecipe recipe, int gradeIndex, String gradeDisplay, int amount) {
         Color potionColor = GRADE_COLORS[gradeIndex];
+        double multiplier = GRADE_MULTIPLIERS[gradeIndex];
 
-        ItemBuilder builder = new ItemBuilder(Material.POTION)
+        // Lấy Material đặc trưng cho từng loại đan dược
+        Material pillMaterial = PILL_MATERIALS.getOrDefault(recipe.id, Material.POTION);
+
+        // Lấy effect lore hiển thị giá trị thực tế từ config
+        PillConfig.PillEffect effect = plugin.getPillConfig().getEffect(recipe.id);
+        String effectLore = (effect != null) ? effect.getLore(multiplier) : "&7Đan dược quý giá";
+        // Lấy flavor text ngẫu nhiên từ config
+        String flavorLore = plugin.getPillConfig().getRandomFlavor(recipe.id);
+
+        ItemBuilder builder = new ItemBuilder(pillMaterial)
                 .setName(recipe.displayName)
                 .setAmount(Math.min(amount, 64))
                 .setGlow(true)
-                .setPotionColor(potionColor)
                 .setPersistentData("vnmine_pill_type", recipe.id)
                 .setPersistentData("vnmine_pill_charges", String.valueOf(DEFAULT_CHARGES))
                 .setPersistentData("vnmine_pill_grade", String.valueOf(gradeIndex))
                 .setLore("",
-                        recipe.lore,
+                        effectLore,
+                        flavorLore,
                         "",
-                        "&7Phẩm cấp: " + gradeDisplay,
-                        "&7Lượng dùng: &e" + DEFAULT_CHARGES + " &7lần",
+                        "&7Lượng dùng: &e" + DEFAULT_CHARGES + "/" + DEFAULT_CHARGES + " &7lần",
                         "&a✦ Click phải để sử dụng!");
 
-        // Ẩn potion effect mặc định
+        // Set màu nếu item là potion
+        if (pillMaterial == Material.POTION || pillMaterial == Material.LINGERING_POTION || pillMaterial == Material.SPLASH_POTION) {
+            builder.setPotionColor(potionColor);
+        }
+
+        // Ẩn effect mặc định + tooltip vanilla bằng cách set potion effect rỗng
         builder.hideAll();
+        if (pillMaterial == Material.POTION || pillMaterial == Material.LINGERING_POTION || pillMaterial == Material.SPLASH_POTION) {
+            // Set một effect vô hại để ẩn tooltip vanilla
+            PotionMeta meta = (PotionMeta) builder.build().getItemMeta();
+            if (meta != null) {
+                meta.addCustomEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, 0, 0, true, false, false), true);
+                builder.build().setItemMeta(meta);
+            }
+        }
 
         return builder.build();
     }

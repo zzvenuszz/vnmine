@@ -1,6 +1,7 @@
 package com.vnmine.gui;
 
 import com.vnmine.VNMinePlugin;
+import com.vnmine.cultivation.PillConfig;
 import com.vnmine.item.ItemBuilder;
 import com.vnmine.util.ColorUtils;
 import com.vnmine.util.MessageUtils;
@@ -112,40 +113,52 @@ public class AdminMenuGUI implements Listener {
         }
     }
 
-    // ==================== PILL DEFINITIONS (12 grades) - dùng POTION + charge system ====================
+    // ==================== PILL DEFINITIONS (12 grades) - Material đa dạng + charge system ====================
     private static final List<AdminItemDef> ALL_PILLS = new ArrayList<>();
+
+    private static Material getPillMaterial(String baseName) {
+        switch (baseName) {
+            case "Hồi Linh Đan": return Material.POTION;
+            case "Đại Hồi Linh Đan": return Material.LINGERING_POTION;
+            case "Cương Thể Đan": return Material.SPLASH_POTION;
+            case "Thanh Tâm Đan": return Material.HONEY_BOTTLE;
+            case "Tốc Thánh Đan": return Material.POTION;
+            case "Tu Luyện Đan": return Material.EXPERIENCE_BOTTLE;
+            case "Phi Thăng Đan": return Material.DRAGON_BREATH;
+            case "Bách Độc Đan": return Material.POTION;
+            case "Thiên Hồi Đan": return Material.LINGERING_POTION;
+            case "Phê Ma Đan": return Material.SPLASH_POTION;
+            case "Trường Thọ Đan": return Material.HONEY_BOTTLE;
+            default: return Material.POTION;
+        }
+    }
+
     static {
         String[][] pillTypes = {
-            {"Hồi Linh Đan", "POTION", "Hồi phục linh lực"},
-            {"Đại Hồi Linh Đan", "POTION", "Hồi phục lớn linh lực + hồi phục"},
-            {"Cương Thể Đan", "POTION", "Tăng sát thương"},
-            {"Thanh Tâm Đan", "POTION", "Giải trừ trạng thái xấu"},
-            {"Tốc Thánh Đan", "POTION", "Tăng tốc độ di chuyển"},
-            {"Tu Luyện Đan", "POTION", "Tăng EXP tu luyện"},
-            {"Phi Thăng Đan", "POTION", "EXP lớn (1 lần/đại cảnh giới)"},
-            {"Bách Độc Đan", "POTION", "Miễn nhiễm độc"},
-            {"Thiên Hồi Đan", "POTION", "Hồi HP + Linh lực lớn"},
-            {"Phê Ma Đan", "POTION", "Tăng sát thương vs quái"},
-            {"Trường Thọ Đan", "POTION", "Hồi sinh sau khi chết"}
+            {"HOI_LINH_DAN", "Hồi Linh Đan", "Hồi phục linh lực"},
+            {"DAI_HOI_LINH_DAN", "Đại Hồi Linh Đan", "Hồi phục lớn linh lực + hồi phục"},
+            {"CUONG_THE_DAN", "Cương Thể Đan", "Tăng sát thương"},
+            {"THANH_TAM_DAN", "Thanh Tâm Đan", "Giải trừ trạng thái xấu"},
+            {"TOC_THANH_DAN", "Tốc Thánh Đan", "Tăng tốc độ di chuyển"},
+            {"TU_LUYEN_DAN", "Tu Luyện Đan", "Tăng EXP tu luyện"},
+            {"PHI_THANG_DAN", "Phi Thăng Đan", "EXP lớn (1 lần/đại cảnh giới)"},
+            {"BACH_DOC_DAN", "Bách Độc Đan", "Miễn nhiễm độc"},
+            {"THIEN_HOI_DAN", "Thiên Hồi Đan", "Hồi HP + Linh lực lớn"},
+            {"PHE_MA_DAN", "Phê Ma Đan", "Tăng sát thương vs quái"},
+            {"TRUONG_THO_DAN", "Trường Thọ Đan", "Hồi sinh sau khi chết"}
         };
         double[] manaMultipliers = {1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.3, 2.6, 3.0, 3.5, 4.0, 5.0};
         int[] cooldowns = {60, 55, 50, 45, 40, 35, 30, 25, 20, 15, 10, 5};
-        // Màu sắc theo phẩm cấp (đồng bộ với AlchemyCraftGUI)
-        org.bukkit.Color[] colors = {
-            org.bukkit.Color.WHITE, org.bukkit.Color.YELLOW, org.bukkit.Color.LIME,
-            org.bukkit.Color.AQUA, org.bukkit.Color.ORANGE, org.bukkit.Color.GREEN,
-            org.bukkit.Color.PURPLE, org.bukkit.Color.fromRGB(0xFF00FF), org.bukkit.Color.RED,
-            org.bukkit.Color.fromRGB(0xFFD700), org.bukkit.Color.fromRGB(0x00FFFF), org.bukkit.Color.fromRGB(0x8B00FF)
-        };
 
         for (String[] pill : pillTypes) {
-            Material mat = Material.POTION;
+            Material mat = getPillMaterial(pill[1]);
+            String pillId = pill[0];
             for (int g = 0; g < 4; g++) {
                 for (int s = 0; s < 3; s++) {
                     int idx = g * 3 + s;
-                    String dn = skillName(pill[0], g, s);
+                    String dn = skillName(pill[1], g, s);
                     String lore = "&7" + pill[2] + "\n&7Hiệu quả: x" + String.format("%.1f", manaMultipliers[idx])
-                        + "\n&7CD: " + cooldowns[idx] + "s\n&7Lượng dùng: 10 lần";
+                        + "\n&7CD: " + cooldowns[idx] + "s\n&7Lượng dùng: 10/10 lần";
                     ALL_PILLS.add(new AdminItemDef(dn, mat, lore, false));
                 }
             }
@@ -334,10 +347,84 @@ public class AdminMenuGUI implements Listener {
 
     private ItemStack createMenuItem(AdminItemDef def) {
         String amountStr = def.stack64 ? "&8[x64]" : "&8[x1]";
-        ItemBuilder builder = new ItemBuilder(def.material).setName(def.displayName)
-                .setLore("", def.lore, "", "&eClick để thêm vào kho đồ!", amountStr);
+        ItemBuilder builder = new ItemBuilder(def.material).setName(def.displayName);
+        
+        // DEBUG
+        plugin.getLogger().info("[AdminDebug] ========== createMenuItem START ==========");
+        plugin.getLogger().info("[AdminDebug] displayName: " + def.displayName);
+        plugin.getLogger().info("[AdminDebug] material: " + def.material);
+        plugin.getLogger().info("[AdminDebug] lore contains 'Lượng dùng': " + (def.lore != null && def.lore.contains("Lượng dùng")));
+        
+        // Nếu là pill (đan dược) thì tạo lore động với giá trị thực + flavor text
+        if (def.lore != null && def.lore.contains("Lượng dùng")) {
+            String pillId = extractPillId(def.displayName);
+            plugin.getLogger().info("[AdminDebug] pillId: " + pillId);
+            
+            // Parse multiplier từ lore cũ
+            double mult = 1.0;
+            if (def.lore.contains("x")) {
+                try {
+                    String[] parts = def.lore.split("x");
+                    if (parts.length > 1) {
+                        mult = Double.parseDouble(parts[1].split("\n")[0].trim());
+                    }
+                } catch (Exception e) {
+                    plugin.getLogger().warning("[AdminDebug] parse mult error: " + e.getMessage());
+                }
+            }
+            plugin.getLogger().info("[AdminDebug] multiplier: " + mult);
+            
+            String effectLore = getPillEffectLore(pillId, mult);
+            plugin.getLogger().info("[AdminDebug] effectLore: " + effectLore);
+            
+            
+            // Kiểm tra PillConfig null
+            String flavorLore = "";
+            if (plugin.getPillConfig() == null) {
+                plugin.getLogger().warning("[AdminDebug] PillConfig is NULL!");
+            } else {
+                flavorLore = plugin.getPillConfig().getRandomFlavor(pillId);
+                plugin.getLogger().info("[AdminDebug] PillConfig flavors enabled: " + plugin.getPillConfig().isFlavorsEnabled());
+            }
+            plugin.getLogger().info("[AdminDebug] flavorLore: '" + flavorLore + "'");
+            
+            List<String> fullLore = Arrays.asList("", effectLore, flavorLore, "", "&7Lượng dùng: 10/10 lần", "&aClick để thêm vào kho đồ!", amountStr);
+            plugin.getLogger().info("[AdminDebug] Full lore lines: " + fullLore.size());
+            for (int i = 0; i < fullLore.size(); i++) {
+                plugin.getLogger().info("[AdminDebug] Lore[" + i + "]: " + fullLore.get(i));
+            }
+            
+            builder.setLore("", effectLore, flavorLore, "", "&7Lượng dùng: 10/10 lần", "&aClick để thêm vào kho đồ!", amountStr);
+        } else {
+            plugin.getLogger().info("[AdminDebug] NOT a pill item, using static lore");
+            builder.setLore("", def.lore, "", "&aClick để thêm vào kho đồ!", amountStr);
+        }
+        
         if (def.stack64) builder.setGlow(true);
-        return builder.build();
+        ItemStack result = builder.build();
+        
+        // Log lore thực tế của item đã build
+        if (result.getItemMeta() != null && result.getItemMeta().getLore() != null) {
+            plugin.getLogger().info("[AdminDebug] ACTUAL lore in built item:");
+            List<String> actualLore = result.getItemMeta().getLore();
+            for (int i = 0; i < actualLore.size(); i++) {
+                plugin.getLogger().info("[AdminDebug] ACTUAL[" + i + "]: " + actualLore.get(i));
+            }
+        }
+        
+        plugin.getLogger().info("[AdminDebug] ========== createMenuItem END ==========");
+        return result;
+    }
+
+    /**
+     * Lấy effect lore cho đan dược từ AdminMenuGUI (dùng config)
+     */
+    private String getPillEffectLore(String pillId, double mult) {
+        PillConfig.PillEffect effect = plugin.getPillConfig().getEffect(pillId);
+        if (effect != null) {
+            return effect.getLore(mult);
+        }
+        return "&7Đan dược quý giá";
     }
 
     // ==================== CLICK HANDLERS ====================
@@ -433,16 +520,114 @@ public class AdminMenuGUI implements Listener {
         }
     }
 
+    private String extractPillId(String displayName) {
+        if (displayName.contains("Hồi Linh Đan") && !displayName.contains("Đại Hồi")) return "HOI_LINH_DAN";
+        if (displayName.contains("Đại Hồi Linh")) return "DAI_HOI_LINH_DAN";
+        if (displayName.contains("Cương Thể")) return "CUONG_THE_DAN";
+        if (displayName.contains("Thanh Tâm")) return "THANH_TAM_DAN";
+        if (displayName.contains("Tốc Thánh")) return "TOC_THANH_DAN";
+        if (displayName.contains("Tu Luyện")) return "TU_LUYEN_DAN";
+        if (displayName.contains("Phi Thăng")) return "PHI_THANG_DAN";
+        if (displayName.contains("Bách Độc")) return "BACH_DOC_DAN";
+        if (displayName.contains("Thiên Hồi")) return "THIEN_HOI_DAN";
+        if (displayName.contains("Phê Ma")) return "PHE_MA_DAN";
+        if (displayName.contains("Trường Thọ")) return "TRUONG_THO_DAN";
+        return "HOI_LINH_DAN";
+    }
+
+    /**
+     * Parse grade index (0-11) từ display name
+     * Dựa trên: Hoàng=0, Huyền=1, Địa=2, Thiên=3 và Hạ=0, Trung=1, Thượng=2
+     */
+    private int extractPillGrade(String displayName) {
+        String stripped = stripColor(displayName);
+        int grade = 0; // Hoàng / Hạ
+        if (stripped.contains("Huyền")) grade = 1;
+        else if (stripped.contains("Địa")) grade = 2;
+        else if (stripped.contains("Thiên")) grade = 3;
+        int sub = 0; // Hạ
+        if (stripped.contains("Trung")) sub = 1;
+        else if (stripped.contains("Thượng")) sub = 2;
+        return grade * 3 + sub;
+    }
+
     private void giveItemToPlayer(Player player, AdminItemDef matched) {
+        // DEBUG
+        plugin.getLogger().info("[AdminDebug] ========== giveItemToPlayer START ==========");
+        plugin.getLogger().info("[AdminDebug] displayName: " + matched.displayName);
+        plugin.getLogger().info("[AdminDebug] material: " + matched.material);
+        plugin.getLogger().info("[AdminDebug] static lore: " + matched.lore);
+        
         int amount = matched.stack64 ? 64 : 1;
-        ItemBuilder giveBuilder = new ItemBuilder(matched.material).setName(matched.displayName)
-                .setLore("", matched.lore).setGlow(true).setAmount(amount);
+        ItemBuilder giveBuilder = new ItemBuilder(matched.material).setName(matched.displayName);
+        
+        // Tạo lore động cho pills giống như createMenuItem()
+        if (matched.lore != null && matched.lore.contains("Lượng dùng")) {
+            String pillId = extractPillId(matched.displayName);
+            plugin.getLogger().info("[AdminDebug] pillId: " + pillId);
+            
+            double mult = 1.0;
+            if (matched.lore.contains("x")) {
+                try {
+                    String[] parts = matched.lore.split("x");
+                    if (parts.length > 1) {
+                        mult = Double.parseDouble(parts[1].split("\n")[0].trim());
+                    }
+                } catch (Exception e) {
+                    plugin.getLogger().warning("[AdminDebug] parse mult error: " + e.getMessage());
+                }
+            }
+            plugin.getLogger().info("[AdminDebug] multiplier: " + mult);
+            
+            String effectLore = getPillEffectLore(pillId, mult);
+            plugin.getLogger().info("[AdminDebug] effectLore: " + effectLore);
+            
+            
+            // Kiểm tra PillConfig null
+            String flavorLore = "";
+            if (plugin.getPillConfig() == null) {
+                plugin.getLogger().warning("[AdminDebug] PillConfig is NULL in giveItemToPlayer!");
+            } else {
+                flavorLore = plugin.getPillConfig().getRandomFlavor(pillId);
+            }
+            plugin.getLogger().info("[AdminDebug] flavorLore: '" + flavorLore + "'");
+            
+            giveBuilder.setLore("", effectLore, flavorLore, "", "&7Lượng dùng: 10/10 lần");
+        } else {
+            plugin.getLogger().info("[AdminDebug] NOT a pill item, using static lore");
+            giveBuilder.setLore("", matched.lore);
+        }
+        
+        giveBuilder.setGlow(true).setAmount(amount);
         giveBuilder.setPersistentData("vnmine_item", "true");
+        
+        // Nếu là pill (đan dược) thì thêm charge data mặc định
+        if (matched.lore != null && matched.lore.contains("Lượng dùng")) {
+            String pillType = extractPillId(matched.displayName);
+            int pillGrade = extractPillGrade(matched.displayName);
+            plugin.getLogger().info("[AdminDebug] Setting pill persistent data: type=" + pillType + " grade=" + pillGrade);
+            giveBuilder.setPersistentData("vnmine_pill_type", pillType);
+            giveBuilder.setPersistentData("vnmine_pill_charges", "10");
+            giveBuilder.setPersistentData("vnmine_pill_grade", String.valueOf(pillGrade));
+        }
+        
         ItemStack giveItem = giveBuilder.build();
+        
+        // DEBUG - Log lore thực tế của item cho player
+        if (giveItem.getItemMeta() != null && giveItem.getItemMeta().getLore() != null) {
+            plugin.getLogger().info("[AdminDebug] GIVE ITEM lore lines: " + giveItem.getItemMeta().getLore().size());
+            List<String> giveLore = giveItem.getItemMeta().getLore();
+            for (int i = 0; i < giveLore.size(); i++) {
+                plugin.getLogger().info("[AdminDebug] GIVE[" + i + "]: " + giveLore.get(i));
+            }
+        }
+        
         Map<Integer, ItemStack> leftover = player.getInventory().addItem(giveItem);
         for (ItemStack drop : leftover.values()) player.getWorld().dropItemNaturally(player.getLocation(), drop);
         MessageUtils.send(player, "&aĐã nhận &f" + matched.displayName + " &r&a(" + (matched.stack64 ? "x64" : "x1") + ")!");
         MessageUtils.playSound(player, Sound.ENTITY_ITEM_PICKUP);
+        
+        plugin.getLogger().info("[AdminDebug] ========== giveItemToPlayer END ==========");
     }
 
     private AdminItemDef findItemInList(List<AdminItemDef> items, ItemStack clicked) {

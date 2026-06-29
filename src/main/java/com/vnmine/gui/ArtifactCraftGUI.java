@@ -44,8 +44,8 @@ public class ArtifactCraftGUI implements Listener {
     private static final int SLOT_GUIDE = 46;
 
     // ==================== 21-TIER ARTIFACT GRADE SYSTEM ====================
+    // {giaiName, capName, giaiColor, capColor}
     private static final String[][] ARTIFACT_GRADES = {
-        // {giaiName, capName, giaiColor, capColor}
         {"Phàm Giai", "Phàm Cấp", "&7", "&7"},
         {"Phàm Giai", "Hậu Thiên", "&7", "&8"},
         {"Phàm Giai", "Tiên Thiên", "&7", "&f"},
@@ -76,9 +76,81 @@ public class ArtifactCraftGUI implements Listener {
         4.5, 5.0, 6.0, 7.0, 8.0
     };
 
-    private static String gradeDisplayName(int tierIndex) {
+    // Material mapping theo grade cho Kiếm Phi Hành
+    private static final Material[][] ARTIFACT_MATERIALS = {
+        // Kiếm Phi Hành: từ gỗ -> đá -> sắt -> vàng -> kim cương -> netherite
+        {Material.WOODEN_SWORD, Material.STONE_SWORD, Material.GOLDEN_SWORD,
+         Material.IRON_SWORD, Material.IRON_SWORD, Material.IRON_SWORD,
+         Material.DIAMOND_SWORD, Material.DIAMOND_SWORD, Material.DIAMOND_SWORD,
+         Material.DIAMOND_SWORD, Material.DIAMOND_SWORD, Material.DIAMOND_SWORD,
+         Material.DIAMOND_SWORD, Material.DIAMOND_SWORD, Material.DIAMOND_SWORD,
+         Material.NETHERITE_SWORD, Material.NETHERITE_SWORD, Material.NETHERITE_SWORD,
+         Material.NETHERITE_SWORD, Material.NETHERITE_SWORD, Material.NETHERITE_SWORD},
+        // Linh Chung
+        {Material.BELL, Material.BELL, Material.BELL,
+         Material.BELL, Material.BELL, Material.BELL,
+         Material.BELL, Material.BELL, Material.BELL,
+         Material.BELL, Material.BELL, Material.BELL,
+         Material.BELL, Material.BELL, Material.BELL,
+         Material.BELL, Material.BELL, Material.BELL,
+         Material.BELL, Material.BELL, Material.BELL},
+        // Bát Quái Kính
+        {Material.SHIELD, Material.SHIELD, Material.SHIELD,
+         Material.SHIELD, Material.SHIELD, Material.SHIELD,
+         Material.SHIELD, Material.SHIELD, Material.SHIELD,
+         Material.SHIELD, Material.SHIELD, Material.SHIELD,
+         Material.SHIELD, Material.SHIELD, Material.SHIELD,
+         Material.SHIELD, Material.SHIELD, Material.SHIELD,
+         Material.SHIELD, Material.SHIELD, Material.SHIELD},
+        // Hồn Ngọc
+        {Material.EMERALD, Material.EMERALD, Material.EMERALD,
+         Material.EMERALD, Material.EMERALD, Material.EMERALD,
+         Material.DIAMOND, Material.DIAMOND, Material.DIAMOND,
+         Material.DIAMOND, Material.DIAMOND, Material.DIAMOND,
+         Material.DIAMOND, Material.NETHERITE_SCRAP, Material.NETHERITE_SCRAP,
+         Material.NETHERITE_SCRAP, Material.NETHERITE_SCRAP, Material.NETHERITE_SCRAP,
+         Material.NETHERITE_SCRAP, Material.NETHERITE_SCRAP, Material.NETHERITE_SCRAP},
+        // Thiên Linh Thuẫn
+        {Material.IRON_CHESTPLATE, Material.IRON_CHESTPLATE, Material.IRON_CHESTPLATE,
+         Material.IRON_CHESTPLATE, Material.IRON_CHESTPLATE, Material.IRON_CHESTPLATE,
+         Material.DIAMOND_CHESTPLATE, Material.DIAMOND_CHESTPLATE, Material.DIAMOND_CHESTPLATE,
+         Material.DIAMOND_CHESTPLATE, Material.DIAMOND_CHESTPLATE, Material.DIAMOND_CHESTPLATE,
+         Material.DIAMOND_CHESTPLATE, Material.DIAMOND_CHESTPLATE, Material.DIAMOND_CHESTPLATE,
+         Material.NETHERITE_CHESTPLATE, Material.NETHERITE_CHESTPLATE, Material.NETHERITE_CHESTPLATE,
+         Material.NETHERITE_CHESTPLATE, Material.NETHERITE_CHESTPLATE, Material.NETHERITE_CHESTPLATE},
+        // Lôi Ấn
+        {Material.TRIDENT, Material.TRIDENT, Material.TRIDENT,
+         Material.TRIDENT, Material.TRIDENT, Material.TRIDENT,
+         Material.TRIDENT, Material.TRIDENT, Material.TRIDENT,
+         Material.TRIDENT, Material.TRIDENT, Material.TRIDENT,
+         Material.TRIDENT, Material.TRIDENT, Material.TRIDENT,
+         Material.TRIDENT, Material.TRIDENT, Material.TRIDENT,
+         Material.TRIDENT, Material.TRIDENT, Material.TRIDENT},
+        // Phượng Hoàng Lệnh
+        {Material.FEATHER, Material.FEATHER, Material.FEATHER,
+         Material.FEATHER, Material.FEATHER, Material.FEATHER,
+         Material.FEATHER, Material.FEATHER, Material.FEATHER,
+         Material.FEATHER, Material.FEATHER, Material.FEATHER,
+         Material.FEATHER, Material.FEATHER, Material.FEATHER,
+         Material.FEATHER, Material.FEATHER, Material.FEATHER,
+         Material.FEATHER, Material.FEATHER, Material.FEATHER}
+    };
+
+    /** Lấy prefix màu cho grade */
+    private static String gradeColorPrefix(int tierIndex) {
         String[] g = ARTIFACT_GRADES[tierIndex];
-        return g[2] + "[" + g[0] + "]-" + g[3] + "[" + g[1] + "]";
+        return g[2] + "[" + g[0] + "]-" + g[3] + "[" + g[1] + "] &f&l";
+    }
+
+    /** Lấy tên grade thuần (không màu) dùng cho so sánh */
+    private static String gradePlainName(int tierIndex) {
+        String[] g = ARTIFACT_GRADES[tierIndex];
+        return "[" + g[0] + "]-[" + g[1] + "]";
+    }
+
+    /** Lấy tên grade hiển thị đầy đủ (có màu) */
+    private static String gradeDisplayName(int tierIndex) {
+        return gradeColorPrefix(tierIndex);
     }
 
     private static String gradeLabelPlain(int tierIndex) {
@@ -415,10 +487,22 @@ public class ArtifactCraftGUI implements Listener {
         if (success) {
             double bonus = ARTIFACT_BONUS[gradeIndex];
             int manaReduction = (int)(bonus * 100);
-            // Use baseName + grade format - crafted by Material (ID), not name
+
+            // Lấy recipe index để ánh xạ material theo grade
+            int recipeIndex = -1;
+            for (int i = 0; i < RECIPES.size(); i++) {
+                if (RECIPES.get(i).id.equals(recipe.id)) { recipeIndex = i; break; }
+            }
+            Material finalMaterial = recipe.resultMaterial;
+            if (recipeIndex >= 0 && recipeIndex < ARTIFACT_MATERIALS.length
+                    && gradeIndex < ARTIFACT_MATERIALS[recipeIndex].length) {
+                finalMaterial = ARTIFACT_MATERIALS[recipeIndex][gradeIndex];
+            }
+
+            // Use baseName + grade format - crafted by grade-based Material
             String craftedName = gradeDisplayName(gradeIndex) + " &f&l" + recipe.displayName;
 
-            ItemStack result = new ItemBuilder(recipe.resultMaterial)
+            ItemStack result = new ItemBuilder(finalMaterial)
                     .setName(craftedName)
                     .setGlow(true)
                     .setLore("", recipe.lore, "",

@@ -1,6 +1,7 @@
 package com.vnmine.item;
 
 import com.vnmine.VNMinePlugin;
+import com.vnmine.cultivation.PillConfig;
 import com.vnmine.cultivation.PlayerCultivationData;
 import com.vnmine.util.ColorUtils;
 import com.vnmine.util.MessageUtils;
@@ -28,6 +29,7 @@ import java.util.UUID;
  * PillUseListener - Xử lý sử dụng đan dược khi click phải
  * Sử dụng PersistentDataContainer để nhận diện loại đan và charge count
  * Mỗi lọ đan dược có 10 charges, giảm dần khi dùng
+ * Tác dụng scale theo phẩm cấp (gradeIndex 0-11)
  */
 public class PillUseListener implements Listener {
 
@@ -49,6 +51,13 @@ public class PillUseListener implements Listener {
     // Keys cho persistent data
     private static final String KEY_PILL_TYPE = "vnmine_pill_type";
     private static final String KEY_PILL_CHARGES = "vnmine_pill_charges";
+    private static final String KEY_PILL_GRADE = "vnmine_pill_grade";
+    private static final int DEFAULT_CHARGES = 10;
+
+    // Grade multipliers (đồng bộ với AlchemyCraftGUI)
+    private static final double[] GRADE_MULTIPLIERS = {
+        1.0, 1.3, 1.6, 2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 6.0, 7.5, 10.0
+    };
 
     public PillUseListener(VNMinePlugin plugin) {
         this.plugin = plugin;
@@ -94,43 +103,44 @@ public class PillUseListener implements Listener {
             return;
         }
 
-        plugin.getLogger().info("[PillDebug] " + player.getName() + " used " + pillType);
+        plugin.getLogger().info("[PillDebug] " + player.getName() + " used " + pillType
+            + " grade=" + getPillGrade(item) + " charges=" + getCharges(item));
 
         // Xử lý tác dụng theo loại đan
         boolean consumed = false;
         switch (pillType) {
             case "HOI_LINH_DAN":
-                consumed = useHoiLinhDan(player, data);
+                consumed = useHoiLinhDan(player, data, item);
                 break;
             case "DAI_HOI_LINH_DAN":
-                consumed = useDaiHoiLinhDan(player, data);
+                consumed = useDaiHoiLinhDan(player, data, item);
                 break;
             case "CUONG_THE_DAN":
-                consumed = useCuongTheDan(player, data);
+                consumed = useCuongTheDan(player, data, item);
                 break;
             case "THANH_TAM_DAN":
-                consumed = useThanhTamDan(player, data);
+                consumed = useThanhTamDan(player, data, item);
                 break;
             case "TOC_THANH_DAN":
-                consumed = useTocThanhDan(player, data);
+                consumed = useTocThanhDan(player, data, item);
                 break;
             case "TU_LUYEN_DAN":
-                consumed = useTuLuyenDan(player, data);
+                consumed = useTuLuyenDan(player, data, item);
                 break;
             case "PHI_THANG_DAN":
-                consumed = usePhiThangDan(player, data);
+                consumed = usePhiThangDan(player, data, item);
                 break;
             case "BACH_DOC_DAN":
-                consumed = useBachDocDan(player, data);
+                consumed = useBachDocDan(player, data, item);
                 break;
             case "THIEN_HOI_DAN":
-                consumed = useThienHoiDan(player, data);
+                consumed = useThienHoiDan(player, data, item);
                 break;
             case "PHE_MA_DAN":
-                consumed = usePheMaDan(player, data);
+                consumed = usePheMaDan(player, data, item);
                 break;
             case "TRUONG_THO_DAN":
-                consumed = useTruongThoDan(player, data);
+                consumed = useTruongThoDan(player, data, item);
                 break;
         }
 
@@ -174,18 +184,47 @@ public class PillUseListener implements Listener {
     }
 
     /**
+     * Lấy grade index từ item (0=Hoàng Hạ -> 11=Thiên Thượng)
+     */
+    private int getPillGrade(ItemStack item) {
+        String gradeStr = ItemBuilder.getPersistentData(item, KEY_PILL_GRADE);
+        if (gradeStr != null) {
+            try {
+                return Integer.parseInt(gradeStr);
+            } catch (NumberFormatException e) {
+                return 0;
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Lấy multiplier từ grade index
+     */
+    private double getGradeMultiplier(int gradeIndex) {
+        if (gradeIndex < 0 || gradeIndex >= GRADE_MULTIPLIERS.length) return 1.0;
+        return GRADE_MULTIPLIERS[gradeIndex];
+    }
+
+    /**
      * Lấy số charge còn lại từ item
      */
     private int getCharges(ItemStack item) {
         String chargesStr = ItemBuilder.getPersistentData(item, KEY_PILL_CHARGES);
         if (chargesStr != null) {
             try {
-                return Integer.parseInt(chargesStr);
+                int charges = Integer.parseInt(chargesStr);
+                if (charges > 0) return charges;
             } catch (NumberFormatException e) {
-                return 1; // fallback
+                // ignore
             }
         }
-        return 1; // item cũ không có charge data
+        // Fallback: không có persistent data -> kiểm tra stack size
+        if (item.getAmount() > 1) {
+            // Item cũ dùng stack amount làm charge
+            return item.getAmount();
+        }
+        return 10; // Default cho item mới
     }
 
     /**
@@ -193,12 +232,14 @@ public class PillUseListener implements Listener {
      */
     private void consumeCharge(Player player, ItemStack item) {
         int charges = getCharges(item);
+        plugin.getLogger().info("[PillDebug] consumeCharge: current charges=" + charges + " for " + player.getName());
         charges--;
 
         if (charges <= 0) {
             // Hết charge - xóa item
             player.getInventory().setItemInMainHand(null);
             MessageUtils.send(player, "&cLọ đan dược đã hết!");
+            plugin.getLogger().info("[PillDebug] Item removed (charges depleted) for " + player.getName());
         } else {
             // Còn charge - update persistent data
             ItemMeta meta = item.getItemMeta();
@@ -206,12 +247,12 @@ public class PillUseListener implements Listener {
                 NamespacedKey key = new NamespacedKey(plugin, KEY_PILL_CHARGES);
                 meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, String.valueOf(charges));
 
-                // Cập nhật lore để hiển thị số lần còn lại
+                // Cập nhật lore để hiển thị số lần còn lại (ví dụ: 10/10)
                 List<String> lore = meta.getLore();
                 if (lore != null) {
                     for (int i = 0; i < lore.size(); i++) {
                         if (lore.get(i).contains("Lượng dùng:")) {
-                            lore.set(i, ColorUtils.colorize("&7Lượng dùng: &e" + charges + " &7lần"));
+                            lore.set(i, ColorUtils.colorize("&7Lượng dùng: &e" + charges + "/" + DEFAULT_CHARGES + " &7lần"));
                             break;
                         }
                     }
@@ -220,6 +261,7 @@ public class PillUseListener implements Listener {
 
                 item.setItemMeta(meta);
                 player.updateInventory();
+                plugin.getLogger().info("[PillDebug] Charges updated to " + charges + " for " + player.getName());
             }
         }
     }
@@ -232,40 +274,55 @@ public class PillUseListener implements Listener {
     // Trả về true nếu dùng thành công (để giảm charge)
 
     /**
-     * Hồi Linh Đan - Hồi 30 linh lực
+     * Hồi Linh Đan - Hồi linh lực (đọc từ config)
      */
-    private boolean useHoiLinhDan(Player player, PlayerCultivationData data) {
+    private boolean useHoiLinhDan(Player player, PlayerCultivationData data, ItemStack item) {
         if (data.getMana() >= data.getMaxMana()) {
             MessageUtils.send(player, "&cLinh lực đã đầy, không thể sử dụng!");
             return false;
         }
-        data.regenMana(30);
-        MessageUtils.send(player, "&a✦ Hồi Linh Đan: Hồi phục &b30 &alinh lực!");
+        double mult = getGradeMultiplier(getPillGrade(item));
+        PillConfig.PillEffect effect = plugin.getPillConfig().getEffect("HOI_LINH_DAN");
+        int manaRegen = (effect != null) ? (int)(effect.baseRecover * mult) : (int)(30 * mult);
+        data.regenMana(manaRegen);
+        MessageUtils.send(player, "&a✦ Hồi Linh Đan: Hồi phục &b" + manaRegen + " &alinh lực! (x" + String.format("%.1f", mult) + ")");
         MessageUtils.playSound(player, Sound.ENTITY_GENERIC_DRINK);
         return true;
     }
 
     /**
-     * Đại Hồi Linh Đan - Hồi 100 linh lực + hiệu ứng hồi phục 30s
+     * Đại Hồi Linh Đan - Hồi linh lực lớn + hồi phục (đọc từ config)
      */
-    private boolean useDaiHoiLinhDan(Player player, PlayerCultivationData data) {
+    private boolean useDaiHoiLinhDan(Player player, PlayerCultivationData data, ItemStack item) {
         if (data.getMana() >= data.getMaxMana()) {
             MessageUtils.send(player, "&cLinh lực đã đầy, không thể sử dụng!");
             return false;
         }
-        data.regenMana(100);
-        player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 600, 0, false, true, true));
-        MessageUtils.send(player, "&b✦ Đại Hồi Linh Đan: Hồi phục &b100 &7linh lực + hồi phục 30s!");
+        double mult = getGradeMultiplier(getPillGrade(item));
+        PillConfig.PillEffect effect = plugin.getPillConfig().getEffect("DAI_HOI_LINH_DAN");
+        int manaRegen = (effect != null) ? (int)(effect.baseRecover * mult) : (int)(100 * mult);
+        int regenDuration = (effect != null) ? (int)(effect.baseDuration * mult) : (int)(30 * mult);
+        data.regenMana(manaRegen);
+        player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, regenDuration * 20, 0, false, true, true));
+        MessageUtils.send(player, "&b✦ Đại Hồi Linh Đan: Hồi phục &b" + manaRegen + " &7linh lực + hồi phục " + regenDuration + "s! (x" + String.format("%.1f", mult) + ")");
         MessageUtils.playSound(player, Sound.ENTITY_GENERIC_DRINK);
         return true;
     }
 
     /**
-     * Cương Thể Đan - Tăng 20% sát thương trong 60 giây
+     * Cương Thể Đan - Tăng sát thương (đọc từ config)
      */
-    private boolean useCuongTheDan(Player player, PlayerCultivationData data) {
-        player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 1200, 0, false, true, true));
-        MessageUtils.send(player, "&c✦ Cương Thể Đan: Tăng &c20% sát thương &7trong 60 giây!");
+    private boolean useCuongTheDan(Player player, PlayerCultivationData data, ItemStack item) {
+        double mult = getGradeMultiplier(getPillGrade(item));
+        PillConfig.PillEffect effect = plugin.getPillConfig().getEffect("CUONG_THE_DAN");
+        int baseDmg = (effect != null) ? effect.baseDmg : 20;
+        int baseDuration = (effect != null) ? effect.baseDuration : 60;
+        int level = Math.min(4, (int)(mult / 2));
+        int bonusDmg = level * 5;
+        int duration = (int)(baseDuration * mult);
+        int totalDmg = baseDmg + bonusDmg;
+        player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, duration * 20, level, false, true, true));
+        MessageUtils.send(player, "&c✦ Cương Thể Đan: Tăng &c" + totalDmg + "% sát thương &7trong " + duration + " giây! (x" + String.format("%.1f", mult) + ")");
         MessageUtils.playSound(player, Sound.ENTITY_GENERIC_DRINK);
         return true;
     }
@@ -273,7 +330,7 @@ public class PillUseListener implements Listener {
     /**
      * Thanh Tâm Đan - Giải trừ mọi trạng thái xấu
      */
-    private boolean useThanhTamDan(Player player, PlayerCultivationData data) {
+    private boolean useThanhTamDan(Player player, PlayerCultivationData data, ItemStack item) {
         player.removePotionEffect(PotionEffectType.POISON);
         player.removePotionEffect(PotionEffectType.BLINDNESS);
         player.removePotionEffect(PotionEffectType.SLOWNESS);
@@ -291,22 +348,34 @@ public class PillUseListener implements Listener {
     }
 
     /**
-     * Tốc Thánh Đan - Tăng 50% tốc độ trong 30 giây
+     * Tốc Thánh Đan - Tăng tốc độ (đọc từ config)
      */
-    private boolean useTocThanhDan(Player player, PlayerCultivationData data) {
-        player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 600, 1, false, true, true));
-        MessageUtils.send(player, "&b✦ Tốc Thánh Đan: Tăng &b50% tốc độ &7trong 30 giây!");
+    private boolean useTocThanhDan(Player player, PlayerCultivationData data, ItemStack item) {
+        double mult = getGradeMultiplier(getPillGrade(item));
+        PillConfig.PillEffect effect = plugin.getPillConfig().getEffect("TOC_THANH_DAN");
+        int baseRegen = (effect != null) ? effect.baseRegen : 50;
+        int baseDuration = (effect != null) ? effect.baseDuration : 300;
+        int level = Math.min(4, (int)(mult / 2));
+        int bonusRegen = level * 20;
+        int duration = (int)(baseDuration * mult);
+        int totalRegen = baseRegen + bonusRegen;
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, duration * 20, level, false, true, true));
+        MessageUtils.send(player, "&b✦ Tốc Thánh Đan: Tăng &b" + totalRegen + "% tốc độ &7trong " + duration + " giây! (x" + String.format("%.1f", mult) + ")");
         MessageUtils.playSound(player, Sound.ENTITY_GENERIC_DRINK);
         return true;
     }
 
     /**
-     * Tu Luyện Đan - +50 EXP tu luyện
+     * Tu Luyện Đan - +EXP tu luyện (đọc từ config)
      */
-    private boolean useTuLuyenDan(Player player, PlayerCultivationData data) {
+    private boolean useTuLuyenDan(Player player, PlayerCultivationData data, ItemStack item) {
+        double mult = getGradeMultiplier(getPillGrade(item));
+        PillConfig.PillEffect effect = plugin.getPillConfig().getEffect("TU_LUYEN_DAN");
+        int baseExp = (effect != null) ? effect.baseExp : 50;
+        int expAmount = (int)(baseExp * mult);
         int oldLevel = data.getLevel();
-        plugin.getCultivationManager().addExperience(player, 50);
-        MessageUtils.send(player, "&5✦ Tu Luyện Đan: +50 EXP tu luyện!");
+        plugin.getCultivationManager().addExperience(player, expAmount);
+        MessageUtils.send(player, "&5✦ Tu Luyện Đan: +" + expAmount + " EXP tu luyện! (x" + String.format("%.1f", mult) + ")");
         if (data.getLevel() > oldLevel) {
             MessageUtils.send(player, "&d&l✦ THĂNG CẤP! Bạn đã lên cấp &e" + data.getLevel());
         }
@@ -315,9 +384,9 @@ public class PillUseListener implements Listener {
     }
 
     /**
-     * Phi Thăng Đan - +500 EXP (1 lần/đại cảnh giới)
+     * Phi Thăng Đan - +EXP lớn (đọc từ config)
      */
-    private boolean usePhiThangDan(Player player, PlayerCultivationData data) {
+    private boolean usePhiThangDan(Player player, PlayerCultivationData data, ItemStack item) {
         int currentRealm = data.getLevel() / 10;
         UUID uuid = player.getUniqueId();
         Integer lastUsedRealm = phiThangDanUsedRealms.get(uuid);
@@ -328,10 +397,14 @@ public class PillUseListener implements Listener {
             return false;
         }
 
+        double mult = getGradeMultiplier(getPillGrade(item));
+        PillConfig.PillEffect effect = plugin.getPillConfig().getEffect("PHI_THANG_DAN");
+        int baseExp = (effect != null) ? effect.baseExp : 500;
+        int expAmount = (int)(baseExp * mult);
         phiThangDanUsedRealms.put(uuid, currentRealm);
         int oldLevel = data.getLevel();
-        plugin.getCultivationManager().addExperience(player, 500);
-        MessageUtils.send(player, "&6✦ Phi Thăng Đan: +500 EXP tu luyện!");
+        plugin.getCultivationManager().addExperience(player, expAmount);
+        MessageUtils.send(player, "&6✦ Phi Thăng Đan: +" + expAmount + " EXP tu luyện! (x" + String.format("%.1f", mult) + ")");
         if (data.getLevel() > oldLevel) {
             MessageUtils.send(player, "&d&l✦ THĂNG CẤP! Bạn đã lên cấp &e" + data.getLevel());
         }
@@ -340,40 +413,55 @@ public class PillUseListener implements Listener {
     }
 
     /**
-     * Bách Độc Đan - Miễn nhiễm độc 5 phút
+     * Bách Độc Đan - Miễn nhiễm độc (đọc từ config)
      */
-    private boolean useBachDocDan(Player player, PlayerCultivationData data) {
+    private boolean useBachDocDan(Player player, PlayerCultivationData data, ItemStack item) {
+        double mult = getGradeMultiplier(getPillGrade(item));
+        PillConfig.PillEffect effect = plugin.getPillConfig().getEffect("BACH_DOC_DAN");
+        int baseDuration = (effect != null) ? effect.baseDuration : 300;
+        int duration = (int)(baseDuration * mult);
         player.removePotionEffect(PotionEffectType.POISON);
-        player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 6000, 0, false, true, true));
-        MessageUtils.send(player, "&9✦ Bách Độc Đan: Miễn nhiễm độc &95 &7phút!");
+        player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, duration * 20, 0, false, true, true));
+        MessageUtils.send(player, "&9✦ Bách Độc Đan: Miễn nhiễm độc &9" + duration + " &7giây! (x" + String.format("%.1f", mult) + ")");
         MessageUtils.playSound(player, Sound.ENTITY_GENERIC_DRINK);
         return true;
     }
 
     /**
-     * Thiên Hồi Đan - Hồi 50% HP + 50% Linh lực
+     * Thiên Hồi Đan - Hồi HP + Linh lực (đọc từ config)
      */
-    private boolean useThienHoiDan(Player player, PlayerCultivationData data) {
+    private boolean useThienHoiDan(Player player, PlayerCultivationData data, ItemStack item) {
+        double mult = getGradeMultiplier(getPillGrade(item));
+        PillConfig.PillEffect effect = plugin.getPillConfig().getEffect("THIEN_HOI_DAN");
+        int baseHeal = (effect != null) ? effect.baseHeal : 50;
+        int baseRecover = (effect != null) ? effect.baseRecover : 50;
         double maxHealth = player.getMaxHealth();
         double currentHealth = player.getHealth();
-        double healAmount = maxHealth * 0.5;
+        double healPercent = Math.min(1.0, (baseHeal * mult) / 100.0);
+        double healAmount = maxHealth * healPercent;
         player.setHealth(Math.min(maxHealth, currentHealth + healAmount));
-
-        int manaHeal = data.getMaxMana() / 2;
+        int manaHeal = (int)(data.getMaxMana() * (baseRecover * mult / 100.0));
         data.regenMana(manaHeal);
-
-        MessageUtils.send(player, "&6✦ Thiên Hồi Đan: Hồi &a50% HP &7+ &b50% linh lực!");
+        MessageUtils.send(player, "&6✦ Thiên Hồi Đan: Hồi &a" + (int)(healPercent*100) + "% HP &7+ &b" + (int)(baseRecover * mult) + "% linh lực! (x" + String.format("%.1f", mult) + ")");
         MessageUtils.playSound(player, Sound.ENTITY_PLAYER_LEVELUP);
         return true;
     }
 
     /**
-     * Phê Ma Đan - Tăng 30% sát thương vs quái 2 phút
+     * Phê Ma Đan - Tăng sát thương vs quái (đọc từ config)
      */
-    private boolean usePheMaDan(Player player, PlayerCultivationData data) {
-        player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 2400, 1, false, true, true));
-        pheMaDanExpiry.put(player.getUniqueId(), System.currentTimeMillis() + 120000);
-        MessageUtils.send(player, "&8✦ Phê Ma Đan: Tăng &c30% sát thương &7vs quái trong 2 phút!");
+    private boolean usePheMaDan(Player player, PlayerCultivationData data, ItemStack item) {
+        double mult = getGradeMultiplier(getPillGrade(item));
+        PillConfig.PillEffect effect = plugin.getPillConfig().getEffect("PHE_MA_DAN");
+        int baseDmg = (effect != null) ? effect.baseDmg : 30;
+        int baseDuration = (effect != null) ? effect.baseDuration : 120;
+        int level = Math.min(4, (int)(mult / 2));
+        int bonusDmg = level * 10;
+        int duration = (int)(baseDuration * mult);
+        int totalDmg = baseDmg + bonusDmg;
+        player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, duration * 20, level + 1, false, true, true));
+        pheMaDanExpiry.put(player.getUniqueId(), System.currentTimeMillis() + (duration * 50L));
+        MessageUtils.send(player, "&8✦ Phê Ma Đan: Tăng &c" + totalDmg + "% sát thương &7vs quái trong " + duration + " giây! (x" + String.format("%.1f", mult) + ")");
         MessageUtils.playSound(player, Sound.ENTITY_GENERIC_DRINK);
         return true;
     }
@@ -381,7 +469,7 @@ public class PillUseListener implements Listener {
     /**
      * Trường Thọ Đan - Hồi sinh 1 lần (CD 1h)
      */
-    private boolean useTruongThoDan(Player player, PlayerCultivationData data) {
+    private boolean useTruongThoDan(Player player, PlayerCultivationData data, ItemStack item) {
         UUID uuid = player.getUniqueId();
         Long lastUsed = truongThoDanExpiry.get(uuid);
         long now = System.currentTimeMillis();
@@ -392,8 +480,10 @@ public class PillUseListener implements Listener {
             return false;
         }
 
-        truongThoDanExpiry.put(uuid, now + 3600000);
-        MessageUtils.send(player, "&6✦ Trường Thọ Đan: Đã kích hoạt hồi sinh! &7(CD 1h)");
+        double mult = getGradeMultiplier(getPillGrade(item));
+        long cdMs = (long)(3600000 / Math.min(mult, 10.0));
+        truongThoDanExpiry.put(uuid, now + cdMs);
+        MessageUtils.send(player, "&6✦ Trường Thọ Đan: Đã kích hoạt hồi sinh! &7(CD " + (cdMs/1000/60) + " phút)");
         MessageUtils.playSound(player, Sound.ENTITY_PLAYER_LEVELUP);
         return true;
     }
