@@ -80,6 +80,12 @@ public class AdminMenuGUI implements Listener {
         4.5, 5.0, 6.0, 7.0, 8.0
     };
 
+    // Grade multipliers cho đan dược (đồng bộ với AlchemyCraftGUI và PillUseListener)
+    // 12 phẩm cấp: Hoàng Hạ=0 → Thiên Thượng=11
+    private static final double[] PILL_GRADE_MULTIPLIERS = {
+        1.0, 1.3, 1.6, 2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 6.0, 7.5, 10.0
+    };
+
     // Helper: build artifact display name
     private static String artifactName(String baseName, int tierIndex) {
         String[] g = ARTIFACT_GRADES[tierIndex];
@@ -360,19 +366,10 @@ public class AdminMenuGUI implements Listener {
             String pillId = extractPillId(def.displayName);
             plugin.getLogger().info("[AdminDebug] pillId: " + pillId);
             
-            // Parse multiplier từ lore cũ
-            double mult = 1.0;
-            if (def.lore.contains("x")) {
-                try {
-                    String[] parts = def.lore.split("x");
-                    if (parts.length > 1) {
-                        mult = Double.parseDouble(parts[1].split("\n")[0].trim());
-                    }
-                } catch (Exception e) {
-                    plugin.getLogger().warning("[AdminDebug] parse mult error: " + e.getMessage());
-                }
-            }
-            plugin.getLogger().info("[AdminDebug] multiplier: " + mult);
+            // Lấy multiplier từ grade index (đồng bộ với PillUseListener)
+            int gradeIdx = extractPillGrade(def.displayName);
+            double mult = PILL_GRADE_MULTIPLIERS[Math.min(gradeIdx, PILL_GRADE_MULTIPLIERS.length - 1)];
+            plugin.getLogger().info("[AdminDebug] gradeIdx: " + gradeIdx + " multiplier: " + mult);
             
             String effectLore = getPillEffectLore(pillId, mult);
             plugin.getLogger().info("[AdminDebug] effectLore: " + effectLore);
@@ -566,18 +563,10 @@ public class AdminMenuGUI implements Listener {
             String pillId = extractPillId(matched.displayName);
             plugin.getLogger().info("[AdminDebug] pillId: " + pillId);
             
-            double mult = 1.0;
-            if (matched.lore.contains("x")) {
-                try {
-                    String[] parts = matched.lore.split("x");
-                    if (parts.length > 1) {
-                        mult = Double.parseDouble(parts[1].split("\n")[0].trim());
-                    }
-                } catch (Exception e) {
-                    plugin.getLogger().warning("[AdminDebug] parse mult error: " + e.getMessage());
-                }
-            }
-            plugin.getLogger().info("[AdminDebug] multiplier: " + mult);
+            // Lấy multiplier từ grade index (đồng bộ với PillUseListener)
+            int gradeIdx = extractPillGrade(matched.displayName);
+            double mult = PILL_GRADE_MULTIPLIERS[Math.min(gradeIdx, PILL_GRADE_MULTIPLIERS.length - 1)];
+            plugin.getLogger().info("[AdminDebug] gradeIdx: " + gradeIdx + " multiplier: " + mult);
             
             String effectLore = getPillEffectLore(pillId, mult);
             plugin.getLogger().info("[AdminDebug] effectLore: " + effectLore);
