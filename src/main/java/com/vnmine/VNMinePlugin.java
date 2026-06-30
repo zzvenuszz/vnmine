@@ -43,6 +43,9 @@ import com.vnmine.cultivation.MeditationCommand;
 import com.vnmine.cultivation.MeditationConfig;
 import com.vnmine.biome.BiomeQiManager;
 import com.vnmine.world.WorldManager;
+import com.vnmine.spiritfarm.SpiritFarmManager;
+import com.vnmine.spiritfarm.SpiritFarmListener;
+import com.vnmine.spiritfarm.SpiritNPCListener;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
 import org.bukkit.World;
@@ -100,6 +103,9 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
 
     private BiomeQiManager biomeQiManager;
     private PillConfig pillConfig;
+    private SpiritFarmManager spiritFarmManager;
+    private SpiritFarmListener spiritFarmListener;
+    private SpiritNPCListener spiritNPCListener;
 
     // === GETTERS ===
     public CultivationManager getCultivationManager() { return cultivationManager; }
@@ -116,6 +122,9 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
     public MeditationConfig getMeditationConfig() { return meditationConfig; }
     public BiomeQiManager getBiomeQiManager() { return biomeQiManager; }
     public PillConfig getPillConfig() { return pillConfig; }
+    public AlchemyCraftGUI getAlchemyCraftGUI() { return alchemyCraftGUI; }
+    public ArtifactCraftGUI getArtifactCraftGUI() { return artifactCraftGUI; }
+    public SpiritFarmManager getSpiritFarmManager() { return spiritFarmManager; }
 
     @Override
     public void onEnable() {
@@ -188,6 +197,13 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         MountItemListener mountItemListener = new MountItemListener(this);
         PhoenixRebirthListener phoenixRebirthListener = new PhoenixRebirthListener(this);
 
+        // Khởi tạo Spirit Farm
+        spiritFarmManager = new SpiritFarmManager(this);
+        spiritFarmManager.initialize();
+        spiritFarmListener = new SpiritFarmListener(this);
+        spiritFarmListener.setFarmManager(spiritFarmManager);
+        spiritNPCListener = new SpiritNPCListener(this, spiritFarmManager);
+
         // Register events
         getServer().getPluginManager().registerEvents(blockDropListener, this);
         getServer().getPluginManager().registerEvents(artifactAbilityListener, this);
@@ -208,6 +224,8 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         getServer().getPluginManager().registerEvents(mountItemListener, this);
         getServer().getPluginManager().registerEvents(phoenixRebirthListener, this);
         getServer().getPluginManager().registerEvents(meditationListener, this);
+        getServer().getPluginManager().registerEvents(spiritFarmListener, this);
+        getServer().getPluginManager().registerEvents(spiritNPCListener, this);
 
         // Register commands
         getCommand("vnmine").setExecutor(this);
@@ -241,6 +259,7 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         if (cultivationManager != null) cultivationManager.saveData();
         if (npcManager != null) npcManager.despawnAll();
         if (mountManager != null) mountManager.reload();
+        if (spiritFarmManager != null) spiritFarmManager.shutdown();
         getLogger().info("VNMine plugin da duoc tat!");
     }
 
@@ -298,6 +317,12 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
                     sender.sendMessage("§cBạn không có quyền sử dụng lệnh này! (Yêu cầu OP)");
                     return true;
                 }
+                
+                // Xử lý /vnadmin give spirit-herb
+                if (args.length >= 5 && args[0].equalsIgnoreCase("give") && args[2].equalsIgnoreCase("spirit-herb")) {
+                    return handleAdminGiveSpiritHerb(sender, args);
+                }
+                
                 if (adminMenuGUI != null) {
                     adminMenuGUI.open(adminPlayer);
                 }
@@ -977,6 +1002,71 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
                 MessageUtils.send(sender, "&cSử dụng: /vnmine player <tên> skill <learn|remove> <skill_id>");
                 return true;
         }
+        return true;
+    }
+
+    // ==================== ADMIN GIVE SPIRIT-HERB ====================
+    /**
+     * Xử lý lệnh /vnadmin give <player> spirit-herb <herb_id> <age_code> <amount>
+     * Age code: 1→Trưởng Thành, 2→1 Năm, 3→10 Năm, 4→100 Năm, 5→1000 Năm, 6→10000 Năm
+     */
+    private boolean handleAdminGiveSpiritHerb(CommandSender sender, String[] args) {
+        // args[0]=give, args[1]=player, args[2]=spirit-herb, args[3]=herb_id, args[4]=age_code, args[5]=amount
+        if (args.length < 6) {
+            sender.sendMessage("§cSử dụng: /vnadmin give <player> spirit-herb <herb_id> <age_code> <amount>");
+            sender.sendMessage("§7Age code: 1=Trưởng Thành, 2=1 Năm, 3=10 Năm, 4=100 Năm, 5=1000 Năm, 6=10000 Năm");
+            sender.sendMessage("§7Herb ID: LINH_THAO, HUYET_LINH_THAO, THIEN_LINH_THAO, ...");
+            return true;
+        }
+        
+        Player target = Bukkit.getPlayer(args[1]);
+        if (target == null) {
+            sender.sendMessage("§cNgười chơi '" + args[1] + "' không trực tuyến!");
+            return true;
+        }
+        
+        String herbId = args[3].toUpperCase();
+        com.vnmine.spiritfarm.SpiritHerb herb = com.vnmine.spiritfarm.SpiritHerb.getHerb(herbId);
+        if (herb == null) {
+            sender.sendMessage("§cKhông tìm thấy linh thảo ID: " + herbId);
+            sender.sendMessage("§7Các ID hợp lệ: LINH_THAO, NGUYET_QUANG_THAO, BINH_LINH_THAO, LAM_LINH_THAO, LOI_LINH_THAO, HUYEN_BINH_THAO, HUYET_LINH_THAO, HOA_LINH_THAO, HAC_LINH_THAO, KIM_LINH_THAO, LONG_HUYET_THAO, THIEN_LINH_THAO, PHUNG_LINH_THAO, VAN_NIEN_LINH_CHI, LUYEN_THAN_THAO, TIEN_THAO, LONG_LINH_THAO, THANH_LONG_THAO, HONG_MONG_THAO, THIEN_HA_THAO");
+            return true;
+        }
+        
+        int ageCode;
+        try {
+            ageCode = Integer.parseInt(args[4]);
+            if (ageCode < 1 || ageCode > 6) {
+                sender.sendMessage("§cAge code phải từ 1 đến 6!");
+                return true;
+            }
+        } catch (NumberFormatException e) {
+            sender.sendMessage("§cAge code phải là số từ 1-6!");
+            return true;
+        }
+        
+        int amount;
+        try {
+            amount = Integer.parseInt(args[5]);
+            if (amount < 1 || amount > 64) {
+                sender.sendMessage("§cSố lượng phải từ 1 đến 64!");
+                return true;
+            }
+        } catch (NumberFormatException e) {
+            sender.sendMessage("§cSố lượng phải là số nguyên!");
+            return true;
+        }
+        
+        com.vnmine.spiritfarm.SpiritHerb.HerbQuality quality = com.vnmine.spiritfarm.SpiritHerb.HerbQuality.fromAgeCode(ageCode);
+        org.bukkit.inventory.ItemStack herbItem = herb.createHerbItem(quality, amount);
+        
+        java.util.Map<Integer, org.bukkit.inventory.ItemStack> leftover = target.getInventory().addItem(herbItem);
+        for (org.bukkit.inventory.ItemStack drop : leftover.values()) {
+            target.getWorld().dropItemNaturally(target.getLocation(), drop);
+        }
+        
+        sender.sendMessage("§aĐã give " + amount + "x " + herb.getName() + " (" + quality.getDisplay() + "&a) cho " + target.getName());
+        com.vnmine.util.MessageUtils.send(target, "&a✦ Bạn nhận được &e" + amount + "x &f" + herb.getName() + " &7(" + quality.getDisplay() + "&7) từ admin!");
         return true;
     }
 

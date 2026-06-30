@@ -64,14 +64,15 @@ public class PillConfig {
             plugin.getLogger().info("[PillConfig] Đã load " + effects.size() + " loại đan dược effects từ cultivation.yml");
         }
         
-        // Load flavor texts
-        ConfigurationSection flavorSection = config.getConfigurationSection("pill-flavor-texts");
-        if (flavorSection == null) {
-            plugin.getLogger().warning("[PillConfig] Không tìm thấy section 'pill-flavor-texts' trong cultivation.yml");
-            flavorsEnabled = false;
-        } else {
-            flavorTexts.clear();
-            int flavorCount = 0;
+        // Load flavor texts (từ section pill-flavor-texts và pill-flavor-texts-new)
+        flavorTexts.clear();
+        int flavorCount = 0;
+        
+        String[] flavorSections = {"pill-flavor-texts", "pill-flavor-texts-new"};
+        for (String sectionName : flavorSections) {
+            ConfigurationSection flavorSection = config.getConfigurationSection(sectionName);
+            if (flavorSection == null) continue;
+            
             for (String key : flavorSection.getKeys(false)) {
                 java.util.List<String> flavors = flavorSection.getStringList(key);
                 if (!flavors.isEmpty()) {
@@ -79,8 +80,14 @@ public class PillConfig {
                     flavorCount++;
                 }
             }
+        }
+        
+        if (flavorCount > 0) {
             plugin.getLogger().info("[PillConfig] Đã load " + flavorCount + " loại đan dược flavor texts từ cultivation.yml");
             flavorsEnabled = true;
+        } else {
+            plugin.getLogger().warning("[PillConfig] Không tìm thấy flavor texts nào trong cultivation.yml");
+            flavorsEnabled = false;
         }
     }
 

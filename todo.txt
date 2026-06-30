@@ -1,0 +1,145 @@
+# ==========================================
+# VNMine — TODO & KẾ HOẠCH PHÁT TRIỂN
+# ==========================================
+# Tổng hợp các kế hoạch lớn cần thực hiện
+# ==========================================
+
+## 📌 MỤC TIÊU TỔNG QUAN
+- Tạo lại hệ thống Linh Thảo đa dạng (20 loại) + hạt giống tương ứng
+- Thêm 12 loại đan dược mới (tổng 23)
+- Sửa cơ chế luyện đan dùng persistent data thay vì Material name
+- Thêm NPC mua linh điền
+- Thêm lệnh /vnadmin give spirit-herb
+- Cập nhật Admin Menu GUI đầy đủ
+- Cập nhật README.md
+
+---
+
+## ✅ CHECKLIST TIẾN ĐỘ (đánh dấu [x] khi hoàn thành)
+
+### Bước 1: Thiết kế lại hệ thống Linh Thảo & Hạt Giống
+- [ ] Cập nhật SpiritHerb.java — thêm HerbQuality enum, material mapping
+- [ ] Cập nhật SpiritFarmManager.java — đăng ký 20 loại linh thảo với Material phù hợp
+- [ ] Tạo hạt giống cho từng loại linh thảo
+- [ ] Cập nhật cơ chế gieo trồng & thu hoạch với age tracking
+
+### Bước 2: Sửa cơ chế kiểm tra nguyên liệu luyện đan
+- [ ] Sửa AlchemyCraftGUI.checkIngredients() dùng persistent data (vnmine_herb) thay vì Material name
+- [ ] Đổi AlchemyRecipe.ingredients từ Material name -> herb ID
+- [ ] Cập nhật 11 công thức cũ
+
+### Bước 3: Thêm 12 loại đan dược mới (tổng 23)
+- [ ] Thêm 12 effect mới vào cultivation.yml
+- [ ] Cập nhật PILL_MATERIALS trong AlchemyCraftGUI
+- [ ] Thêm 12 công thức mới vào RECIPES
+- [ ] Cập nhật ALL_PILLS trong AdminMenuGUI
+- [ ] Thêm xử lý 12 đan dược mới vào PillUseListener
+
+### Bước 4: Cập nhật Admin Menu GUI
+- [ ] Cập nhật danh sách HERBS (20 loại, phân cấp Hạ/Trung/Thượng/Tiên)
+- [ ] Cập nhật getPillMaterial() cho 12 đan dược mới
+- [ ] Cập nhật extractPillId() cho 12 đan dược mới
+
+### Bước 5: Thêm lệnh /vnadmin give spirit-herb
+- [ ] Thêm xử lý lệnh trong VNMinePlugin.java
+- [ ] Tạo item linh thảo với age code (1-6)
+- [ ] Cập nhật GiveCommand.java hỗ trợ spirit-herb type
+
+### Bước 6: Tạo NPC mua linh điền
+- [ ] Cập nhật SpiritNPCListener.java — xử lý click NPC mua linh thảo
+- [ ] Thêm NPC type "Linh Thảo Thương" trong NPCManager
+- [ ] Tính giá linh thảo theo phẩm cấp + số năm tuổi
+
+### Bước 7: Cập nhật SpiritHerb.java
+- [ ] Thêm enum HerbQuality (6 cấp: Mầm Non, Trưởng Thành, 1 năm, 10 năm, 100 năm, 1000 năm, 10000 năm)
+- [ ] Thêm mapping Material -> Herb
+- [ ] Thêm helper tạo item linh thảo với age
+
+### Bước 8: Cập nhật README.md
+- [ ] Thêm ID tất cả linh thảo (20 loại)
+- [ ] Thêm lệnh /vnadmin give spirit-herb
+- [ ] Cập nhật danh sách đan dược (23 loại)
+- [ ] Cập nhật công thức luyện đan
+- [ ] Thêm hướng dẫn về hệ thống Linh Điền & NPC
+
+---
+
+## 📋 DANH SÁCH 20 LINH THẢO
+
+| ID | Tên | Material (Game) | Phẩm Cấp |
+|:--|:----|:----------------|:---------|
+| LINH_THAO | Linh Thảo | GRASS | Hạ Phẩm |
+| NGUYET_QUANG_THAO | Nguyệt Quang Thảo | FERN | Hạ Phẩm |
+| BINH_LINH_THAO | Bình Linh Thảo | AZURE_BLUET | Hạ Phẩm |
+| LAM_LINH_THAO | Lam Linh Thảo | CORNFLOWER | Hạ Phẩm |
+| LOI_LINH_THAO | Lôi Linh Thảo | DANDELION | Hạ Phẩm |
+| HUYEN_BINH_THAO | Huyền Băng Thảo | BLUE_ORCHID | Trung Phẩm |
+| HUYET_LINH_THAO | Huyết Linh Thảo | POPPY | Trung Phẩm |
+| HOA_LINH_THAO | Hoa Linh Thảo | ALLIUM | Trung Phẩm |
+| HAC_LINH_THAO | Hạc Linh Thảo | OXEYE_DAISY | Trung Phẩm |
+| KIM_LINH_THAO | Kim Linh Thảo | SUNFLOWER | Trung Phẩm |
+| LONG_HUYET_THAO | Long Huyết Thảo | RED_TULIP | Thượng Phẩm |
+| THIEN_LINH_THAO | Thiên Linh Thảo | LILAC | Thượng Phẩm |
+| PHUNG_LINH_THAO | Phụng Linh Thảo | PEONY | Thượng Phẩm |
+| VAN_NIEN_LINH_CHI | Vạn Niên Linh Chi | ROSE_BUSH | Thượng Phẩm |
+| LUYEN_THAN_THAO | Luyện Thần Thảo | WITHER_ROSE | Thượng Phẩm |
+| TIEN_THAO | Tiên Thảo | TORCHFLOWER | Tiên Phẩm |
+| LONG_LINH_THAO | Long Linh Thảo | PINK_TULIP | Tiên Phẩm |
+| THANH_LONG_THAO | Thanh Long Thảo | PITCHER_PLANT | Tiên Phẩm |
+| HONG_MONG_THAO | Hồng Mộng Thảo | ORANGE_TULIP | Tiên Phẩm |
+| THIEN_HA_THAO | Thiên Hà Thảo | WHITE_TULIP | Tiên Phẩm |
+
+## 📋 DANH SÁCH 23 ĐAN DƯỢC
+
+| STT | ID | Tên | Tác dụng | Cấp yêu cầu |
+|:--:|:---|:----|:---------|:-----------|
+| 1 | HOI_LINH_DAN | Hồi Linh Đan | Hồi linh lực | 3 |
+| 2 | DAI_HOI_LINH_DAN | Đại Hồi Linh Đan | Hồi LL lớn + hồi phục | 10 |
+| 3 | CUONG_THE_DAN | Cương Thể Đan | Tăng sát thương | 15 |
+| 4 | THANH_TAM_DAN | Thanh Tâm Đan | Giải trừ trạng thái xấu | 5 |
+| 5 | TOC_THANH_DAN | Tốc Thánh Đan | Tăng tốc độ | 8 |
+| 6 | TU_LUYEN_DAN | Tu Luyện Đan | +EXP tu luyện | 20 |
+| 7 | PHI_THANG_DAN | Phi Thăng Đan | +EXP lớn (1 lần/đại cảnh giới) | 30 |
+| 8 | BACH_DOC_DAN | Bách Độc Đan | Miễn nhiễm độc | 12 |
+| 9 | THIEN_HOI_DAN | Thiên Hồi Đan | Hồi HP + LL lớn | 25 |
+| 10 | PHE_MA_DAN | Phê Ma Đan | Tăng sát thương vs quái | 18 |
+| 11 | TRUONG_THO_DAN | Trường Thọ Đan | Hồi sinh sau khi chết | 35 |
+| 12 | KIM_CUONG_DAN | Kim Cương Đan | Tăng giáp, giảm 30% sát thương 60s | 25 |
+| 13 | LINH_NHIEN_DAN | Linh Nhiên Đan | +20% tốc độ đánh + 15% crit 45s | 28 |
+| 14 | TIEM_HANH_DAN | Tiềm Hành Đan | Tàng hình 30s, tăng 50% ST đòn đầu | 30 |
+| 15 | PHAP_TUONG_DAN | Pháp Tướng Đan | +50% max mana 120s | 35 |
+| 16 | THAN_LONG_DAN | Thần Long Đan | Hồi 100% HP + mana + miễn dịch 3s | 40 |
+| 17 | CUONG_LUC_DAN | Cường Lực Đan | +40% sát thương cận chiến 60s | 32 |
+| 18 | HAN_BANG_DAN | Hàn Băng Đan | Làm chậm kẻ địch, tăng giáp băng | 33 |
+| 19 | LINH_PHONG_DAN | Linh Phong Đan | +30% tốc độ + nhảy cao 45s | 27 |
+| 20 | HOA_LONG_DAN | Hóa Long Đan | Biến rồng 10s (tăng ST + phòng thủ) | 55 |
+| 21 | THIEN_LINH_DAN | Thiên Linh Đan | +2000 EXP (1 lần/đại cảnh giới) | 45 |
+| 22 | DAC_COC_DAN | Đặc Cốc Đan | Reset CD tất cả skill (1 lần/giờ) | 38 |
+| 23 | VO_THUONG_DAN | Vô Thượng Đan | +100% all stats 10s (1 lần/ngày) | 70 |
+
+## 🗂️ DANH SÁCH FILE CẦN THAY ĐỔI
+
+| File | Mục đích thay đổi |
+|------|------------------|
+| SpiritHerb.java | Mở rộng enum quality, material mapping |
+| SpiritFarmManager.java | Thêm 20 loại linh thảo |
+| AlchemyCraftGUI.java | Sửa checkIngredients(), thêm 12 công thức |
+| PillUseListener.java | Thêm xử lý 12 đan dược mới |
+| AdminMenuGUI.java | Cập nhật HERBS + PILLS |
+| VNMinePlugin.java | Thêm lệnh /vnadmin give spirit-herb |
+| GiveCommand.java | Thêm type spirit-herb |
+| SpiritNPCListener.java | Logic mua linh thảo từ NPC |
+| NPCShopGUI.java | Giao dịch linh thảo |
+| NPCManager.java | Thêm type NPC mới |
+| cultivation.yml | Thêm 12 effect mới |
+| README.md | Cập nhật đầy đủ |
+
+---
+
+## 🔄 QUY TRÌNH BUILD
+
+```bash
+timeout 15m mvn clean package
+ls -lh target/*.jar
+sha256sum target/*.jar
+date -u "+%Y-%m-%d %H:%M:%S UTC"

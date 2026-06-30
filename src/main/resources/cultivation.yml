@@ -421,3 +421,112 @@ pill-effects:
     scale-duration: true
   TRUONG_THO_DAN:
     lore-template: "&7Tự động hồi sinh 1 lần"
+  # ============ 12 EFFECT MỚI ============
+  KIM_CUONG_DAN:
+    lore-template: "&7Giảm &b{dmg}% &7sát thương nhận vào, tăng giáp &7trong &b{duration}s"
+    base-dmg: 30
+    base-duration: 60
+    scale-with-grade: true
+    scale-duration: true
+  LINH_NHIEN_DAN:
+    lore-template: "&7Tăng &a{regen}% &7tốc độ đánh + &c{dmg}% &7crit &7trong &a{duration}s"
+    base-regen: 20
+    base-dmg: 15
+    base-duration: 45
+    scale-with-grade: true
+    scale-duration: true
+  TIEM_HANH_DAN:
+    lore-template: "&7Tàng hình &a{duration}s &7+ tăng &c{dmg}% &7sát thương đòn đầu"
+    base-duration: 30
+    base-dmg: 50
+    scale-with-grade: true
+    scale-duration: true
+  PHAP_TUONG_DAN:
+    lore-template: "&7Tăng &b{recover}% &7max mana &7trong &b{duration}s"
+    base-recover: 50
+    base-duration: 120
+    scale-with-grade: true
+    scale-duration: true
+  THAN_LONG_DAN:
+    lore-template: "&7Hồi &a{heal}% HP &7+ &b{recover}% &7linh lực + miễn dịch &b{duration}s"
+    base-heal: 100
+    base-recover: 100
+    base-duration: 3
+    scale-with-grade: true
+  CUONG_LUC_DAN:
+    lore-template: "&7Tăng &c{dmg}% &7sát thương cận chiến &7trong &c{duration}s"
+    base-dmg: 40
+    base-duration: 60
+    scale-with-grade: true
+    scale-duration: true
+  HAN_BANG_DAN:
+    lore-template: "&7Làm chậm kẻ địch, tăng giáp băng &7trong &a{duration}s"
+    base-duration: 60
+    scale-duration: true
+  LINH_PHONG_DAN:
+    lore-template: "&7Tăng &a{regen}% &7tốc độ + nhảy cao &7trong &a{duration}s"
+    base-regen: 30
+    base-duration: 45
+    scale-with-grade: true
+    scale-duration: true
+  HOA_LONG_DAN:
+    lore-template: "&7Biến rồng &a{duration}s &7tăng &c{dmg}% &7sát thương + &b{recover}% &7phòng thủ"
+    base-duration: 10
+    base-dmg: 50
+    base-recover: 50
+    scale-with-grade: true
+  THIEN_LINH_DAN:
+    lore-template: "&7+{exp} EXP &7(1 lần/đại cảnh giới)"
+    base-exp: 2000
+    scale-with-grade: true
+  DAC_COC_DAN:
+    lore-template: "&7Reset cooldown tất cả skill &7(1 lần/giờ)"
+    scale-with-grade: false
+  VO_THUONG_DAN:
+    lore-template: "&7Tăng &c{dmg}% &7sát thương + &a{regen}% &7tốc độ + &b{recover}% &7phòng thủ &7trong &c{duration}s &7(1 lần/ngày)"
+    base-duration: 10
+    base-dmg: 100
+    base-regen: 100
+    base-recover: 100
+    scale-with-grade: true
+
+# =============================================
+# FLAVOR TEXTS CHO 12 ĐAN DƯỢC MỚI
+# =============================================
+pill-flavor-texts-new:
+  KIM_CUONG_DAN:
+    - "&7Kiên cố như kim cương, bất hoại bất diệt"
+    - "&7Thân thể cứng hơn đá, khó bị phá hủy"
+  LINH_NHIEN_DAN:
+    - "&7Linh hoạt như tia chớp, đánh nhanh như gió"
+    - "&7Mỗi đòn đánh là một tia sét vô hình"
+  TIEM_HANH_DAN:
+    - "&7Hóa thân vào bóng tối, sát thủ vô hình"
+    - "&7Không ai thấy được ngươi, và rồi họ gục ngã"
+  PHAP_TUONG_DAN:
+    - "&7Pháp lực vô biên, linh khí cuồn cuộn"
+    - "&7Mở rộng đan điền, chứa đựng thiên địa"
+  THAN_LONG_DAN:
+    - "&7Chân long chi lực, phục sinh từ tro tàn"
+    - "&7Long huyết tái tạo, thân bất tử"
+  CUONG_LUC_DAN:
+    - "&7Lực như mãnh hổ, sức mạnh vô song"
+    - "&7Một đòn phá núi, một chưởng xé mây"
+  HAN_BANG_DAN:
+    - "&7Hàn băng ngàn năm, đóng băng địch thủ"
+    - "&7Lạnh giá thấu xương, vạn vật ngưng đọng"
+  LINH_PHONG_DAN:
+    - "&7Phiêu dật như mây, di chuyển như gió"
+    - "&7Lướt trên không trung, vượt qua thế tục"
+  HOA_LONG_DAN:
+    - "&7Thần long xuất thế, chấn động càn khôn"
+    - "&7Long uy phủ đầu, vạn vật quy phục"
+  THIEN_LINH_DAN:
+    - "&7Linh đan thiên thượng, đột phá vô song"
+    - "&7Tiên khí tràn ngập, bay lên trời cao"
+  DAC_COC_DAN:
+    - "&7Đặc cốc thần dược, tái tạo năng lượng"
+    - "&7Một lần dùng, tái tạo toàn bộ sức mạnh"
+  VO_THUONG_DAN:
+    - "&7Vô thượng đại đạo, nhất niệm vạn pháp"
+    - "&7Đỉnh cao không giới hạn, phá tan mọi ràng buộc"

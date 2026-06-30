@@ -202,6 +202,7 @@ public class ArtifactCraftGUI implements Listener {
     }
 
     public void open(Player player) {
+        plugin.getLogger().info("[ArtifactDebug] open() called for " + player.getName());
         Inventory gui = Bukkit.createInventory(null, 54, ColorUtils.colorize("&8✦ Luyện Chế Pháp Bảo ✦"));
         for (int slot : new int[]{SLOT_INPUT_1, SLOT_INPUT_2, SLOT_INPUT_3, SLOT_INPUT_4, SLOT_INPUT_5, SLOT_INPUT_6}) gui.setItem(slot, null);
         gui.setItem(SLOT_CRAFT, new ItemBuilder(Material.ANVIL).setGlow(true).setName("&6&l⚒ Chế Tạo Pháp Bảo")
@@ -234,17 +235,19 @@ public class ArtifactCraftGUI implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player)) return;
+        Player eventPlayer = (Player) event.getWhoClicked();
         String title = ColorUtils.stripColor(event.getView().getTitle());
         if (!title.contains("Luyện Chế Pháp Bảo")) return;
         int slot = event.getRawSlot();
         if (slot < 0) { event.setCancelled(true); return; }
+        plugin.getLogger().info("[ArtifactDebug] Click slot=" + slot + " player=" + eventPlayer.getName());
 
         // === Player inventory clicks (slot >= 54) ===
         if (slot >= 54) {
             // Handle shift-click from player inventory: place into input slots ONLY (not result)
             if (event.getClick() == ClickType.SHIFT_LEFT || event.getClick() == ClickType.SHIFT_RIGHT) {
                 event.setCancelled(true);
-                Player player = (Player) event.getWhoClicked();
+                Player player = eventPlayer;
                 Inventory gui = player.getOpenInventory().getTopInventory();
                 ItemStack clickedItem = event.getCurrentItem();
                 if (clickedItem == null || clickedItem.getType() == Material.AIR) return;
@@ -290,15 +293,15 @@ public class ArtifactCraftGUI implements Listener {
 
             if (slotHasItem) {
                 // Player wants to pick up the result item
-                Player player = (Player) event.getWhoClicked();
+                Player resultPlayer = eventPlayer;
                 if (event.getClick() == ClickType.SHIFT_LEFT || event.getClick() == ClickType.SHIFT_RIGHT) {
                     // Shift+click: move result directly to player inventory
                     event.setCancelled(true);
-                    Map<Integer, ItemStack> leftover = player.getInventory().addItem(currentItem.clone());
+                    Map<Integer, ItemStack> leftover = resultPlayer.getInventory().addItem(currentItem.clone());
                     if (leftover.isEmpty()) {
                         event.getView().getTopInventory().setItem(SLOT_RESULT, null);
                     }
-                    player.updateInventory();
+                    resultPlayer.updateInventory();
                     return;
                 }
                 // Normal click: don't cancel, let Bukkit handle pickup (item goes to cursor)
@@ -312,7 +315,7 @@ public class ArtifactCraftGUI implements Listener {
 
         // === All other GUI slots (borders, etc): block interaction ===
         event.setCancelled(true);
-        Player player = (Player) event.getWhoClicked();
+        Player player = eventPlayer;
         ArtifactSession session = activeSessions.get(player.getUniqueId());
         if (session == null) return;
         ItemStack clicked = event.getCurrentItem();
@@ -343,11 +346,17 @@ public class ArtifactCraftGUI implements Listener {
     }
 
     private void attemptCraft(Player player, ArtifactSession session) {
+        long startTime = System.currentTimeMillis();
+        plugin.getLogger().info("[ArtifactDebug] attemptCraft START for " + player.getName());
         Inventory gui = player.getOpenInventory().getTopInventory();
         PlayerCultivationData data = plugin.getCultivationManager().getPlayerData(player.getUniqueId());
         PlayerSkillData skillData = plugin.getCultivationManager().getPlayerSkillData(player.getUniqueId());
 
+        plugin.getLogger().info("[ArtifactDebug] playerData=" + (data != null ? "OK" : "NULL")
+            + " skillData=" + (skillData != null ? "OK" : "NULL"));
+
         if (data == null || !data.hasLearnedSkill("FORGE_MASTERY")) {
+            plugin.getLogger().info("[ArtifactDebug] FAIL: FORGE_MASTERY not learned!");
             gui.setItem(SLOT_STATUS, new ItemBuilder(Material.BARRIER)
                     .setName("&c&lChưa Học Luyện Khí Thuật!")
                     .setLore("", "&7Bạn cần học kỹ năng &6Luyện Khí Thuật",
@@ -365,7 +374,10 @@ public class ArtifactCraftGUI implements Listener {
             }
         }
 
+        plugin.getLogger().info("[ArtifactDebug] Ingredients found: " + ingredients);
+
         if (ingredients.isEmpty()) {
+            plugin.getLogger().info("[ArtifactDebug] FAIL: No ingredients!");
             gui.setItem(SLOT_STATUS, new ItemBuilder(Material.REDSTONE).setName("&c&lKhông Có Vật Liệu").setLore("", "&7Hãy đặt vật liệu vào ô bên trái!").build());
             MessageUtils.playSound(player, Sound.BLOCK_NOTE_BLOCK_BASS);
             return;
@@ -375,12 +387,19 @@ public class ArtifactCraftGUI implements Listener {
         for (ArtifactRecipe recipe : RECIPES) { if (matchesRecipe(recipe, ingredients)) { matchedRecipe = recipe; break; } }
 
         if (matchedRecipe == null) {
+            plugin.getLogger().info("[ArtifactDebug] FAIL: No matching recipe!");
+        } else {
+            plugin.getLogger().info("[ArtifactDebug] Matched recipe: " + matchedRecipe.id);
+        }
+
+        if (matchedRecipe == null) {
             gui.setItem(SLOT_STATUS, new ItemBuilder(Material.REDSTONE).setName("&c&lKhông Có Công Thức Phù Hợp").setLore("", "&7Vật liệu không khớp!").build());
             MessageUtils.playSound(player, Sound.BLOCK_NOTE_BLOCK_BASS);
             return;
         }
 
         if (data != null && data.getLevel() < matchedRecipe.requiredLevel) {
+            plugin.getLogger().info("[ArtifactDebug] FAIL: Level too low. Required=" + matchedRecipe.requiredLevel + " Current=" + data.getLevel());
             gui.setItem(SLOT_STATUS, new ItemBuilder(Material.REDSTONE_BLOCK).setName("&c&lKhông Đủ Tu Vi")
                     .setLore("", "&7Yêu cầu: &cLevel " + matchedRecipe.requiredLevel, "&7Hiện tại: &eLevel " + data.getLevel()).build());
             MessageUtils.playSound(player, Sound.BLOCK_NOTE_BLOCK_BASS);
@@ -388,10 +407,11 @@ public class ArtifactCraftGUI implements Listener {
         }
 
         int artifactGrade = calculateArtifactGrade(data, skillData);
+        long adjustedTime = matchedRecipe.craftingTime;
+        plugin.getLogger().info("[ArtifactDebug] Crafting: grade=" + artifactGrade + " time=" + adjustedTime + "s");
         String gradeDisplay = gradeDisplayName(artifactGrade);
         String profName = (skillData != null) ? ColorUtils.colorize(skillData.getForgeMasteryProficiencyName()) : "&7N/A";
         int profBonus = (skillData != null) ? skillData.getForgeGradeBonus() : 0;
-        long adjustedTime = matchedRecipe.craftingTime;
 
         gui.setItem(SLOT_STATUS, new ItemBuilder(Material.FURNACE).setName("&6&lĐang Luyện Khí...")
                 .setLore("", "&7Pháp bảo: &f&l" + matchedRecipe.displayName,
@@ -457,6 +477,10 @@ public class ArtifactCraftGUI implements Listener {
                 int percent = (int) (progress * 100);
                 bossBar.setTitle(String.format("§6🔥 [%d%%] Đang luyện khí %s...", percent, finalRecipe.displayName));
 
+                if (currentStep % 10 == 0) {
+                    plugin.getLogger().info("[ArtifactDebug] Progress: " + percent + "% for " + p.getName());
+                }
+
                 String progressText = "§6§l" + "█".repeat(Math.max(0, percent / 5)) + "§7" + "░".repeat(Math.max(0, 20 - percent / 5));
                 inv.setItem(SLOT_STATUS, new ItemBuilder(Material.FURNACE).setName("&6&lĐang Luyện Khí... " + percent + "%")
                         .setLore("", "&7Pháp bảo: &f&l" + finalRecipe.displayName,
@@ -466,6 +490,7 @@ public class ArtifactCraftGUI implements Listener {
                 p.updateInventory();
 
                 if (currentStep >= totalSteps) {
+                    plugin.getLogger().info("[ArtifactDebug] Craft completed for " + p.getName() + " time=" + (System.currentTimeMillis() - startTime) + "ms");
                     cancel(); bossBar.removeAll(); session.isCrafting = false;
                     finishCraft(p, finalGui, finalRecipe, finalData, finalSkillData, finalGradeIndex, finalGradeDisplay);
                 }
@@ -475,14 +500,22 @@ public class ArtifactCraftGUI implements Listener {
 
     private void finishCraft(Player p, Inventory inv, ArtifactRecipe recipe, PlayerCultivationData data,
                              PlayerSkillData skillData, int gradeIndex, String gradeDisplay) {
-        if (p == null || !p.isOnline()) return;
-        if (!inv.equals(p.getOpenInventory().getTopInventory())) return;
+        if (p == null || !p.isOnline()) {
+            plugin.getLogger().info("[ArtifactDebug] finishCraft: Player offline, skipping.");
+            return;
+        }
+        if (!inv.equals(p.getOpenInventory().getTopInventory())) {
+            plugin.getLogger().info("[ArtifactDebug] finishCraft: Inventory mismatch, skipping.");
+            return;
+        }
+        plugin.getLogger().info("[ArtifactDebug] finishCraft for " + p.getName() + " recipe=" + recipe.id + " grade=" + gradeIndex);
 
         double chance = recipe.successChance;
         int levelBonus = (data != null) ? data.getLevel() : 0;
         chance += levelBonus * 1.0;
         chance = Math.min(chance, 90.0);
         boolean success = new Random().nextDouble() * 100 < chance;
+        plugin.getLogger().info("[ArtifactDebug] Success chance=" + chance + " result=" + (success ? "SUCCESS" : "FAIL"));
 
         if (success) {
             double bonus = ARTIFACT_BONUS[gradeIndex];

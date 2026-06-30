@@ -39,17 +39,12 @@ public class MainMenuGUI implements Listener {
     private static final String TITLE_CULTIVATION = "Tu Vi Chi Tiết";
     private static final String TITLE_GUIDE = "Hướng Dẫn Tu Tiên";
 
-    private final Map<UUID, AlchemyCraftGUI> alchemyGUIs;
-    private final Map<UUID, ArtifactCraftGUI> artifactGUIs;
-
     public MainMenuGUI(VNMinePlugin plugin, CultivationManager cultivationManager, 
                        SkillManager skillManager, AdminMenuGUI adminMenuGUI) {
         this.plugin = plugin;
         this.cultivationManager = cultivationManager;
         this.skillManager = skillManager;
         this.adminMenuGUI = adminMenuGUI;
-        this.alchemyGUIs = new HashMap<>();
-        this.artifactGUIs = new HashMap<>();
     }
 
     /**
@@ -325,15 +320,21 @@ public class MainMenuGUI implements Listener {
     }
 
     public void openAlchemyMenu(Player player) {
-        AlchemyCraftGUI gui = alchemyGUIs.computeIfAbsent(player.getUniqueId(), 
-                k -> new AlchemyCraftGUI(plugin, this));
-        gui.open(player);
+        AlchemyCraftGUI gui = plugin.getAlchemyCraftGUI();
+        if (gui != null) {
+            gui.open(player);
+        } else {
+            MessageUtils.send(player, "&cLỗi: Không thể mở lò luyện đan!");
+        }
     }
 
     private void openArtifactCraftMenu(Player player) {
-        ArtifactCraftGUI gui = artifactGUIs.computeIfAbsent(player.getUniqueId(),
-                k -> new ArtifactCraftGUI(plugin, this));
-        gui.open(player);
+        ArtifactCraftGUI gui = plugin.getArtifactCraftGUI();
+        if (gui != null) {
+            gui.open(player);
+        } else {
+            MessageUtils.send(player, "&cLỗi: Không thể mở lò luyện chế!");
+        }
     }
 
     private void openGuide(Player player) {
@@ -482,7 +483,6 @@ public class MainMenuGUI implements Listener {
     }
 
     public void cleanupPlayer(UUID uuid) {
-        alchemyGUIs.remove(uuid);
-        artifactGUIs.remove(uuid);
+        // Không cần cleanup vì dùng instance global
     }
 }

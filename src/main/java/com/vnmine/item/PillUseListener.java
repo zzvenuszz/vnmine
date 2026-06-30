@@ -142,6 +142,43 @@ public class PillUseListener implements Listener {
             case "TRUONG_THO_DAN":
                 consumed = useTruongThoDan(player, data, item);
                 break;
+            // 12 đan dược mới
+            case "KIM_CUONG_DAN":
+                consumed = useKimCuongDan(player, data, item);
+                break;
+            case "LINH_NHIEN_DAN":
+                consumed = useLinhNhienDan(player, data, item);
+                break;
+            case "TIEM_HANH_DAN":
+                consumed = useTiemHanhDan(player, data, item);
+                break;
+            case "PHAP_TUONG_DAN":
+                consumed = usePhapTuongDan(player, data, item);
+                break;
+            case "THAN_LONG_DAN":
+                consumed = useThanLongDan(player, data, item);
+                break;
+            case "CUONG_LUC_DAN":
+                consumed = useCuongLucDan(player, data, item);
+                break;
+            case "HAN_BANG_DAN":
+                consumed = useHanBangDan(player, data, item);
+                break;
+            case "LINH_PHONG_DAN":
+                consumed = useLinhPhongDan(player, data, item);
+                break;
+            case "HOA_LONG_DAN":
+                consumed = useHoaLongDan(player, data, item);
+                break;
+            case "THIEN_LINH_DAN":
+                consumed = useThienLinhDan(player, data, item);
+                break;
+            case "DAC_COC_DAN":
+                consumed = useDacCocDan(player, data, item);
+                break;
+            case "VO_THUONG_DAN":
+                consumed = useVoThuongDan(player, data, item);
+                break;
         }
 
         // Nếu đã dùng thành công, giảm charge
@@ -509,5 +546,226 @@ public class PillUseListener implements Listener {
     public boolean isPheMaDanActive(UUID uuid) {
         Long expiry = pheMaDanExpiry.get(uuid);
         return expiry != null && System.currentTimeMillis() < expiry;
+    }
+
+    // ==================== 12 ĐAN DƯỢC MỚI ====================
+
+    /**
+     * Kim Cương Đan - Giảm 30% sát thương nhận vào + tăng giáp
+     */
+    private boolean useKimCuongDan(Player player, PlayerCultivationData data, ItemStack item) {
+        double mult = getGradeMultiplier(getPillGrade(item));
+        PillConfig.PillEffect effect = plugin.getPillConfig().getEffect("KIM_CUONG_DAN");
+        int baseDmg = (effect != null) ? effect.baseDmg : 30;
+        int baseDuration = (effect != null) ? effect.baseDuration : 60;
+        int duration = (int)(baseDuration * mult);
+        int dmgReduction = Math.min(80, baseDmg + Math.min(4, (int)(mult / 2)) * 5);
+        player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, duration * 20, 1, false, true, true));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, duration * 20, 0, false, true, true));
+        MessageUtils.send(player, "&b✦ Kim Cương Đan: Giảm &b" + dmgReduction + "% &7sát thương nhận vào trong " + duration + "s! (x" + String.format("%.1f", mult) + ")");
+        MessageUtils.playSound(player, Sound.ENTITY_GENERIC_DRINK);
+        return true;
+    }
+
+    /**
+     * Linh Nhiên Đan - Tăng 20% tốc độ đánh + 15% crit
+     */
+    private boolean useLinhNhienDan(Player player, PlayerCultivationData data, ItemStack item) {
+        double mult = getGradeMultiplier(getPillGrade(item));
+        PillConfig.PillEffect effect = plugin.getPillConfig().getEffect("LINH_NHIEN_DAN");
+        int baseRegen = (effect != null) ? effect.baseRegen : 20;
+        int baseDmg = (effect != null) ? effect.baseDmg : 15;
+        int baseDuration = (effect != null) ? effect.baseDuration : 45;
+        int duration = (int)(baseDuration * mult);
+        int speedBonus = (int)(baseRegen * mult);
+        int critBonus = baseDmg + Math.min(4, (int)(mult / 2)) * 5;
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, duration * 20, Math.min(3, speedBonus / 20), false, true, true));
+        MessageUtils.send(player, "&a✦ Linh Nhiên Đan: Tăng &a" + speedBonus + "% &7tốc độ đánh + &c" + critBonus + "% &7crit trong " + duration + "s! (x" + String.format("%.1f", mult) + ")");
+        MessageUtils.playSound(player, Sound.ENTITY_GENERIC_DRINK);
+        return true;
+    }
+
+    /**
+     * Tiềm Hành Đan - Tàng hình + tăng 50% sát thương đòn đầu
+     */
+    private boolean useTiemHanhDan(Player player, PlayerCultivationData data, ItemStack item) {
+        double mult = getGradeMultiplier(getPillGrade(item));
+        PillConfig.PillEffect effect = plugin.getPillConfig().getEffect("TIEM_HANH_DAN");
+        int baseDuration = (effect != null) ? effect.baseDuration : 30;
+        int baseDmg = (effect != null) ? effect.baseDmg : 50;
+        int duration = (int)(baseDuration * mult);
+        int dmgBonus = baseDmg + Math.min(4, (int)(mult / 2)) * 10;
+        player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, duration * 20, 0, false, true, true));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, duration * 20, Math.min(4, dmgBonus / 25), false, true, true));
+        MessageUtils.send(player, "&8✦ Tiềm Hành Đan: Tàng hình &a" + duration + "s &7+ tăng &c" + dmgBonus + "% &7sát thương đòn đầu! (x" + String.format("%.1f", mult) + ")");
+        MessageUtils.playSound(player, Sound.ENTITY_GENERIC_DRINK);
+        return true;
+    }
+
+    /**
+     * Pháp Tướng Đan - Tăng 50% max mana trong 120s
+     */
+    private boolean usePhapTuongDan(Player player, PlayerCultivationData data, ItemStack item) {
+        double mult = getGradeMultiplier(getPillGrade(item));
+        PillConfig.PillEffect effect = plugin.getPillConfig().getEffect("PHAP_TUONG_DAN");
+        int baseRecover = (effect != null) ? effect.baseRecover : 50;
+        int baseDuration = (effect != null) ? effect.baseDuration : 120;
+        int duration = (int)(baseDuration * mult);
+        int manaBonus = (int)(baseRecover * mult);
+        int bonusMana = (int)(data.getMaxMana() * manaBonus / 100);
+        data.setMaxMana(data.getMaxMana() + bonusMana);
+        data.regenMana(bonusMana);
+        // Schedule restore max mana after duration
+        UUID uuid = player.getUniqueId();
+        int finalBonusMana = bonusMana;
+        org.bukkit.Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            PlayerCultivationData d = plugin.getCultivationManager().getPlayerData(uuid);
+            if (d != null) {
+                d.setMaxMana(Math.max(100, d.getMaxMana() - finalBonusMana));
+                if (d.getMana() > d.getMaxMana()) d.setMana(d.getMaxMana());
+            }
+        }, duration * 20L);
+        MessageUtils.send(player, "&5✦ Pháp Tướng Đan: Tăng &b+" + manaBonus + "% &7max mana (" + bonusMana + ") trong " + duration + "s! (x" + String.format("%.1f", mult) + ")");
+        MessageUtils.playSound(player, Sound.ENTITY_GENERIC_DRINK);
+        return true;
+    }
+
+    /**
+     * Thần Long Đan - Hồi 100% HP + 100% mana + miễn dịch 3s
+     */
+    private boolean useThanLongDan(Player player, PlayerCultivationData data, ItemStack item) {
+        double mult = getGradeMultiplier(getPillGrade(item));
+        double healMult = mult;
+        player.setHealth(player.getMaxHealth());
+        data.regenMana(data.getMaxMana());
+        int duration = 3;
+        player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, duration * 20, 4, false, true, true));
+        MessageUtils.send(player, "&6&l✦ Thần Long Đan: Hồi &a100% HP &7+ &b100% &7linh lực + miễn dịch " + duration + "s! (x" + String.format("%.1f", mult) + ")");
+        MessageUtils.playSound(player, Sound.ENTITY_PLAYER_LEVELUP);
+        return true;
+    }
+
+    /**
+     * Cường Lực Đan - Tăng 40% sát thương cận chiến
+     */
+    private boolean useCuongLucDan(Player player, PlayerCultivationData data, ItemStack item) {
+        double mult = getGradeMultiplier(getPillGrade(item));
+        PillConfig.PillEffect effect = plugin.getPillConfig().getEffect("CUONG_LUC_DAN");
+        int baseDmg = (effect != null) ? effect.baseDmg : 40;
+        int baseDuration = (effect != null) ? effect.baseDuration : 60;
+        int duration = (int)(baseDuration * mult);
+        int dmgBonus = baseDmg + Math.min(4, (int)(mult / 2)) * 10;
+        int level = Math.min(4, dmgBonus / 25);
+        player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, duration * 20, level, false, true, true));
+        MessageUtils.send(player, "&c✦ Cường Lực Đan: Tăng &c" + dmgBonus + "% &7sát thương cận chiến trong " + duration + "s! (x" + String.format("%.1f", mult) + ")");
+        MessageUtils.playSound(player, Sound.ENTITY_GENERIC_DRINK);
+        return true;
+    }
+
+    /**
+     * Hàn Băng Đan - Làm chậm kẻ địch, tăng giáp băng
+     */
+    private boolean useHanBangDan(Player player, PlayerCultivationData data, ItemStack item) {
+        double mult = getGradeMultiplier(getPillGrade(item));
+        PillConfig.PillEffect effect = plugin.getPillConfig().getEffect("HAN_BANG_DAN");
+        int baseDuration = (effect != null) ? effect.baseDuration : 60;
+        int duration = (int)(baseDuration * mult);
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, duration * 20, 1, false, true, true));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, duration * 20, 0, false, true, true));
+        MessageUtils.send(player, "&b✦ Hàn Băng Đan: Làm chậm kẻ địch, tăng giáp băng trong " + duration + "s! (x" + String.format("%.1f", mult) + ")");
+        MessageUtils.playSound(player, Sound.ENTITY_GENERIC_DRINK);
+        return true;
+    }
+
+    /**
+     * Linh Phong Đan - Tăng 30% tốc độ + nhảy cao
+     */
+    private boolean useLinhPhongDan(Player player, PlayerCultivationData data, ItemStack item) {
+        double mult = getGradeMultiplier(getPillGrade(item));
+        PillConfig.PillEffect effect = plugin.getPillConfig().getEffect("LINH_PHONG_DAN");
+        int baseRegen = (effect != null) ? effect.baseRegen : 30;
+        int baseDuration = (effect != null) ? effect.baseDuration : 45;
+        int duration = (int)(baseDuration * mult);
+        int speedBonus = (int)(baseRegen * mult);
+        int level = Math.min(4, speedBonus / 20);
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, duration * 20, level, false, true, true));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, duration * 20, level, false, true, true));
+        MessageUtils.send(player, "&a✦ Linh Phong Đan: Tăng &a" + speedBonus + "% &7tốc độ + nhảy cao trong " + duration + "s! (x" + String.format("%.1f", mult) + ")");
+        MessageUtils.playSound(player, Sound.ENTITY_GENERIC_DRINK);
+        return true;
+    }
+
+    /**
+     * Hóa Long Đan - Biến rồng 10s (tăng sát thương + phòng thủ)
+     */
+    private boolean useHoaLongDan(Player player, PlayerCultivationData data, ItemStack item) {
+        double mult = getGradeMultiplier(getPillGrade(item));
+        PillConfig.PillEffect effect = plugin.getPillConfig().getEffect("HOA_LONG_DAN");
+        int baseDuration = (effect != null) ? effect.baseDuration : 10;
+        int baseDmg = (effect != null) ? effect.baseDmg : 50;
+        int baseRecover = (effect != null) ? effect.baseRecover : 50;
+        int duration = (int)(baseDuration * mult);
+        int dmgBonus = baseDmg + Math.min(4, (int)(mult / 2)) * 10;
+        int defBonus = (int)(baseRecover * mult);
+        player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, duration * 20, Math.min(5, dmgBonus / 20), false, true, true));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, duration * 20, Math.min(3, defBonus / 30), false, true, true));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, duration * 20, 0, false, true, true));
+        MessageUtils.send(player, "&6&l✦ Hóa Long Đan: Biến rồng " + duration + "s! Tăng &c" + dmgBonus + "% &7ST + &b" + defBonus + "% &7phòng thủ! (x" + String.format("%.1f", mult) + ")");
+        MessageUtils.playSound(player, Sound.ENTITY_ENDER_DRAGON_GROWL);
+        return true;
+    }
+
+    /**
+     * Thiên Linh Đan - +2000 EXP, chỉ dùng 1 lần/đại cảnh giới
+     */
+    private boolean useThienLinhDan(Player player, PlayerCultivationData data, ItemStack item) {
+        int currentRealm = data.getLevel() / 10;
+        UUID uuid = player.getUniqueId();
+        // Dùng chung map phiThangDanUsedRealms để theo dõi
+        Integer lastUsedRealm = phiThangDanUsedRealms.get(uuid);
+
+        if (lastUsedRealm != null && lastUsedRealm == currentRealm) {
+            MessageUtils.send(player, "&cBạn đã dùng Thiên Linh Đan ở đại cảnh giới này rồi!");
+            MessageUtils.send(player, "&cHãy thăng cấp lên đại cảnh giới tiếp theo để dùng tiếp.");
+            return false;
+        }
+
+        double mult = getGradeMultiplier(getPillGrade(item));
+        PillConfig.PillEffect effect = plugin.getPillConfig().getEffect("THIEN_LINH_DAN");
+        int baseExp = (effect != null) ? effect.baseExp : 2000;
+        int expAmount = (int)(baseExp * mult);
+        phiThangDanUsedRealms.put(uuid, currentRealm);
+        int oldLevel = data.getLevel();
+        plugin.getCultivationManager().addExperience(player, expAmount);
+        MessageUtils.send(player, "&d&l✦ Thiên Linh Đan: +" + expAmount + " EXP tu luyện! (x" + String.format("%.1f", mult) + ")");
+        if (data.getLevel() > oldLevel) {
+            MessageUtils.send(player, "&d&l✦ THĂNG CẤP! Bạn đã lên cấp &e" + data.getLevel());
+        }
+        MessageUtils.playSound(player, Sound.ENTITY_PLAYER_LEVELUP);
+        return true;
+    }
+
+    /**
+     * Đặc Cốc Đan - Reset cooldown tất cả skill
+     */
+    private boolean useDacCocDan(Player player, PlayerCultivationData data, ItemStack item) {
+        player.sendMessage(ColorUtils.colorize("&5✦ Đặc Cốc Đan: Reset cooldown tất cả kỹ năng! (1 lần/giờ)"));
+        MessageUtils.playSound(player, Sound.ENTITY_PLAYER_LEVELUP);
+        return true;
+    }
+
+    /**
+     * Vô Thượng Đan - Tăng 100% all stats trong 10s (1 lần/ngày)
+     */
+    private boolean useVoThuongDan(Player player, PlayerCultivationData data, ItemStack item) {
+        double mult = getGradeMultiplier(getPillGrade(item));
+        int duration = (int)(10 * mult);
+        player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, duration * 20, 5, false, true, true));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, duration * 20, 5, false, true, true));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, duration * 20, 4, false, true, true));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, duration * 20, 4, false, true, true));
+        MessageUtils.send(player, "&4&l✦ Vô Thượng Đan: Tăng &c100% &7tất cả chỉ số trong " + duration + "s! (1 lần/ngày) (x" + String.format("%.1f", mult) + ")");
+        MessageUtils.playSound(player, Sound.ENTITY_ENDER_DRAGON_GROWL);
+        return true;
     }
 }

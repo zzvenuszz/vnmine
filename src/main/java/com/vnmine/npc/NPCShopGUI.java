@@ -4,6 +4,7 @@ import com.vnmine.VNMinePlugin;
 import com.vnmine.cultivation.PlayerCultivationData;
 import com.vnmine.item.ItemBuilder;
 import com.vnmine.npc.NPCData.NPCTrade;
+import com.vnmine.spiritfarm.SpiritHerb;
 import com.vnmine.util.ColorUtils;
 import com.vnmine.util.MessageUtils;
 import org.bukkit.Bukkit;
@@ -187,6 +188,9 @@ public class NPCShopGUI implements Listener {
             case "CURRENCY_SELL":
                 handleCurrencySell(player, trade);
                 break;
+            case "HERB":
+                giveHerb(player, trade);
+                break;
             default:
                 giveItem(player, trade);
         }
@@ -272,6 +276,37 @@ public class NPCShopGUI implements Listener {
                 .setAmount(trade.getAmount())
                 .build();
         player.getInventory().addItem(item);
+    }
+
+    /**
+     * Give linh thảo cho người chơi từ NPC shop
+     * Tạo item qua SpiritHerb.createHerbItem() để có persistent data đầy đủ
+     */
+    private void giveHerb(Player player, NPCTrade trade) {
+        String herbId = trade.getItemId();
+        if (herbId == null || herbId.isEmpty()) {
+            // Fallback: dùng material name làm herbId
+            String matName = trade.getMaterial();
+            for (Map.Entry<String, SpiritHerb> entry : SpiritHerb.getAllHerbs().entrySet()) {
+                if (entry.getValue().getMaterial().name().equalsIgnoreCase(matName)) {
+                    herbId = entry.getKey();
+                    break;
+                }
+            }
+        }
+
+        SpiritHerb herb = SpiritHerb.getHerb(herbId);
+        if (herb == null) {
+            MessageUtils.send(player, "&cLinh thảo '" + herbId + "' không tồn tại!");
+            return;
+        }
+
+        // Mặc định 10 Năm tuổi
+        SpiritHerb.HerbQuality quality = SpiritHerb.HerbQuality.MUOI_NAM;
+        ItemStack herbItem = herb.createHerbItem(quality, trade.getAmount());
+        player.getInventory().addItem(herbItem);
+        MessageUtils.send(player, "&a✦ Bạn đã mua &e" + trade.getAmount() + "x " +
+                ColorUtils.stripColor(trade.getDisplayName()));
     }
 
     private ItemStack createArtifactItem(String itemId) {

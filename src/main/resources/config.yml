@@ -599,10 +599,86 @@ items:
       cooldown-message: "&cPhượng Hoàng Lệnh đang hồi phục! Còn &e{remaining} &cgiây!"
 
 # =============================================
-# X. HỆ THỐNG LINH THẢO & LINH ĐIỀN
+# X. HỆ THỐNG LINH THẢO & LINH ĐIỀN (SPIRIT FARM)
 # =============================================
 spirit-farming:
   enabled: true
+  # Thời gian cơ bản phát triển 1 giai đoạn (giây) - 300s = 5 phút
+  base-growth-time-seconds: 300
+  # Định nghĩa 12 loại block linh điền (grade 0-11)
+  blocks:
+    0:
+      name: "Hoàng Hạ Linh Điền"
+      material: "FARMLAND"
+      lore: "&7Mảnh đất linh khí Hoàng cấp Hạ phẩm"
+      growth-multiplier: 0.5
+      max-yield: 2
+    1:
+      name: "Hoàng Trung Linh Điền"
+      material: "FARMLAND"
+      lore: "&7Mảnh đất linh khí Hoàng cấp Trung phẩm"
+      growth-multiplier: 0.7
+      max-yield: 2
+    2:
+      name: "Hoàng Thượng Linh Điền"
+      material: "FARMLAND"
+      lore: "&7Mảnh đất linh khí Hoàng cấp Thượng phẩm"
+      growth-multiplier: 0.9
+      max-yield: 3
+    3:
+      name: "Huyền Hạ Linh Điền"
+      material: "FARMLAND"
+      lore: "&7Mảnh đất linh khí Huyền cấp Hạ phẩm"
+      growth-multiplier: 1.0
+      max-yield: 3
+    4:
+      name: "Huyền Trung Linh Điền"
+      material: "FARMLAND"
+      lore: "&7Mảnh đất linh khí Huyền cấp Trung phẩm"
+      growth-multiplier: 1.2
+      max-yield: 3
+    5:
+      name: "Huyền Thượng Linh Điền"
+      material: "FARMLAND"
+      lore: "&7Mảnh đất linh khí Huyền cấp Thượng phẩm"
+      growth-multiplier: 1.5
+      max-yield: 4
+    6:
+      name: "Địa Hạ Linh Điền"
+      material: "FARMLAND"
+      lore: "&7Mảnh đất linh khí Địa cấp Hạ phẩm"
+      growth-multiplier: 1.8
+      max-yield: 4
+    7:
+      name: "Địa Trung Linh Điền"
+      material: "FARMLAND"
+      lore: "&7Mảnh đất linh khí Địa cấp Trung phẩm"
+      growth-multiplier: 2.0
+      max-yield: 4
+    8:
+      name: "Địa Thượng Linh Điền"
+      material: "FARMLAND"
+      lore: "&7Mảnh đất linh khí Địa cấp Thượng phẩm"
+      growth-multiplier: 2.5
+      max-yield: 5
+    9:
+      name: "Thiên Hạ Linh Điền"
+      material: "FARMLAND"
+      lore: "&7Mảnh đất linh khí Thiên cấp Hạ phẩm"
+      growth-multiplier: 3.0
+      max-yield: 5
+    10:
+      name: "Thiên Trung Linh Điền"
+      material: "FARMLAND"
+      lore: "&7Mảnh đất linh khí Thiên cấp Trung phẩm"
+      growth-multiplier: 4.0
+      max-yield: 5
+    11:
+      name: "Thiên Thượng Linh Điền"
+      material: "FARMLAND"
+      lore: "&7Mảnh đất linh khí Thiên cấp Thượng phẩm"
+      growth-multiplier: 5.0
+      max-yield: 5
 
 # =============================================
 # XI. HỆ THỐNG NPC SHOP
@@ -731,6 +807,91 @@ npc-shop:
             material: "PRISMARINE_SHARD"
             amount: 10
           stock: -1
+
+    # NPC Linh Điền - Farming Master
+    farming_master:
+      enabled: true
+      name: "&2&l◆ Linh Điền Sư ◆"
+      type: "VILLAGER"
+      profession: "FARMER"
+      trades:
+        FARM_BLOCK_0:
+          type: "FARM_BLOCK"
+          grade: 0
+          display-name: "&7Hoàng Hạ Linh Điền"
+          material: "STONE"
+          amount: 1
+          lore: ["&7Linh điền cấp thấp nhất"]
+          price:
+            material: "PRISMARINE_SHARD"
+            amount: 10
+          stock: -1
+        FARM_BLOCK_3:
+          type: "FARM_BLOCK"
+          grade: 3
+          display-name: "&bHuyền Hạ Linh Điền"
+          material: "IRON_BLOCK"
+          amount: 1
+          lore: ["&7Linh điền trung cấp"]
+          price:
+            material: "PRISMARINE_SHARD"
+            amount: 50
+          stock: -1
+        FARM_BLOCK_6:
+          type: "FARM_BLOCK"
+          grade: 6
+          display-name: "&5Địa Hạ Linh Điền"
+          material: "DIAMOND_BLOCK"
+          amount: 1
+          lore: ["&7Linh điền cao cấp"]
+          price:
+            material: "PRISMARINE_SHARD"
+            amount: 150
+          stock: -1
+        FARM_BLOCK_11:
+          type: "FARM_BLOCK"
+          grade: 11
+          display-name: "&6Thiên Thượng Linh Điền"
+          material: "EMERALD_BLOCK"
+          amount: 1
+          lore: ["&7Linh điền tối thượng"]
+          price:
+            material: "PRISMARINE_SHARD"
+            amount: 1000
+          stock: 3
+        SEED_LINH_THAO:
+          type: "SEED"
+          herb-id: "LINH_THAO"
+          display-name: "&aHạt Giống Linh Thảo"
+          material: "GREEN_DYE"
+          amount: 1
+          lore: ["&7Hạt giống linh thảo cơ bản"]
+          price:
+            material: "PRISMARINE_SHARD"
+            amount: 3
+          stock: -1
+        SEED_HUYET_LINH_THAO:
+          type: "SEED"
+          herb-id: "HUYET_LINH_THAO"
+          display-name: "&cHạt Giống Huyết Linh Thảo"
+          material: "RED_DYE"
+          amount: 1
+          lore: ["&7Hạt giống huyết linh thảo"]
+          price:
+            material: "PRISMARINE_SHARD"
+            amount: 5
+          stock: -1
+        SEED_THIEN_LINH_THAO:
+          type: "SEED"
+          herb-id: "THIEN_LINH_THAO"
+          display-name: "&bHạt Giống Thiên Linh Thảo"
+          material: "CYAN_DYE"
+          amount: 1
+          lore: ["&7Hạt giống thiên linh thảo"]
+          price:
+            material: "PRISMARINE_SHARD"
+            amount: 15
+          stock: 5
 
     # Mount NPC - Tọa Kỵ Thương
     mount_master:

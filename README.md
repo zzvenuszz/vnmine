@@ -1,6 +1,6 @@
 # 🏔️ VNMine — Plugin Tu Tiên cho Minecraft Paper 1.21+
 
-**Phiên bản:** 2.1.0  
+**Phiên bản:** 2.2.0  
 **Tác giả:** VNMine Team  
 **Yêu cầu:** Paper 1.21+ (API 1.21.4)
 
@@ -29,9 +29,10 @@
 - **Skill Bar** — 9 slot kỹ năng, gán qua GUI, thi triển bằng phím Q
 
 #### 🔬 Luyện Đan (Alchemy)
-- **7 Loại Đan Dược** — Hồi Linh Đan, Đại Hồi Linh Đan, Thanh Tâm Đan, Tốc Thánh Đan, Cương Thể Đan, Tu Luyện Đan, Thiên Hồi Đan, Phi Thăng Đan, Bách Độc Đan, Phệ Ma Đan, Trường Thọ Đan
+- **23 Loại Đan Dược** — 11 loại cơ bản + 12 loại mới (xem danh sách đầy đủ bên dưới)
 - **12 Phẩm cấp** — Hoàng/Huyền/Địa/Thiên × Hạ/Trung/Thượng, tỉ lệ thành công và số lượng đan khác nhau
 - **GUI Luyện Đan** — Đặt 6 nguyên liệu, chọn công thức, chế tạo mất 60 giây
+- **Hệ thống nguyên liệu linh thảo** — Mỗi công thức yêu cầu linh thảo + nguyên liệu chế tạo
 
 #### ⚔️ Pháp Bảo (Artifacts)
 - **7 Pháp Bảo** với khả năng đặc biệt:
@@ -69,6 +70,18 @@
 - **LuckPerms-like** — Group hierarchy, inheritance, wildcard permissions
 - **Quản lý Group** — Tạo/xóa nhóm, thêm quyền, thêm nhóm cha, đặt prefix/suffix
 - **Quản lý Player** — Set group, thêm quyền riêng, kiểm tra quyền chi tiết
+
+#### 🌿 Hệ thống Linh Điền (Spirit Farm)
+- **Trồng 20 loại Linh Thảo** — Từ Hạ Phẩm đến Tiên Phẩm, mỗi loại có 5 giai đoạn trưởng thành
+- **12 cấp Linh Điền** — Hoàng/Huyền/Địa/Thiên × Hạ/Trung/Thượng, ảnh hưởng chất lượng thu hoạch
+- **Hạt giống** — Mỗi loại linh thảo có hạt giống riêng, mua từ NPC Linh Điền Sư
+- **Chất lượng thu hoạch** — Trưởng Thành → 10 Năm → 100 Năm → 1000 Năm tùy phẩm cấp linh điền
+- **NPC Linh Thảo Thương** — Bán linh thảo cho NPC để nhận linh thạch
+
+#### 🤖 NPC Shop (Mở rộng)
+- **5 Loại NPC** — Đại Sư Công Pháp, Luyện Khí Đại Sư, Luyện Đan Sư, Linh Thạch Thương, **Linh Thảo Thương** (mới)
+- **Linh Điền Sư** — Bán block linh điền và hạt giống các loại
+- **Linh Thảo Thương** — Mua linh thảo từ người chơi, tính giá theo phẩm cấp + số năm tuổi
 
 #### 🌍 World Generation
 - **Tạo world tuỳ chỉnh** — Seed, type (NORMAL/FLAT/AMPLIFIED), environment
@@ -205,11 +218,90 @@
 |------|-----------|-------|-------|
 | `/vngive hoanbh skill FIRE_BALL` | `vnmine.command.give` | Give kỹ năng Hỏa Cầu Thuật cho **hoanbh** — hoanbh sẽ học được kỹ năng này ngay lập tức | `/vngive hoanbh skill FIRE_BALL` |
 | `/vngive hoanbh pill HOI_LINH_DAN 10` | `vnmine.command.give` | Give 10 viên Hồi Linh Đan cho **hoanbh** — hoanbh nhận được 10 đan dược vào túi đồ | `/vngive hoanbh pill HOI_LINH_DAN 10` |
+| `/vngive hoanbh herb LINH_THAO 64` | `vnmine.command.give` | Give 64 Linh Thảo (mặc định 10 Năm tuổi) cho **hoanbh** | `/vngive hoanbh herb LINH_THAO 64` |
+| `/vngive hoanbh herb TIEN_THAO 10 6` | `vnmine.command.give` | Give 10 Tiên Thảo 1 Vạn Năm tuổi (age_code=6) cho **hoanbh** | `/vngive hoanbh herb TIEN_THAO 10 6` |
 | `/vngive hoanbh artifact FLYING_SWORD` | `vnmine.command.give` | Give pháp bảo Kiếm Phi Hành cho **hoanbh** — hoanbh nhận 1 Kiếm Phi Hành vào túi đồ | `/vngive hoanbh artifact FLYING_SWORD` |
 | `/vngive hoanbh currency 1000` | `vnmine.command.give` | Give 1000 linh thạch cho **hoanbh** — số dư của hoanbh tăng thêm 1000 | `/vngive hoanbh currency 1000` |
 | `/vngive hoanbh exp 5000` | `vnmine.command.give` | Give 5000 EXP tu luyện cho **hoanbh** — hoanbh được cộng 5000 EXP | `/vngive hoanbh exp 5000` |
 | `/vngive hoanbh level 50` | `vnmine.command.give` | Set cấp độ của **hoanbh** lên 50 — hoanbh sẽ đạt cấp 50 và mở khóa cảnh giới tương ứng | `/vngive hoanbh level 50` |
 | `/vngive hoanbh mount PHUONG_HOANG` | `vnmine.command.give` | Mở khóa tọa kỵ Phượng Hoàng cho **hoanbh** — hoanbh có thể triệu hồi Phượng Hoàng | `/vngive hoanbh mount PHUONG_HOANG` |
+
+### 📋 Danh sách Item ID cho lệnh `/vngive`
+
+#### 🌿 Herb ID (Linh Thảo)
+
+| ID | Tên hiển thị | Phẩm cấp | Material |
+|----|-------------|----------|----------|
+| `LINH_THAO` | Linh Thảo | Hạ Phẩm | SHORT_GRASS |
+| `NGUYET_QUANG_THAO` | Nguyệt Quang Thảo | Hạ Phẩm | FERN |
+| `BINH_LINH_THAO` | Bình Linh Thảo | Hạ Phẩm | AZURE_BLUET |
+| `LAM_LINH_THAO` | Lam Linh Thảo | Hạ Phẩm | CORNFLOWER |
+| `LOI_LINH_THAO` | Lôi Linh Thảo | Hạ Phẩm | DANDELION |
+| `HUYEN_BINH_THAO` | Huyền Băng Thảo | Trung Phẩm | BLUE_ORCHID |
+| `HUYET_LINH_THAO` | Huyết Linh Thảo | Trung Phẩm | POPPY |
+| `HOA_LINH_THAO` | Hoa Linh Thảo | Trung Phẩm | ALLIUM |
+| `HAC_LINH_THAO` | Hạc Linh Thảo | Trung Phẩm | OXEYE_DAISY |
+| `KIM_LINH_THAO` | Kim Linh Thảo | Trung Phẩm | SUNFLOWER |
+| `LONG_HUYET_THAO` | Long Huyết Thảo | Thượng Phẩm | RED_TULIP |
+| `THIEN_LINH_THAO` | Thiên Linh Thảo | Thượng Phẩm | LILAC |
+| `PHUNG_LINH_THAO` | Phụng Linh Thảo | Thượng Phẩm | PEONY |
+| `VAN_NIEN_LINH_CHI` | Vạn Niên Linh Chi | Thượng Phẩm | ROSE_BUSH |
+| `LUYEN_THAN_THAO` | Luyện Thần Thảo | Thượng Phẩm | WITHER_ROSE |
+| `TIEN_THAO` | Tiên Thảo | Tiên Phẩm | TORCHFLOWER |
+| `LONG_LINH_THAO` | Long Linh Thảo | Tiên Phẩm | PINK_TULIP |
+| `THANH_LONG_THAO` | Thanh Long Thảo | Tiên Phẩm | PITCHER_PLANT |
+| `HONG_MONG_THAO` | Hồng Mộng Thảo | Tiên Phẩm | ORANGE_TULIP |
+| `THIEN_HA_THAO` | Thiên Hà Thảo | Tiên Phẩm | WHITE_TULIP |
+
+**Age Code:** `0=Mầm Non`, `1=Trưởng Thành`, `2=1 Năm`, `3=10 Năm` (mặc định), `4=100 Năm`, `5=1000 Năm`, `6=1 Vạn Năm`
+
+#### 💊 Pill ID (Đan Dược)
+
+| ID | Tên hiển thị | Level yêu cầu |
+|----|-------------|:---:|
+| `HOI_LINH_DAN` | Hồi Linh Đan | 3 |
+| `DAI_HOI_LINH_DAN` | Đại Hồi Linh Đan | 10 |
+| `THANH_TAM_DAN` | Thanh Tâm Đan | 5 |
+| `TOC_THANH_DAN` | Tốc Thánh Đan | 8 |
+| `CUONG_THE_DAN` | Cương Thể Đan | 15 |
+| `BACH_DOC_DAN` | Bách Độc Đan | 25 |
+| `TU_LUYEN_DAN` | Tu Luyện Đan | 20 |
+| `THIEN_HOI_DAN` | Thiên Hồi Đan | 35 |
+| `PHE_MA_DAN` | Phê Ma Đan | 40 |
+| `TRUONG_THO_DAN` | Trường Thọ Đan | 45 |
+| `PHI_THANG_DAN` | Phi Thăng Đan | 50 |
+| `KIM_CUONG_DAN` | Kim Cương Đan | 25 |
+| `LINH_NHIEN_DAN` | Linh Nhiên Đan | 28 |
+| `TIEM_HANH_DAN` | Tiềm Hành Đan | 30 |
+| `PHAP_TUONG_DAN` | Pháp Tướng Đan | 35 |
+| `THAN_LONG_DAN` | Thần Long Đan | 40 |
+| `CUONG_LUC_DAN` | Cường Lực Đan | 32 |
+| `HAN_BANG_DAN` | Hàn Băng Đan | 33 |
+| `LINH_PHONG_DAN` | Linh Phong Đan | 27 |
+| `HOA_LONG_DAN` | Hóa Long Đan | 55 |
+| `THIEN_LINH_DAN` | Thiên Linh Đan | 45 |
+| `DAC_COC_DAN` | Đặc Cốc Đan | 38 |
+| `VO_THUONG_DAN` | Vô Thượng Đan | 70 |
+
+#### 🗡️ Artifact ID (Pháp Bảo)
+
+| ID | Tên hiển thị |
+|----|-------------|
+| `FLYING_SWORD` | Kiếm Phi Hành |
+| `SPIRIT_BELL` | Linh Chung |
+| `BAGUA_MIRROR` | Bát Quái Kính |
+| `SOUL_JADE` | Hồn Ngọc |
+| `HEAVEN_SHIELD` | Thiên Linh Thuẫn |
+| `THUNDER_SEAL` | Lôi Ấn |
+| `PHOENIX_REBIRTH` | Phượng Hoàng Lệnh |
+
+#### 🐉 Mount ID (Tọa Kỵ)
+
+| ID | Tên hiển thị | Level yêu cầu |
+|----|-------------|:---:|
+| `PHUONG_HOANG` | Phượng Hoàng | 30 |
+| `BACH_HO` | Bạch Hổ | 40 |
+| `THANH_LONG` | Thanh Long | 50 |
 
 ### 🔹 Hệ thống Phân Quyền (Permission)
 

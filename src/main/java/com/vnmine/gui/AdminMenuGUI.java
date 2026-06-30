@@ -3,6 +3,7 @@ package com.vnmine.gui;
 import com.vnmine.VNMinePlugin;
 import com.vnmine.cultivation.PillConfig;
 import com.vnmine.item.ItemBuilder;
+import com.vnmine.spiritfarm.SpiritHerb;
 import com.vnmine.util.ColorUtils;
 import com.vnmine.util.MessageUtils;
 import org.bukkit.Bukkit;
@@ -151,7 +152,20 @@ public class AdminMenuGUI implements Listener {
             {"BACH_DOC_DAN", "Bách Độc Đan", "Miễn nhiễm độc"},
             {"THIEN_HOI_DAN", "Thiên Hồi Đan", "Hồi HP + Linh lực lớn"},
             {"PHE_MA_DAN", "Phê Ma Đan", "Tăng sát thương vs quái"},
-            {"TRUONG_THO_DAN", "Trường Thọ Đan", "Hồi sinh sau khi chết"}
+            {"TRUONG_THO_DAN", "Trường Thọ Đan", "Hồi sinh sau khi chết"},
+            // 12 đan dược mới
+            {"KIM_CUONG_DAN", "Kim Cương Đan", "Giảm sát thương nhận vào, tăng giáp"},
+            {"LINH_NHIEN_DAN", "Linh Nhiên Đan", "Tăng tốc độ đánh + crit"},
+            {"TIEM_HANH_DAN", "Tiềm Hành Đan", "Tàng hình + tăng ST đòn đầu"},
+            {"PHAP_TUONG_DAN", "Pháp Tướng Đan", "Tăng max mana"},
+            {"THAN_LONG_DAN", "Thần Long Đan", "Hồi 100% HP + mana + miễn dịch"},
+            {"CUONG_LUC_DAN", "Cường Lực Đan", "Tăng sát thương cận chiến"},
+            {"HAN_BANG_DAN", "Hàn Băng Đan", "Làm chậm kẻ địch, tăng giáp băng"},
+            {"LINH_PHONG_DAN", "Linh Phong Đan", "Tăng tốc độ + nhảy cao"},
+            {"HOA_LONG_DAN", "Hóa Long Đan", "Biến rồng, tăng ST + phòng thủ"},
+            {"THIEN_LINH_DAN", "Thiên Linh Đan", "EXP lớn (1 lần/đại cảnh giới)"},
+            {"DAC_COC_DAN", "Đặc Cốc Đan", "Reset CD tất cả skill"},
+            {"VO_THUONG_DAN", "Vô Thượng Đan", "Tăng 100% all stats"}
         };
         double[] manaMultipliers = {1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.3, 2.6, 3.0, 3.5, 4.0, 5.0};
         int[] cooldowns = {60, 55, 50, 45, 40, 35, 30, 25, 20, 15, 10, 5};
@@ -198,20 +212,33 @@ public class AdminMenuGUI implements Listener {
         }
     }
 
-    // ==================== HERBS (tiered) ====================
+    // ==================== HERBS (20 loại, 4 cấp) ====================
     private static final List<AdminItemDef> HERBS = new ArrayList<>();
     static {
-        // Hạ Phẩm
-        addHerb("&f[Hạ Phẩm] &f&lLinh Thảo", "GREEN_DYE", "Nguyên liệu cơ bản, quái yếu掉落");
-        addHerb("&f[Hạ Phẩm] &f&lBình Linh Thảo", "LIGHT_BLUE_DYE", "Tinh hoa giải độc, quái vùng tuyết掉落");
-        addHerb("&f[Hạ Phẩm] &f&lLôi Linh Thảo", "YELLOW_DYE", "Hấp thu lôi khí, quái lightning掉落");
-        // Trung Phẩm
-        addHerb("&e[Trung Phẩm] &f&lHuyết Linh Thảo", "RED_DYE", "Nguyên liệu trung cấp, quái trung cấp掉落");
-        addHerb("&e[Trung Phẩm] &f&lHoa Linh Thảo", "MAGENTA_DYE", "Duy hỏa, Blaze掉落");
-        // Thượng Phẩm
-        addHerb("&a[Thượng Phẩm] &f&lLong Huyết Thảo", "ORANGE_DYE", "Nguyên liệu cao cấp, Elite掉落");
-        addHerb("&a[Thượng Phẩm] &f&lThiên Linh Thảo", "CYAN_DYE", "Linh thảo thiên thượng, Boss掉落");
-        addHerb("&a[Thượng Phẩm] &f&lVạn Niên Linh Chi", "PURPLE_DYE", "Tăng 100 năm tu vi, Boss hiếm掉落");
+        // Hạ Phẩm (5 loại)
+        addHerb("&f[Hạ Phẩm] &f&lLinh Thảo", "SHORT_GRASS", "Nguyên liệu cơ bản, dễ tìm nhất");
+        addHerb("&f[Hạ Phẩm] &f&lNguyệt Quang Thảo", "FERN", "Hấp thu ánh trăng, thanh lọc tạp chất");
+        addHerb("&f[Hạ Phẩm] &f&lBình Linh Thảo", "AZURE_BLUET", "Tinh hoa giải độc, mọc vùng tuyết");
+        addHerb("&f[Hạ Phẩm] &f&lLam Linh Thảo", "CORNFLOWER", "Linh thảo thủy hệ, tăng linh lực");
+        addHerb("&f[Hạ Phẩm] &f&lLôi Linh Thảo", "DANDELION", "Hấp thu lôi khí, tăng tốc độ");
+        // Trung Phẩm (5 loại)
+        addHerb("&e[Trung Phẩm] &f&lHuyền Băng Thảo", "BLUE_ORCHID", "Hàn băng ngàn năm, tăng giáp băng");
+        addHerb("&e[Trung Phẩm] &f&lHuyết Linh Thảo", "POPPY", "Máu huyết ngưng tụ, tăng sát thương");
+        addHerb("&e[Trung Phẩm] &f&lHoa Linh Thảo", "ALLIUM", "Duy hỏa, tăng hỏa hệ sát thương");
+        addHerb("&e[Trung Phẩm] &f&lHạc Linh Thảo", "OXEYE_DAISY", "Linh khí thanh khiết, tăng tu vi");
+        addHerb("&e[Trung Phẩm] &f&lKim Linh Thảo", "SUNFLOWER", "Hấp thu nhật nguyệt, tăng phòng thủ");
+        // Thượng Phẩm (5 loại)
+        addHerb("&a[Thượng Phẩm] &f&lLong Huyết Thảo", "RED_TULIP", "Long huyết tẩy luyện, tăng thể chất");
+        addHerb("&a[Thượng Phẩm] &f&lThiên Linh Thảo", "LILAC", "Linh thảo thiên thượng, tăng linh căn");
+        addHerb("&a[Thượng Phẩm] &f&lPhụng Linh Thảo", "PEONY", "Phượng hoàng lửa, hồi sinh khí huyết");
+        addHerb("&a[Thượng Phẩm] &f&lVạn Niên Linh Chi", "ROSE_BUSH", "Tăng 100 năm tu vi, cực kỳ quý hiếm");
+        addHerb("&a[Thượng Phẩm] &f&lLuyện Thần Thảo", "WITHER_ROSE", "Luyện hóa thần hồn, tăng tinh thần");
+        // Tiên Phẩm (5 loại)
+        addHerb("&d[Tiên Phẩm] &f&lTiên Thảo", "TORCHFLOWER", "Tiên khí ngưng tụ, tăng toàn bộ chỉ số");
+        addHerb("&d[Tiên Phẩm] &f&lLong Linh Thảo", "PINK_TULIP", "Long linh huyết mạch, tăng long uy");
+        addHerb("&d[Tiên Phẩm] &f&lThanh Long Thảo", "PITCHER_PLANT", "Thanh long chi khí, tăng pháp lực");
+        addHerb("&d[Tiên Phẩm] &f&lHồng Mộng Thảo", "ORANGE_TULIP", "Hồng hoang mộng cảnh, tăng ảo giác");
+        addHerb("&d[Tiên Phẩm] &f&lThiên Hà Thảo", "WHITE_TULIP", "Thiên hà chi thủy, tăng sinh mệnh");
     }
     private static void addHerb(String dn, String mat, String desc) {
         HERBS.add(new AdminItemDef(dn, Material.valueOf(mat), "&7" + desc, true));
@@ -444,7 +471,7 @@ public class AdminMenuGUI implements Listener {
         else if (title.contains(TITLE_PILLS)) handleSubItemClick(player, ALL_PILLS, clicked);
         else if (title.contains(TITLE_ARTIFACTS)) handleSubItemClick(player, ALL_ARTIFACTS, clicked);
         else if (title.contains(TITLE_SKILLS)) handleSkillClick(player, clicked, slot);
-        else if (title.contains(TITLE_HERBS)) handleSubItemClick(player, HERBS, clicked);
+        else if (title.contains(TITLE_HERBS)) handleHerbClick(player, clicked);
         else if (title.contains(TITLE_MATERIALS)) handleSubItemClick(player, MATERIALS, clicked);
         else if (title.contains(TITLE_MOUNTS)) handleSubItemClick(player, MOUNT_KEYS, clicked);
         else if (title.contains(TITLE_CURRENCY)) handleSubItemClick(player, CURRENCY_ITEMS, clicked);
@@ -492,6 +519,44 @@ public class AdminMenuGUI implements Listener {
         giveItemToPlayer(player, matched);
     }
 
+    /**
+     * Xử lý click vào herb trong admin menu
+     * Tạo item linh thảo qua SpiritHerb.createHerbItem() để có persistent data đầy đủ
+     */
+    private void handleHerbClick(Player player, ItemStack clicked) {
+        String stripped = stripColor(clicked.getItemMeta() != null ? clicked.getItemMeta().getDisplayName() : "");
+        if (stripped.contains("Quay Lai")) { open(player); return; }
+        AdminItemDef matched = findItemInList(HERBS, clicked);
+        if (matched == null) return;
+
+        // Map display name sang herb ID
+        String herbId = null;
+        for (Map.Entry<String, SpiritHerb> entry : SpiritHerb.getAllHerbs().entrySet()) {
+            if (stripped.contains(entry.getValue().getName())) {
+                herbId = entry.getKey();
+                break;
+            }
+        }
+
+        if (herbId == null) {
+            MessageUtils.send(player, "&cKhông tìm thấy ID linh thảo!");
+            return;
+        }
+
+        SpiritHerb herb = SpiritHerb.getHerb(herbId);
+        if (herb == null) return;
+
+        int amount = matched.stack64 ? 64 : 1;
+        // Mặc định 10 Năm tuổi
+        ItemStack herbItem = herb.createHerbItem(SpiritHerb.HerbQuality.MUOI_NAM, amount);
+        Map<Integer, ItemStack> leftover = player.getInventory().addItem(herbItem);
+        for (ItemStack drop : leftover.values()) {
+            player.getWorld().dropItemNaturally(player.getLocation(), drop);
+        }
+        MessageUtils.send(player, "&aĐã nhận &f" + matched.displayName + " &r&a(x" + amount + ")!");
+        MessageUtils.playSound(player, Sound.ENTITY_ITEM_PICKUP);
+    }
+
     private void handleSkillClick(Player player, ItemStack clicked, int slot) {
         if (slot >= 45) { open(player); return; }
         String stripped = stripColor(clicked.getItemMeta() != null ? clicked.getItemMeta().getDisplayName() : "");
@@ -529,6 +594,19 @@ public class AdminMenuGUI implements Listener {
         if (displayName.contains("Thiên Hồi")) return "THIEN_HOI_DAN";
         if (displayName.contains("Phê Ma")) return "PHE_MA_DAN";
         if (displayName.contains("Trường Thọ")) return "TRUONG_THO_DAN";
+        // 12 đan dược mới
+        if (displayName.contains("Kim Cương")) return "KIM_CUONG_DAN";
+        if (displayName.contains("Linh Nhiên")) return "LINH_NHIEN_DAN";
+        if (displayName.contains("Tiềm Hành")) return "TIEM_HANH_DAN";
+        if (displayName.contains("Pháp Tướng")) return "PHAP_TUONG_DAN";
+        if (displayName.contains("Thần Long")) return "THAN_LONG_DAN";
+        if (displayName.contains("Cường Lực")) return "CUONG_LUC_DAN";
+        if (displayName.contains("Hàn Băng")) return "HAN_BANG_DAN";
+        if (displayName.contains("Linh Phong")) return "LINH_PHONG_DAN";
+        if (displayName.contains("Hóa Long")) return "HOA_LONG_DAN";
+        if (displayName.contains("Thiên Linh") && displayName.contains("Đan")) return "THIEN_LINH_DAN";
+        if (displayName.contains("Đặc Cốc")) return "DAC_COC_DAN";
+        if (displayName.contains("Vô Thượng")) return "VO_THUONG_DAN";
         return "HOI_LINH_DAN";
     }
 
