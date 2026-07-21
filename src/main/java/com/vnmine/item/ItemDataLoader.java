@@ -21,6 +21,10 @@ public class ItemDataLoader {
     private final Map<String, ItemDefinition> allItems = new LinkedHashMap<>();
     private final GradeDefinitions grades = new GradeDefinitions();
     
+    // Recipe caches
+    private final Map<String, PillRecipe> pillRecipes = new LinkedHashMap<>();
+    private final Map<String, ArtifactRecipe> artifactRecipes = new LinkedHashMap<>();
+    
     // Danh sách các file YML cần load
     private static final String[] ITEM_FILES = {
         "grades.yml",
@@ -291,10 +295,121 @@ public class ItemDataLoader {
     }
 
     /**
+     * Xây dựng recipe caches từ ItemDefinitions đã load
+     */
+    public void buildRecipes() {
+        pillRecipes.clear();
+        artifactRecipes.clear();
+        
+        for (ItemDefinition def : allItems.values()) {
+            if (!def.hasRecipe()) continue;
+            
+            List<ArtifactRecipe.IngredientDef> artIngredients = ArtifactRecipe.parseIngredients(def.getIngredients());
+            
+            if ("pill".equals(def.getCategory()) || def.isPill()) {
+                PillRecipe recipe = new PillRecipe(
+                    def.getId(),
+                    def.getName(),
+                    def.getMaterial(),
+                    def.getLore() != null && !def.getLore().isEmpty() ? String.join("\n", def.getLore()) : "",
+                    convertToPillIngredients(artIngredients),
+                    def.getRequiredLevel(),
+                    def.getCookingTime(),
+                    def.getSuccessChance(),
+                    def.getEffects(),
+                    def.getSideEffects()
+                );
+                pillRecipes.put(def.getId().toUpperCase(), recipe);
+            } else if ("artifact".equals(def.getCategory()) || def.isArtifact()) {
+                // Parse required skill
+                String reqSkill = "";
+                int reqSkillLevel = 0;
+                if (def.getRequiredSkills() != null && !def.getRequiredSkills().isEmpty()) {
+                    String skillStr = def.getRequiredSkills().get(0);
+                    String[] parts = skillStr.split(":");
+                    if (parts.length >= 1) reqSkill = parts[0];
+                    if (parts.length >= 2) {
+                        try { reqSkillLevel = Integer.parseInt(parts[1]); } catch (NumberFormatException ignored) {}
+                    }
+                }
+                
+                ArtifactRecipe recipe = new ArtifactRecipe(
+                    def.getId(),
+                    def.getName(),
+                    def.getMaterial(),
+                    def.getLore() != null && !def.getLore().isEmpty() ? String.join("\n", def.getLore()) : "",
+                    convertToArtifactIngredients(artIngredients),
+                    def.getRequiredLevel(),
+                    def.getCookingTime(),
+                    def.getSuccessChance(),
+                    reqSkill,
+                    reqSkillLevel,
+                    def.getEffects()
+                );
+                artifactRecipes.put(def.getId().toUpperCase(), recipe);
+            }
+        }
+        
+        plugin.getLogger().info("[ItemLoader] Đã build " + pillRecipes.size() + " pill recipes, "
+            + artifactRecipes.size() + " artifact recipes");
+    }
+    
+    /**
+     * Chuyển đổi ArtifactRecipe.IngredientDef → PillRecipe.IngredientDef
+     */
+    private List<PillRecipe.IngredientDef> convertToPillIngredients(List<ArtifactRecipe.IngredientDef> artIngredients) {
+        List<PillRecipe.IngredientDef> result = new ArrayList<>();
+        if (artIngredients == null) return result;
+        for (ArtifactRecipe.IngredientDef ing : artIngredients) {
+            String herbId = ing.isHerb ? ing.getHerbId() : null;
+            result.add(new PillRecipe.IngredientDef(herbId, ing.getMaterial(), ing.getCount(), ing.isHerb));
+        }
+        return result;
+    }
+    
+    /**
+     * Chuyển đổi ArtifactRecipe.IngredientDef → ArtifactRecipe.IngredientDef (identity)
+     */
+    private List<ArtifactRecipe.IngredientDef> convertToArtifactIngredients(List<ArtifactRecipe.IngredientDef> artIngredients) {
+        return artIngredients != null ? new ArrayList<>(artIngredients) : new ArrayList<>();
+    }
+    
+    /**
+     * Lấy tất cả pill recipes
+     */
+    public Map<String, PillRecipe> getPillRecipes() {
+        return Collections.unmodifiableMap(pillRecipes);
+    }
+    
+    /**
+     * Lấy tất cả artifact recipes
+     */
+    public Map<String, ArtifactRecipe> getArtifactRecipes() {
+        return Collections.unmodifiableMap(artifactRecipes);
+    }
+    
+    /**
+     * Lấy pill recipe theo ID
+     */
+    public PillRecipe getPillRecipe(String id) {
+        if (id == null) return null;
+        return pillRecipes.get(id.toUpperCase());
+    }
+    
+    /**
+     * Lấy artifact recipe theo ID
+     */
+    public ArtifactRecipe getArtifactRecipe(String id) {
+        if (id == null) return null;
+        return artifactRecipes.get(id.toUpperCase());
+    }
+
+    /**
      * Reload tất cả dữ liệu
      */
     public void reload() {
         loadAll();
+        buildRecipes();
         plugin.getLogger().info("[ItemLoader] Đã reload " + allItems.size() + " items");
     }
 }

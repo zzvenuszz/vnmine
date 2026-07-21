@@ -179,6 +179,7 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         pillConfig.load();
         itemDataLoader = new ItemDataLoader(this);
         itemDataLoader.loadAll();
+        itemDataLoader.buildRecipes();
         SpiritHerb.setPlugin(this);
         biomeQiManager = new BiomeQiManager(this);
         meditationListener = new MeditationListener(this, meditationManager);

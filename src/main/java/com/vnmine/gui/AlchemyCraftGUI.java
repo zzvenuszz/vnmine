@@ -4,6 +4,8 @@ import com.vnmine.VNMinePlugin;
 import com.vnmine.cultivation.PillConfig;
 import com.vnmine.cultivation.PlayerCultivationData;
 import com.vnmine.item.ItemBuilder;
+import com.vnmine.item.ItemDataLoader;
+import com.vnmine.item.PillRecipe;
 import com.vnmine.skill.PlayerSkillData;
 import com.vnmine.spiritfarm.SpiritHerb;
 import com.vnmine.util.ColorUtils;
@@ -70,189 +72,32 @@ public class AlchemyCraftGUI implements Listener {
         {2, 4}, {2, 4}, {3, 5}, {3, 5}, {4, 5}, {5, 5}
     };
 
-    // Material đa dạng cho từng loại đan dược
-    private static final Map<String, Material> PILL_MATERIALS = new HashMap<>();
-    static {
-        PILL_MATERIALS.put("HOI_LINH_DAN", Material.POTION);
-        PILL_MATERIALS.put("DAI_HOI_LINH_DAN", Material.LINGERING_POTION);
-        PILL_MATERIALS.put("CUONG_THE_DAN", Material.SPLASH_POTION);
-        PILL_MATERIALS.put("THANH_TAM_DAN", Material.HONEY_BOTTLE);
-        PILL_MATERIALS.put("TOC_THANH_DAN", Material.POTION);
-        PILL_MATERIALS.put("TU_LUYEN_DAN", Material.EXPERIENCE_BOTTLE);
-        PILL_MATERIALS.put("PHI_THANG_DAN", Material.DRAGON_BREATH);
-        PILL_MATERIALS.put("BACH_DOC_DAN", Material.POTION);
-        PILL_MATERIALS.put("THIEN_HOI_DAN", Material.LINGERING_POTION);
-        PILL_MATERIALS.put("PHE_MA_DAN", Material.SPLASH_POTION);
-        PILL_MATERIALS.put("TRUONG_THO_DAN", Material.HONEY_BOTTLE);
-        PILL_MATERIALS.put("KIM_CUONG_DAN", Material.SPLASH_POTION);
-        PILL_MATERIALS.put("LINH_NHIEN_DAN", Material.POTION);
-        PILL_MATERIALS.put("TIEM_HANH_DAN", Material.POTION);
-        PILL_MATERIALS.put("PHAP_TUONG_DAN", Material.LINGERING_POTION);
-        PILL_MATERIALS.put("THAN_LONG_DAN", Material.DRAGON_BREATH);
-        PILL_MATERIALS.put("CUONG_LUC_DAN", Material.SPLASH_POTION);
-        PILL_MATERIALS.put("HAN_BANG_DAN", Material.LINGERING_POTION);
-        PILL_MATERIALS.put("LINH_PHONG_DAN", Material.POTION);
-        PILL_MATERIALS.put("HOA_LONG_DAN", Material.DRAGON_BREATH);
-        PILL_MATERIALS.put("THIEN_LINH_DAN", Material.EXPERIENCE_BOTTLE);
-        PILL_MATERIALS.put("DAC_COC_DAN", Material.HONEY_BOTTLE);
-        PILL_MATERIALS.put("VO_THUONG_DAN", Material.DRAGON_BREATH);
-    }
-
     private static final int DEFAULT_CHARGES = 10;
-
-    // ==================== INGREDIENT DEFINITION ====================
-    private static class IngredientDef {
-        final String herbId;      // null nếu không phải linh thảo
-        final Material material;  // Material để kiểm tra fallback
-        final int count;
-        final boolean isHerb;
-
-        IngredientDef(String herbId, Material material, int count, boolean isHerb) {
-            this.herbId = herbId;
-            this.material = material;
-            this.count = count;
-            this.isHerb = isHerb;
-        }
-    }
-
-    // Helper để tạo IngredientDef cho linh thảo
-    private static IngredientDef herb(String herbId, int count) {
-        SpiritHerb h = SpiritHerb.getHerb(herbId);
-        Material mat = (h != null) ? h.getMaterial() : Material.SHORT_GRASS;
-        return new IngredientDef(herbId, mat, count, true);
-    }
-
-    // Helper để tạo IngredientDef cho nguyên liệu thường
-    private static IngredientDef mat(String materialName, int count) {
-        Material mat = Material.getMaterial(materialName);
-        return new IngredientDef(null, (mat != null) ? mat : Material.STONE, count, false);
-    }
-
-    // ==================== RECIPES ====================
-    private static final List<AlchemyRecipe> RECIPES = new ArrayList<>();
-    static {
-        RECIPES.add(new AlchemyRecipe("HOI_LINH_DAN", "&aHồi Linh Đan", Material.POTION,
-                "&7Hồi phục &b{recover} &7linh lực",
-                Arrays.asList(herb("LINH_THAO", 3), mat("POTION", 1)),
-                3, 10, 80.0));
-
-        RECIPES.add(new AlchemyRecipe("DAI_HOI_LINH_DAN", "&bĐại Hồi Linh Đan", Material.LINGERING_POTION,
-                "&7Hồi &b{recover} &7linh lực + &a{regen} &7trong &a{duration}s",
-                Arrays.asList(herb("HUYET_LINH_THAO", 2), herb("LINH_THAO", 5)),
-                10, 30, 60.0));
-
-        RECIPES.add(new AlchemyRecipe("THANH_TAM_DAN", "&aThanh Tâm Đan", Material.HONEY_BOTTLE,
-                "&7Giải trừ mọi trạng thái xấu",
-                Arrays.asList(herb("BINH_LINH_THAO", 3), mat("POTION", 1)),
-                5, 15, 85.0));
-
-        RECIPES.add(new AlchemyRecipe("TOC_THANH_DAN", "&bTốc Thánh Đan", Material.POTION,
-                "&7Tăng &b{regen}% tốc độ &7trong &a{duration}s",
-                Arrays.asList(herb("LOI_LINH_THAO", 3), mat("SUGAR", 2), mat("FEATHER", 1)),
-                8, 15, 70.0));
-
-        RECIPES.add(new AlchemyRecipe("CUONG_THE_DAN", "&cCương Thể Đan", Material.SPLASH_POTION,
-                "&7Tăng &c{dmg}% sát thương &7trong &c{duration}s",
-                Arrays.asList(herb("HUYET_LINH_THAO", 3), herb("LINH_THAO", 5), mat("BLAZE_POWDER", 1)),
-                15, 20, 55.0));
-
-        RECIPES.add(new AlchemyRecipe("BACH_DOC_DAN", "&9Bách Độc Đan", Material.POTION,
-                "&7Miễn nhiễm độc &7trong &b{duration}s",
-                Arrays.asList(herb("BINH_LINH_THAO", 3), mat("REDSTONE", 2), mat("BLAZE_POWDER", 1)),
-                25, 25, 50.0));
-
-        RECIPES.add(new AlchemyRecipe("TU_LUYEN_DAN", "&5Tu Luyện Đan", Material.EXPERIENCE_BOTTLE,
-                "&7Tăng &5+{exp} EXP &7tu luyện",
-                Arrays.asList(herb("LINH_THAO", 10), herb("HUYET_LINH_THAO", 5), herb("LONG_HUYET_THAO", 2), mat("GOLD_INGOT", 1)),
-                20, 45, 40.0));
-
-        RECIPES.add(new AlchemyRecipe("THIEN_HOI_DAN", "&6Thiên Hồi Đan", Material.LINGERING_POTION,
-                "&7Hồi &a{heal}% HP &7+ &b{recover}% &7linh lực",
-                Arrays.asList(herb("THIEN_LINH_THAO", 5), herb("HOA_LINH_THAO", 3), mat("PRISMARINE_SHARD", 1)),
-                35, 40, 45.0));
-
-        RECIPES.add(new AlchemyRecipe("PHE_MA_DAN", "&8Phê Ma Đan", Material.SPLASH_POTION,
-                "&7Tăng &c{dmg}% sát thương &7vs quái &7trong &c{duration}s",
-                Arrays.asList(herb("LOI_LINH_THAO", 3), mat("IRON_INGOT", 2), mat("END_STONE", 1)),
-                40, 30, 40.0));
-
-        RECIPES.add(new AlchemyRecipe("TRUONG_THO_DAN", "&6Trường Thọ Đan", Material.HONEY_BOTTLE,
-                "&7Tự động hồi sinh 1 lần",
-                Arrays.asList(herb("VAN_NIEN_LINH_CHI", 5), mat("IRON_NUGGET", 3), mat("EMERALD", 2)),
-                45, 60, 25.0));
-
-        RECIPES.add(new AlchemyRecipe("PHI_THANG_DAN", "&6&l◆ Phi Thăng Đan ◆", Material.DRAGON_BREATH,
-                "&7+{exp} EXP &7(1 lần/đại cảnh giới)",
-                Arrays.asList(herb("TIEN_THAO", 10), mat("DRAGON_BREATH", 1), mat("NETHERITE_INGOT", 2)),
-                50, 120, 15.0));
-
-        // 12 công thức mới
-        RECIPES.add(new AlchemyRecipe("KIM_CUONG_DAN", "&bKim Cương Đan", Material.SPLASH_POTION,
-                "&7Giảm &b{dmg}% &7sát thương nhận vào &7trong &b{duration}s",
-                Arrays.asList(herb("KIM_LINH_THAO", 5), mat("DIAMOND", 2), mat("OBSIDIAN", 1)),
-                25, 35, 50.0));
-
-        RECIPES.add(new AlchemyRecipe("LINH_NHIEN_DAN", "&aLinh Nhiên Đan", Material.POTION,
-                "&7Tăng &a{regen}% &7tốc độ đánh + &c{dmg}% &7crit &7trong &a{duration}s",
-                Arrays.asList(herb("HAC_LINH_THAO", 5), mat("SUGAR", 3), mat("FEATHER", 2)),
-                28, 30, 55.0));
-
-        RECIPES.add(new AlchemyRecipe("TIEM_HANH_DAN", "&8Tiềm Hành Đan", Material.POTION,
-                "&7Tàng hình &a{duration}s &7+ tăng &c{dmg}% &7sát thương đòn đầu",
-                Arrays.asList(herb("NGUYET_QUANG_THAO", 5), mat("ENDER_PEARL", 2), mat("FEATHER", 1)),
-                30, 40, 45.0));
-
-        RECIPES.add(new AlchemyRecipe("PHAP_TUONG_DAN", "&5Pháp Tướng Đan", Material.LINGERING_POTION,
-                "&7Tăng &b{recover}% &7max mana &7trong &b{duration}s",
-                Arrays.asList(herb("LONG_HUYET_THAO", 5), mat("GOLD_INGOT", 2), mat("DIAMOND", 1)),
-                35, 50, 40.0));
-
-        RECIPES.add(new AlchemyRecipe("THAN_LONG_DAN", "&6&l◆ Thần Long Đan ◆", Material.DRAGON_BREATH,
-                "&7Hồi &a{heal}% HP &7+ &b{recover}% &7linh lực + miễn dịch &b{duration}s",
-                Arrays.asList(herb("TIEN_THAO", 8), mat("DRAGON_BREATH", 2), mat("NETHERITE_INGOT", 1), mat("GOLDEN_APPLE", 1)),
-                40, 60, 30.0));
-
-        RECIPES.add(new AlchemyRecipe("CUONG_LUC_DAN", "&cCường Lực Đan", Material.SPLASH_POTION,
-                "&7Tăng &c{dmg}% &7sát thương cận chiến &7trong &c{duration}s",
-                Arrays.asList(herb("HUYET_LINH_THAO", 5), mat("BLAZE_POWDER", 3), mat("IRON_INGOT", 2)),
-                32, 35, 50.0));
-
-        RECIPES.add(new AlchemyRecipe("HAN_BANG_DAN", "&bHàn Băng Đan", Material.LINGERING_POTION,
-                "&7Làm chậm kẻ địch, tăng giáp băng &7trong &a{duration}s",
-                Arrays.asList(herb("HUYEN_BINH_THAO", 5), mat("BLUE_ICE", 2), mat("PRISMARINE_SHARD", 2)),
-                33, 40, 45.0));
-
-        RECIPES.add(new AlchemyRecipe("LINH_PHONG_DAN", "&aLinh Phong Đan", Material.POTION,
-                "&7Tăng &a{regen}% &7tốc độ + nhảy cao &7trong &a{duration}s",
-                Arrays.asList(herb("LAM_LINH_THAO", 3), mat("FEATHER", 3), mat("SUGAR", 2)),
-                27, 25, 60.0));
-
-        RECIPES.add(new AlchemyRecipe("HOA_LONG_DAN", "&6&l◆ Hóa Long Đan ◆", Material.DRAGON_BREATH,
-                "&7Biến rồng &a{duration}s &7tăng &c{dmg}% &7sát thương + &b{recover}% &7phòng thủ",
-                Arrays.asList(herb("TIEN_THAO", 8), mat("DRAGON_BREATH", 3), mat("NETHERITE_INGOT", 2), mat("GOLD_BLOCK", 1)),
-                55, 90, 20.0));
-
-        RECIPES.add(new AlchemyRecipe("THIEN_LINH_DAN", "&d&l◆ Thiên Linh Đan ◆", Material.EXPERIENCE_BOTTLE,
-                "&7+{exp} EXP &7(1 lần/đại cảnh giới)",
-                Arrays.asList(herb("THIEN_LINH_THAO", 8), mat("DIAMOND", 3), mat("NETHERITE_INGOT", 2), mat("DRAGON_BREATH", 1)),
-                45, 80, 25.0));
-
-        RECIPES.add(new AlchemyRecipe("DAC_COC_DAN", "&5Đặc Cốc Đan", Material.HONEY_BOTTLE,
-                "&7Reset cooldown tất cả skill &7(1 lần/giờ)",
-                Arrays.asList(herb("PHUNG_LINH_THAO", 5), mat("EMERALD", 3), mat("GOLD_INGOT", 2), mat("BLAZE_POWDER", 1)),
-                38, 50, 35.0));
-
-        RECIPES.add(new AlchemyRecipe("VO_THUONG_DAN", "&4&l◆ Vô Thượng Đan ◆", Material.DRAGON_BREATH,
-                "&7Tăng &c{dmg}% &7sát thương + &a{regen}% &7tốc độ + &b{recover}% &7phòng thủ &7trong &c{duration}s &7(1 lần/ngày)",
-                Arrays.asList(herb("LUYEN_THAN_THAO", 10), mat("NETHERITE_INGOT", 3), mat("DRAGON_BREATH", 2), mat("END_CRYSTAL", 1)),
-                70, 120, 10.0));
-    }
 
     private static final Map<UUID, AlchemySession> activeSessions = new HashMap<>();
 
     public AlchemyCraftGUI(VNMinePlugin plugin, MainMenuGUI mainMenu) {
         this.plugin = plugin;
         this.mainMenu = mainMenu;
+    }
+
+    /**
+     * Lấy danh sách recipes từ ItemDataLoader (đã load từ YML)
+     */
+    private List<PillRecipe> getRecipes() {
+        ItemDataLoader loader = plugin.getItemDataLoader();
+        if (loader == null) return new ArrayList<>();
+        Map<String, PillRecipe> recipeMap = loader.getPillRecipes();
+        return new ArrayList<>(recipeMap.values());
+    }
+
+    /**
+     * Lấy recipe theo ID
+     */
+    private PillRecipe getRecipeById(String id) {
+        ItemDataLoader loader = plugin.getItemDataLoader();
+        if (loader == null) return null;
+        return loader.getPillRecipe(id);
     }
 
     public void open(Player player) {
@@ -270,19 +115,30 @@ public class AlchemyCraftGUI implements Listener {
         gui.setItem(SLOT_STATUS, new ItemBuilder(Material.PAPER).setName("&e&lTrạng Thái")
                 .setLore("", "&7Sẵn sàng luyện đan!").build());
 
-        // Guide
+        // Guide sách - build từ recipes
+        List<PillRecipe> recipes = getRecipes();
+        List<String> guideLore = new ArrayList<>();
+        guideLore.add("");
+        for (PillRecipe recipe : recipes) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("&a◆ ").append(ColorUtils.stripColor(recipe.getDisplayName())).append(" ◆: &7");
+            List<String> partNames = new ArrayList<>();
+            for (PillRecipe.IngredientDef ing : recipe.getIngredients()) {
+                if (ing.isHerb()) {
+                    SpiritHerb h = SpiritHerb.getHerb(ing.getHerbId());
+                    String herbName = (h != null) ? ColorUtils.stripColor(h.getName()) : ing.getHerbId();
+                    partNames.add(herbName + " x" + ing.getCount());
+                } else {
+                    String matName = formatMaterialName(ing.getMaterial().name());
+                    partNames.add(matName + " x" + ing.getCount());
+                }
+            }
+            sb.append(String.join(" + ", partNames));
+            guideLore.add(ColorUtils.colorize(sb.toString()));
+        }
+
         gui.setItem(SLOT_GUIDE, new ItemBuilder(Material.KNOWLEDGE_BOOK).setName("&6&lCông Thức Luyện Đan")
-                .setLore("", "&a◆ Hồi Linh Đan ◆: &73 Linh Thảo + 1 Nước Tinh Khiết",
-                        "&b◆ Đại Hồi Linh Đan ◆: &72 Huyết Linh Thảo + 5 Linh Thảo",
-                        "&c◆ Cương Thể Đan ◆: &73 Huyết Linh Thảo + 5 Linh Thảo + 1 Bột Blaze",
-                        "&a◆ Thanh Tâm Đan ◆: &73 Bình Linh Thảo + 1 Nước Tinh Khiết",
-                        "&b◆ Tốc Thánh Đan ◆: &73 Lôi Linh Thảo + 2 Đường + 1 Lông Vũ",
-                        "&5◆ Tu Luyện Đan ◆: &710 Linh Thảo + 5 Huyết Linh Thảo + 2 Long Huyết Thảo + 1 Vàng Thanh",
-                        "&6◆ Phi Thăng Đan ◆: &710 Tiên Thảo + 1 Hơi Rồng + 2 Netherite Thanh",
-                        "&9◆ Bách Độc Đan ◆: &73 Bình Linh Thảo + 2 Huyết Thạch + 1 Bột Blaze",
-                        "&6◆ Thiên Hồi Đan ◆: &75 Thiên Linh Thảo + 3 Hoa Linh Thảo + 1 Long Lân",
-                        "&8◆ Phê Ma Đan ◆: &73 Lôi Linh Thảo + 2 Huyền Kim + 1 Thiên Thạch",
-                        "&6◆ Trường Thọ Đan ◆: &75 Vạn Niên Linh Chi + 3 Ngân Sa + 2 Ngọc Lục Bảo").build());
+                .setLore(guideLore.toArray(new String[0])).build());
 
         ItemStack border = new ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).setName("&r").build();
         for (int i = 0; i < 54; i++) {
@@ -437,8 +293,8 @@ public class AlchemyCraftGUI implements Listener {
         return Math.max(0, Math.min(grade, 11));
     }
 
-    private double calculateSuccessChance(AlchemyRecipe recipe, PlayerCultivationData playerData, int extraItemCount) {
-        double chance = recipe.successChance;
+    private double calculateSuccessChance(PillRecipe recipe, PlayerCultivationData playerData, int extraItemCount) {
+        double chance = recipe.getSuccessChance();
         if (playerData != null) {
             chance += playerData.getLevel() * 0.5;
         }
@@ -456,21 +312,35 @@ public class AlchemyCraftGUI implements Listener {
 
     // ==================== TẠO ITEM ĐAN DƯỢC ====================
 
-    private ItemStack createPotionItem(AlchemyRecipe recipe, int gradeIndex, int amount) {
+    /**
+     * Lấy Material cho Pill dựa vào ItemDefinition trong data loader
+     */
+    private Material getPillMaterial(String pillId) {
+        ItemDataLoader loader = plugin.getItemDataLoader();
+        if (loader != null) {
+            com.vnmine.item.ItemDefinition def = loader.getItem(pillId);
+            if (def != null) {
+                return def.getMaterial();
+            }
+        }
+        return Material.POTION;
+    }
+
+    private ItemStack createPotionItem(PillRecipe recipe, int gradeIndex, int amount) {
         Color potionColor = GRADE_COLORS[gradeIndex];
         double multiplier = GRADE_MULTIPLIERS[gradeIndex];
-        Material pillMaterial = PILL_MATERIALS.getOrDefault(recipe.id, Material.POTION);
+        Material pillMaterial = getPillMaterial(recipe.getId());
 
-        PillConfig.PillEffect effect = plugin.getPillConfig().getEffect(recipe.id);
+        PillConfig.PillEffect effect = plugin.getPillConfig().getEffect(recipe.getId());
         String effectLore = (effect != null) ? effect.getLore(multiplier) : "&7Đan dược quý giá";
-        String flavorLore = plugin.getPillConfig().getRandomFlavor(recipe.id);
+        String flavorLore = plugin.getPillConfig().getRandomFlavor(recipe.getId());
         String gradeDisplay = GRADE_DISPLAY[gradeIndex];
 
         ItemBuilder builder = new ItemBuilder(pillMaterial)
-                .setName(recipe.displayName)
+                .setName(recipe.getDisplayName())
                 .setAmount(Math.min(amount, 64))
                 .setGlow(true)
-                .setPersistentData("vnmine_pill_type", recipe.id)
+                .setPersistentData("vnmine_pill_type", recipe.getId())
                 .setPersistentData("vnmine_pill_charges", String.valueOf(DEFAULT_CHARGES))
                 .setPersistentData("vnmine_pill_grade", String.valueOf(gradeIndex))
                 .setLore("",
@@ -500,12 +370,12 @@ public class AlchemyCraftGUI implements Listener {
     // ==================== KIỂM TRA NGUYÊN LIỆU ====================
 
     private static class IngredientCheckResult {
-        final AlchemyRecipe recipe;
+        final PillRecipe recipe;
         final Map<String, Integer> recipeHerbs;     // herbId -> count
         final Map<String, Integer> recipeMaterials; // material name -> count
         final int extraItemCount;
 
-        IngredientCheckResult(AlchemyRecipe recipe, Map<String, Integer> recipeHerbs,
+        IngredientCheckResult(PillRecipe recipe, Map<String, Integer> recipeHerbs,
                              Map<String, Integer> recipeMaterials, int extraItemCount) {
             this.recipe = recipe;
             this.recipeHerbs = recipeHerbs;
@@ -541,16 +411,17 @@ public class AlchemyCraftGUI implements Listener {
 
         if (inputHerbs.isEmpty() && inputMaterials.isEmpty()) return null;
 
-        // Tìm công thức phù hợp
-        for (AlchemyRecipe recipe : RECIPES) {
+        // Tìm công thức phù hợp từ YML
+        List<PillRecipe> recipes = getRecipes();
+        for (PillRecipe recipe : recipes) {
             // Tách ingredients thành herb và material requirements
             Map<String, Integer> requiredHerbs = new HashMap<>();
             Map<String, Integer> requiredMaterials = new HashMap<>();
-            for (IngredientDef ing : recipe.ingredients) {
-                if (ing.isHerb) {
-                    requiredHerbs.put(ing.herbId, requiredHerbs.getOrDefault(ing.herbId, 0) + ing.count);
+            for (PillRecipe.IngredientDef ing : recipe.getIngredients()) {
+                if (ing.isHerb()) {
+                    requiredHerbs.put(ing.getHerbId(), requiredHerbs.getOrDefault(ing.getHerbId(), 0) + ing.getCount());
                 } else {
-                    requiredMaterials.put(ing.material.name(), requiredMaterials.getOrDefault(ing.material.name(), 0) + ing.count);
+                    requiredMaterials.put(ing.getMaterial().name(), requiredMaterials.getOrDefault(ing.getMaterial().name(), 0) + ing.getCount());
                 }
             }
 
@@ -646,12 +517,12 @@ public class AlchemyCraftGUI implements Listener {
             return;
         }
 
-        AlchemyRecipe matchedRecipe = checkResult.recipe;
+        PillRecipe matchedRecipe = checkResult.recipe;
         int extraItemCount = checkResult.extraItemCount;
 
-        if (playerData.getLevel() < matchedRecipe.requiredLevel) {
+        if (playerData.getLevel() < matchedRecipe.getRequiredLevel()) {
             gui.setItem(SLOT_STATUS, new ItemBuilder(Material.REDSTONE_BLOCK).setName("&c&lKhông Đủ Tu Vi")
-                    .setLore("", "&7Yêu cầu: &cLevel " + matchedRecipe.requiredLevel,
+                    .setLore("", "&7Yêu cầu: &cLevel " + matchedRecipe.getRequiredLevel(),
                             "&7Hiện tại: &eLevel " + playerData.getLevel()).build());
             MessageUtils.playSound(player, Sound.BLOCK_NOTE_BLOCK_BASS);
             return;
@@ -660,7 +531,7 @@ public class AlchemyCraftGUI implements Listener {
         int ingredientQuality = calculateIngredientQuality(gui);
         int pillGradeIndex = calculatePillGrade(playerData, skillData, ingredientQuality);
         String pillGradeDisplay = GRADE_DISPLAY[pillGradeIndex];
-        long adjustedTime = calculateCookingTime(matchedRecipe.cookingTime, skillData);
+        long adjustedTime = calculateCookingTime(matchedRecipe.getCookingTime(), skillData);
         double successChance = calculateSuccessChance(matchedRecipe, playerData, extraItemCount);
 
         String profName = (skillData != null) ? ColorUtils.colorize(skillData.getFireControlProficiencyName()) : "&7N/A";
@@ -669,7 +540,7 @@ public class AlchemyCraftGUI implements Listener {
 
         List<String> statusLore = new ArrayList<>();
         statusLore.add("");
-        statusLore.add(ColorUtils.colorize("&7Đan dược: " + matchedRecipe.displayName));
+        statusLore.add(ColorUtils.colorize("&7Đan dược: " + matchedRecipe.getDisplayName()));
         statusLore.add(ColorUtils.colorize("&7Phẩm cấp dự kiến: " + pillGradeDisplay));
         statusLore.add(ColorUtils.colorize("&7Khống Hỏa Thuật: " + profName + " &7(+" + profBonus + " phẩm)"));
         statusLore.add(ColorUtils.colorize("&7Giảm thời gian: &c" + (int)(timeReduction * 100) + "%"));
@@ -690,7 +561,7 @@ public class AlchemyCraftGUI implements Listener {
         MessageUtils.playSound(player, Sound.BLOCK_FIRE_AMBIENT);
 
         final UUID playerUUID = player.getUniqueId();
-        final AlchemyRecipe finalRecipe = matchedRecipe;
+        final PillRecipe finalRecipe = matchedRecipe;
         final PlayerCultivationData finalData = playerData;
         final PlayerSkillData finalSkillData = skillData;
         final Inventory finalGui = gui;
@@ -699,7 +570,7 @@ public class AlchemyCraftGUI implements Listener {
         final int finalExtraItems = extraItemCount;
 
         BossBar bossBar = Bukkit.createBossBar(
-                ColorUtils.colorize("&a🔥 Đang luyện " + stripColor(matchedRecipe.displayName) + "..."),
+                ColorUtils.colorize("&a🔥 Đang luyện " + stripColor(matchedRecipe.getDisplayName()) + "..."),
                 BarColor.GREEN, BarStyle.SEGMENTED_10);
         bossBar.addPlayer(player);
         session.activeBossBar = bossBar;
@@ -725,7 +596,7 @@ public class AlchemyCraftGUI implements Listener {
                 double progress = Math.min(1.0, (double) currentStep / totalSteps);
                 bossBar.setProgress(progress);
                 int percent = (int) (progress * 100);
-                bossBar.setTitle(String.format("§a🔥 [%d%%] Đang luyện %s...", percent, stripColor(finalRecipe.displayName)));
+                bossBar.setTitle(String.format("§a🔥 [%d%%] Đang luyện %s...", percent, stripColor(finalRecipe.getDisplayName())));
 
                 if (currentStep >= totalSteps) {
                     cancel();
@@ -742,7 +613,7 @@ public class AlchemyCraftGUI implements Listener {
     /**
      * Tiêu hao nguyên liệu từ input slots
      */
-    private void consumeIngredients(Inventory gui, AlchemyRecipe recipe, IngredientCheckResult checkResult) {
+    private void consumeIngredients(Inventory gui, PillRecipe recipe, IngredientCheckResult checkResult) {
         // Gom tất cả yêu cầu vào một map: key = "herb:herbId" hoặc "mat:MaterialName"
         Map<String, Integer> remainingNeeded = new HashMap<>();
         for (Map.Entry<String, Integer> entry : checkResult.recipeHerbs.entrySet()) {
@@ -788,7 +659,7 @@ public class AlchemyCraftGUI implements Listener {
         return Math.max(10, (long)(baseTime * (1.0 - timeReduction)));
     }
 
-    private void finishCraft(Player p, Inventory inv, AlchemyRecipe recipe, PlayerCultivationData data,
+    private void finishCraft(Player p, Inventory inv, PillRecipe recipe, PlayerCultivationData data,
                              PlayerSkillData skillData, int gradeIndex, double chance, int extraItems) {
         if (p == null || !p.isOnline()) return;
 
@@ -820,14 +691,14 @@ public class AlchemyCraftGUI implements Listener {
             }
 
             inv.setItem(SLOT_STATUS, new ItemBuilder(Material.EMERALD).setName("&a&l✦ Luyện Đan Thành Công ✦")
-                    .setLore("", "&7Đan dược: " + recipe.displayName,
+                    .setLore("", "&7Đan dược: " + recipe.getDisplayName(),
                             "&7Phẩm cấp: " + GRADE_DISPLAY[gradeIndex],
                             "&7Số lượng: &e" + yield + " lọ",
                             "&7Tỷ lệ: &a" + String.format("%.1f", chance) + "%").build());
             p.updateInventory();
 
             if (data != null) {
-                double expReward = recipe.cookingTime * 2;
+                double expReward = recipe.getCookingTime() * 2;
                 plugin.getCultivationManager().addExperience(p, expReward);
                 data.incrementPillsCrafted();
                 MessageUtils.send(p, "&a✦ Luyện đan thành công! Nhận &e" + (int)expReward + " &atu vi!");
@@ -881,20 +752,65 @@ public class AlchemyCraftGUI implements Listener {
         return input.replaceAll("§[0-9a-fk-or]", "").replaceAll("&[0-9a-fk-or]", "").trim();
     }
 
+    /**
+     * Format Material name sang tên tiếng Việt dễ đọc
+     */
+    private String formatMaterialName(String materialName) {
+        // Một số từ đặc biệt
+        switch (materialName) {
+            case "POTION": return "Nước Tinh Khiết";
+            case "BLAZE_POWDER": return "Bột Blaze";
+            case "SUGAR": return "Đường";
+            case "FEATHER": return "Lông Vũ";
+            case "REDSTONE": return "Huyết Thạch";
+            case "GOLD_INGOT": return "Vàng Thanh";
+            case "IRON_INGOT": return "Sắt";
+            case "BLUE_ICE": return "Băng Lam";
+            case "PRISMARINE_SHARD": return "Long Lân";
+            case "DRAGON_BREATH": return "Hơi Rồng";
+            case "NETHERITE_INGOT": return "Netherite Thanh";
+            case "DIAMOND": return "Kim Cương";
+            case "EMERALD": return "Ngọc Lục Bảo";
+            case "OBSIDIAN": return "Đá Obsidian";
+            case "ENDER_PEARL": return "Mắt End";
+            case "IRON_NUGGET": return "Ngân Sa";
+            case "END_STONE": return "Thiên Thạch";
+            case "GOLDEN_APPLE": return "Táo Vàng";
+            case "GOLD_BLOCK": return "Khối Vàng";
+            case "END_CRYSTAL": return "Pha Lê End";
+            default: {
+                // Format chung: thay _ bằng khoảng trắng, viết hoa chữ cái đầu
+                String[] words = materialName.toLowerCase().split("_");
+                StringBuilder sb = new StringBuilder();
+                for (String w : words) {
+                    if (w.length() > 0) {
+                        sb.append(Character.toUpperCase(w.charAt(0))).append(w.substring(1)).append(" ");
+                    }
+                }
+                return sb.toString().trim();
+            }
+        }
+    }
+
     // ==================== DATA CLASSES ====================
 
+    /**
+     * AlchemyRecipe - wrapper giữ backward compatibility
+     * Dữ liệu thực tế lấy từ PillRecipe trong ItemDataLoader
+     */
+    @Deprecated
     public static class AlchemyRecipe {
         final String id;
         final String displayName;
         final Material resultMaterial;
         final String lore;
-        final List<IngredientDef> ingredients;
+        final List<com.vnmine.item.PillRecipe.IngredientDef> ingredients;
         final int requiredLevel;
         final int cookingTime;
         final double successChance;
 
         public AlchemyRecipe(String id, String displayName, Material resultMaterial, String lore,
-                            List<IngredientDef> ingredients, int requiredLevel,
+                            List<com.vnmine.item.PillRecipe.IngredientDef> ingredients, int requiredLevel,
                             int cookingTime, double successChance) {
             this.id = id;
             this.displayName = displayName;

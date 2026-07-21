@@ -2,7 +2,9 @@ package com.vnmine.gui;
 
 import com.vnmine.VNMinePlugin;
 import com.vnmine.cultivation.PlayerCultivationData;
+import com.vnmine.item.ArtifactRecipe;
 import com.vnmine.item.ItemBuilder;
+import com.vnmine.item.ItemDataLoader;
 import com.vnmine.skill.PlayerSkillData;
 import com.vnmine.util.ColorUtils;
 import com.vnmine.util.MessageUtils;
@@ -76,7 +78,7 @@ public class ArtifactCraftGUI implements Listener {
         4.5, 5.0, 6.0, 7.0, 8.0
     };
 
-    // Material mapping theo grade cho Kiếm Phi Hành
+    // Material mapping theo grade cho từng loại pháp bảo
     private static final Material[][] ARTIFACT_MATERIALS = {
         // Kiếm Phi Hành: từ gỗ -> đá -> sắt -> vàng -> kim cương -> netherite
         {Material.WOODEN_SWORD, Material.STONE_SWORD, Material.GOLDEN_SWORD,
@@ -157,38 +159,6 @@ public class ArtifactCraftGUI implements Listener {
         return ARTIFACT_GRADES[tierIndex][0] + " " + ARTIFACT_GRADES[tierIndex][1];
     }
 
-    private static final List<ArtifactRecipe> RECIPES = new ArrayList<>();
-    static {
-        RECIPES.add(new ArtifactRecipe("FLYING_SWORD", "Kiếm Phi Hành", Material.DIAMOND_SWORD,
-                "&7Click phải để ngự kiếm phi hành, tiêu hao linh lực",
-                new LinkedHashMap<Material, Integer>() {{ put(Material.DIAMOND_SWORD, 1); put(Material.DIAMOND, 8); put(Material.FEATHER, 4); }},
-                15, 30, 50.0, "FORGE_MASTERY", 3));
-        RECIPES.add(new ArtifactRecipe("SPIRIT_BELL", "Linh Chung", Material.BELL,
-                "&7Làm choáng quái trong bán kính, tiêu hao linh lực",
-                new LinkedHashMap<Material, Integer>() {{ put(Material.BELL, 1); put(Material.GOLD_INGOT, 4); put(Material.DIAMOND, 2); }},
-                10, 20, 60.0, "FORGE_MASTERY", 2));
-        RECIPES.add(new ArtifactRecipe("BAGUA_MIRROR", "Bát Quái Kính", Material.SHIELD,
-                "&7Cầm trên tay: Giảm 30% sát thương nhận vào",
-                new LinkedHashMap<Material, Integer>() {{ put(Material.SHIELD, 1); put(Material.OBSIDIAN, 4); put(Material.EMERALD, 4); }},
-                20, 40, 45.0, "FORGE_MASTERY", 4));
-        RECIPES.add(new ArtifactRecipe("SOUL_JADE", "Hồn Ngọc", Material.EMERALD,
-                "&7Tự động: Hồi 50% máu khi HP<20%, CD 5 phút",
-                new LinkedHashMap<Material, Integer>() {{ put(Material.EMERALD, 1); put(Material.GOLD_INGOT, 4); put(Material.ENDER_PEARL, 2); }},
-                25, 45, 40.0, "FORGE_MASTERY", 5));
-        RECIPES.add(new ArtifactRecipe("HEAVEN_SHIELD", "Thiên Linh Thuẫn", Material.NETHERITE_CHESTPLATE,
-                "&7Kích hoạt: Bất tử 5 giây, CD 3 phút",
-                new LinkedHashMap<Material, Integer>() {{ put(Material.NETHERITE_CHESTPLATE, 1); put(Material.ENDER_EYE, 8); }},
-                40, 60, 25.0, "FORGE_MASTERY", 6));
-        RECIPES.add(new ArtifactRecipe("THUNDER_SEAL", "Lôi Ấn", Material.TRIDENT,
-                "&7Click vào quái: Gọi sét đánh, tiêu hao linh lực",
-                new LinkedHashMap<Material, Integer>() {{ put(Material.TRIDENT, 1); put(Material.DIAMOND, 4); put(Material.DRAGON_BREATH, 2); }},
-                30, 35, 35.0, "FORGE_MASTERY", 5));
-        RECIPES.add(new ArtifactRecipe("PHOENIX_REBIRTH", "Phượng Hoàng Lệnh", Material.FEATHER,
-                "&7Tự động: Hồi sinh 1 lần sau khi chết, CD 1 ngày",
-                new LinkedHashMap<Material, Integer>() {{ put(Material.FEATHER, 1); put(Material.GOLD_BLOCK, 8); put(Material.NETHERITE_INGOT, 4); put(Material.DRAGON_EGG, 1); }},
-                60, 120, 10.0, "FORGE_MASTERY", 8));
-    }
-
     private boolean isInputSlot(int slot) {
         return slot == SLOT_INPUT_1 || slot == SLOT_INPUT_2 || slot == SLOT_INPUT_3 ||
                slot == SLOT_INPUT_4 || slot == SLOT_INPUT_5 || slot == SLOT_INPUT_6;
@@ -201,6 +171,27 @@ public class ArtifactCraftGUI implements Listener {
         this.mainMenu = mainMenu;
     }
 
+    /**
+     * Lấy danh sách artifact recipes từ ItemDataLoader (đã load từ YML)
+     */
+    private List<ArtifactRecipe> getRecipes() {
+        ItemDataLoader loader = plugin.getItemDataLoader();
+        if (loader == null) return new ArrayList<>();
+        Map<String, ArtifactRecipe> recipeMap = loader.getArtifactRecipes();
+        return new ArrayList<>(recipeMap.values());
+    }
+
+    /**
+     * Lấy recipe index trong danh sách recipes (để map material)
+     */
+    private int getRecipeIndex(String recipeId) {
+        List<ArtifactRecipe> recipes = getRecipes();
+        for (int i = 0; i < recipes.size(); i++) {
+            if (recipes.get(i).getId().equals(recipeId)) return i;
+        }
+        return -1;
+    }
+
     public void open(Player player) {
         plugin.getLogger().info("[ArtifactDebug] open() called for " + player.getName());
         Inventory gui = Bukkit.createInventory(null, 54, ColorUtils.colorize("&8✦ Luyện Chế Pháp Bảo ✦"));
@@ -209,14 +200,30 @@ public class ArtifactCraftGUI implements Listener {
                 .setLore("", "&7Đặt vật liệu vào ô bên trái", "&7Bấm nút này để luyện chế", "", "&cYêu cầu: Luyện Khí Thuật").build());
         gui.setItem(SLOT_RESULT, null);
         gui.setItem(SLOT_STATUS, new ItemBuilder(Material.PAPER).setName("&e&lTrạng Thái").setLore("", "&7Sẵn sàng chế tạo!").build());
+
+        // Guide sách - build từ recipes
+        List<ArtifactRecipe> recipes = getRecipes();
+        List<String> guideLore = new ArrayList<>();
+        guideLore.add("");
+        for (ArtifactRecipe recipe : recipes) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("&b◆ ").append(ColorUtils.stripColor(recipe.getDisplayName())).append(" ◆: &7");
+            List<String> partNames = new ArrayList<>();
+            for (ArtifactRecipe.IngredientDef ing : recipe.getIngredients()) {
+                if (ing.isHerb()) {
+                    partNames.add(ing.getHerbId() + " x" + ing.getCount());
+                } else {
+                    String matName = formatMaterialName(ing.getMaterial().name());
+                    partNames.add(matName + " x" + ing.getCount());
+                }
+            }
+            sb.append(String.join(" + ", partNames));
+            guideLore.add(ColorUtils.colorize(sb.toString()));
+        }
+
         gui.setItem(SLOT_GUIDE, new ItemBuilder(Material.KNOWLEDGE_BOOK).setName("&6&lCông Thức Pháp Bảo")
-                .setLore("", "&b◆ Kiếm Phi Hành ◆: &71 Kiếm Kim Cương + 8 Kim Cương + 4 Lông Vũ",
-                        "&6◆ Linh Chung ◆: &71 Chuông + 4 Vàng Thanh + 2 Kim Cương",
-                        "&5◆ Bát Quái Kính ◆: &71 Khiên + 4 Đá Obsidian + 4 Ngọc Lục Bảo",
-                        "&a◆ Hồn Ngọc ◆: &71 Ngọc Lục Bảo + 4 Vàng Thanh + 2 Mắt End",
-                        "&4◆ Thiên Linh Thuẫn ◆: &71 Giáp Netherite + 8 Mắt Ender",
-                        "&e◆ Lôi Ấn ◆: &71 Đinh Ba + 4 Kim Cương + 2 Hơi Rồng",
-                        "&6◆ Phượng Hoàng Lệnh ◆: &71 Lông Vũ + 8 Khối Vàng + 4 Netherite + 1 Trứng Rồng").build());
+                .setLore(guideLore.toArray(new String[0])).build());
+
         ItemStack border = new ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).setName("&r").build();
         for (int i = 0; i < 54; i++) if (gui.getItem(i) == null && !isInputSlot(i) && i != SLOT_RESULT) gui.setItem(i, border);
         gui.setItem(SLOT_BACK, new ItemBuilder(Material.ARROW).setName("&e&l← Quay Lai").build());
@@ -286,16 +293,13 @@ public class ArtifactCraftGUI implements Listener {
             boolean slotHasItem = currentItem != null && currentItem.getType() != Material.AIR;
 
             if (cursorHasItem) {
-                // Player is trying to place/swap an item into result slot → BLOCK
                 event.setCancelled(true);
                 return;
             }
 
             if (slotHasItem) {
-                // Player wants to pick up the result item
                 Player resultPlayer = eventPlayer;
                 if (event.getClick() == ClickType.SHIFT_LEFT || event.getClick() == ClickType.SHIFT_RIGHT) {
-                    // Shift+click: move result directly to player inventory
                     event.setCancelled(true);
                     Map<Integer, ItemStack> leftover = resultPlayer.getInventory().addItem(currentItem.clone());
                     if (leftover.isEmpty()) {
@@ -304,11 +308,9 @@ public class ArtifactCraftGUI implements Listener {
                     resultPlayer.updateInventory();
                     return;
                 }
-                // Normal click: don't cancel, let Bukkit handle pickup (item goes to cursor)
                 return;
             }
 
-            // Both empty → nothing to do, just block
             event.setCancelled(true);
             return;
         }
@@ -366,30 +368,44 @@ public class ArtifactCraftGUI implements Listener {
             return;
         }
 
-        Map<Material, Integer> ingredients = new HashMap<>();
+        // Thu thập input: herbId -> count và material -> count
+        Map<String, Integer> inputHerbs = new HashMap<>();
+        Map<Material, Integer> inputMaterials = new HashMap<>();
         for (int slot : new int[]{SLOT_INPUT_1, SLOT_INPUT_2, SLOT_INPUT_3, SLOT_INPUT_4, SLOT_INPUT_5, SLOT_INPUT_6}) {
             ItemStack item = gui.getItem(slot);
             if (item != null && item.getType() != Material.AIR) {
-                ingredients.put(item.getType(), ingredients.getOrDefault(item.getType(), 0) + item.getAmount());
+                String herbId = ItemBuilder.getPersistentData(item, "vnmine_herb");
+                if (herbId != null) {
+                    inputHerbs.put(herbId, inputHerbs.getOrDefault(herbId, 0) + item.getAmount());
+                } else {
+                    inputMaterials.put(item.getType(), inputMaterials.getOrDefault(item.getType(), 0) + item.getAmount());
+                }
             }
         }
 
-        plugin.getLogger().info("[ArtifactDebug] Ingredients found: " + ingredients);
+        plugin.getLogger().info("[ArtifactDebug] Herbs found: " + inputHerbs + " Materials: " + inputMaterials);
 
-        if (ingredients.isEmpty()) {
+        if (inputHerbs.isEmpty() && inputMaterials.isEmpty()) {
             plugin.getLogger().info("[ArtifactDebug] FAIL: No ingredients!");
             gui.setItem(SLOT_STATUS, new ItemBuilder(Material.REDSTONE).setName("&c&lKhông Có Vật Liệu").setLore("", "&7Hãy đặt vật liệu vào ô bên trái!").build());
             MessageUtils.playSound(player, Sound.BLOCK_NOTE_BLOCK_BASS);
             return;
         }
 
+        // Tìm công thức phù hợp từ YML
         ArtifactRecipe matchedRecipe = null;
-        for (ArtifactRecipe recipe : RECIPES) { if (matchesRecipe(recipe, ingredients)) { matchedRecipe = recipe; break; } }
+        List<ArtifactRecipe> recipes = getRecipes();
+        for (ArtifactRecipe recipe : recipes) {
+            if (matchesRecipe(recipe, inputHerbs, inputMaterials)) {
+                matchedRecipe = recipe;
+                break;
+            }
+        }
 
         if (matchedRecipe == null) {
             plugin.getLogger().info("[ArtifactDebug] FAIL: No matching recipe!");
         } else {
-            plugin.getLogger().info("[ArtifactDebug] Matched recipe: " + matchedRecipe.id);
+            plugin.getLogger().info("[ArtifactDebug] Matched recipe: " + matchedRecipe.getId());
         }
 
         if (matchedRecipe == null) {
@@ -398,47 +414,32 @@ public class ArtifactCraftGUI implements Listener {
             return;
         }
 
-        if (data != null && data.getLevel() < matchedRecipe.requiredLevel) {
-            plugin.getLogger().info("[ArtifactDebug] FAIL: Level too low. Required=" + matchedRecipe.requiredLevel + " Current=" + data.getLevel());
+        if (data != null && data.getLevel() < matchedRecipe.getRequiredLevel()) {
+            plugin.getLogger().info("[ArtifactDebug] FAIL: Level too low. Required=" + matchedRecipe.getRequiredLevel() + " Current=" + data.getLevel());
             gui.setItem(SLOT_STATUS, new ItemBuilder(Material.REDSTONE_BLOCK).setName("&c&lKhông Đủ Tu Vi")
-                    .setLore("", "&7Yêu cầu: &cLevel " + matchedRecipe.requiredLevel, "&7Hiện tại: &eLevel " + data.getLevel()).build());
+                    .setLore("", "&7Yêu cầu: &cLevel " + matchedRecipe.getRequiredLevel(), "&7Hiện tại: &eLevel " + data.getLevel()).build());
             MessageUtils.playSound(player, Sound.BLOCK_NOTE_BLOCK_BASS);
             return;
         }
 
         int artifactGrade = calculateArtifactGrade(data, skillData);
-        long adjustedTime = matchedRecipe.craftingTime;
+        long adjustedTime = matchedRecipe.getCookingTime();
         plugin.getLogger().info("[ArtifactDebug] Crafting: grade=" + artifactGrade + " time=" + adjustedTime + "s");
         String gradeDisplay = gradeDisplayName(artifactGrade);
         String profName = (skillData != null) ? ColorUtils.colorize(skillData.getForgeMasteryProficiencyName()) : "&7N/A";
         int profBonus = (skillData != null) ? skillData.getForgeGradeBonus() : 0;
 
         gui.setItem(SLOT_STATUS, new ItemBuilder(Material.FURNACE).setName("&6&lĐang Luyện Khí...")
-                .setLore("", "&7Pháp bảo: &f&l" + matchedRecipe.displayName,
+                .setLore("", "&7Pháp bảo: &f&l" + matchedRecipe.getDisplayName(),
                         gradeDisplay + " &7dự kiến",
                         "&7Luyện Khí Thuật: " + profName + " (+" + profBonus + " cấp)",
                         "&7Thời gian: &e" + adjustedTime + " giây",
-                        "&7Tỷ lệ: &a" + matchedRecipe.successChance + "%").build());
-        MessageUtils.send(player, "&6✦ Đang bắt đầu luyện khí &f&l" + matchedRecipe.displayName + "&r&6...");
+                        "&7Tỷ lệ: &a" + matchedRecipe.getSuccessChance() + "%").build());
+        MessageUtils.send(player, "&6✦ Đang bắt đầu luyện khí &f&l" + matchedRecipe.getDisplayName() + "&r&6...");
         player.updateInventory();
 
-        Map<Material, Integer> remainingNeeded = new HashMap<>(matchedRecipe.ingredients);
-        for (int slot : new int[]{SLOT_INPUT_1, SLOT_INPUT_2, SLOT_INPUT_3, SLOT_INPUT_4, SLOT_INPUT_5, SLOT_INPUT_6}) {
-            ItemStack item = gui.getItem(slot);
-            if (item != null && item.getType() != Material.AIR) {
-                Integer needed = remainingNeeded.get(item.getType());
-                if (needed != null && needed > 0) {
-                    int surplus = item.getAmount() - needed;
-                    if (surplus > 0) {
-                        ItemStack returnItem = item.clone();
-                        returnItem.setAmount(surplus);
-                        player.getInventory().addItem(returnItem);
-                    }
-                    remainingNeeded.put(item.getType(), Math.max(0, needed - item.getAmount()));
-                    gui.setItem(slot, null);
-                }
-            }
-        }
+        // Tiêu hao nguyên liệu
+        consumeIngredients(gui, matchedRecipe, inputHerbs, inputMaterials, player);
 
         player.updateInventory();
         session.isCrafting = true;
@@ -453,7 +454,7 @@ public class ArtifactCraftGUI implements Listener {
         final String finalGradeDisplay = gradeDisplay;
 
         BossBar bossBar = Bukkit.createBossBar(
-                ColorUtils.colorize("&6🔥 Đang luyện khí " + matchedRecipe.displayName + "..."),
+                ColorUtils.colorize("&6🔥 Đang luyện khí " + matchedRecipe.getDisplayName() + "..."),
                 BarColor.GREEN, BarStyle.SEGMENTED_10);
         bossBar.addPlayer(player);
         session.activeBossBar = bossBar;
@@ -475,7 +476,7 @@ public class ArtifactCraftGUI implements Listener {
                 double progress = Math.min(1.0, (double) currentStep / totalSteps);
                 bossBar.setProgress(progress);
                 int percent = (int) (progress * 100);
-                bossBar.setTitle(String.format("§6🔥 [%d%%] Đang luyện khí %s...", percent, finalRecipe.displayName));
+                bossBar.setTitle(String.format("§6🔥 [%d%%] Đang luyện khí %s...", percent, finalRecipe.getDisplayName()));
 
                 if (currentStep % 10 == 0) {
                     plugin.getLogger().info("[ArtifactDebug] Progress: " + percent + "% for " + p.getName());
@@ -483,7 +484,7 @@ public class ArtifactCraftGUI implements Listener {
 
                 String progressText = "§6§l" + "█".repeat(Math.max(0, percent / 5)) + "§7" + "░".repeat(Math.max(0, 20 - percent / 5));
                 inv.setItem(SLOT_STATUS, new ItemBuilder(Material.FURNACE).setName("&6&lĐang Luyện Khí... " + percent + "%")
-                        .setLore("", "&7Pháp bảo: &f&l" + finalRecipe.displayName,
+                        .setLore("", "&7Pháp bảo: &f&l" + finalRecipe.getDisplayName(),
                                 finalGradeDisplay + " &7dự kiến",
                                 "", progressText,
                                 "&7Thời gian còn lại: &e" + Math.max(0, (int)((totalTicks - currentStep * intervalTicks) / 20)) + "s").build());
@@ -498,6 +499,66 @@ public class ArtifactCraftGUI implements Listener {
         }.runTaskTimer(plugin, intervalTicks, intervalTicks);
     }
 
+    /**
+     * Tiêu hao nguyên liệu từ input slots
+     */
+    private void consumeIngredients(Inventory gui, ArtifactRecipe recipe,
+                                     Map<String, Integer> inputHerbs,
+                                     Map<Material, Integer> inputMaterials,
+                                     Player player) {
+        // Gom yêu cầu
+        Map<String, Integer> remainingHerbs = new HashMap<>();
+        Map<Material, Integer> remainingMats = new HashMap<>();
+        for (ArtifactRecipe.IngredientDef ing : recipe.getIngredients()) {
+            if (ing.isHerb()) {
+                remainingHerbs.put(ing.getHerbId(), remainingHerbs.getOrDefault(ing.getHerbId(), 0) + ing.getCount());
+            } else {
+                remainingMats.put(ing.getMaterial(), remainingMats.getOrDefault(ing.getMaterial(), 0) + ing.getCount());
+            }
+        }
+
+        for (int slot : new int[]{SLOT_INPUT_1, SLOT_INPUT_2, SLOT_INPUT_3, SLOT_INPUT_4, SLOT_INPUT_5, SLOT_INPUT_6}) {
+            ItemStack item = gui.getItem(slot);
+            if (item == null || item.getType() == Material.AIR) continue;
+
+            String herbId = ItemBuilder.getPersistentData(item, "vnmine_herb");
+            if (herbId != null) {
+                Integer needed = remainingHerbs.get(herbId);
+                if (needed != null && needed > 0) {
+                    int consume = Math.min(needed, item.getAmount());
+                    int surplus = item.getAmount() - consume;
+                    if (surplus > 0) {
+                        ItemStack returnItem = item.clone();
+                        returnItem.setAmount(surplus);
+                        player.getInventory().addItem(returnItem);
+                    }
+                    remainingHerbs.put(herbId, needed - consume);
+                    gui.setItem(slot, null);
+                } else {
+                    // Trả lại nguyên liệu thừa
+                    player.getInventory().addItem(item);
+                    gui.setItem(slot, null);
+                }
+            } else {
+                Integer needed = remainingMats.get(item.getType());
+                if (needed != null && needed > 0) {
+                    int consume = Math.min(needed, item.getAmount());
+                    int surplus = item.getAmount() - consume;
+                    if (surplus > 0) {
+                        ItemStack returnItem = item.clone();
+                        returnItem.setAmount(surplus);
+                        player.getInventory().addItem(returnItem);
+                    }
+                    remainingMats.put(item.getType(), needed - consume);
+                    gui.setItem(slot, null);
+                } else {
+                    player.getInventory().addItem(item);
+                    gui.setItem(slot, null);
+                }
+            }
+        }
+    }
+
     private void finishCraft(Player p, Inventory inv, ArtifactRecipe recipe, PlayerCultivationData data,
                              PlayerSkillData skillData, int gradeIndex, String gradeDisplay) {
         if (p == null || !p.isOnline()) {
@@ -508,9 +569,9 @@ public class ArtifactCraftGUI implements Listener {
             plugin.getLogger().info("[ArtifactDebug] finishCraft: Inventory mismatch, skipping.");
             return;
         }
-        plugin.getLogger().info("[ArtifactDebug] finishCraft for " + p.getName() + " recipe=" + recipe.id + " grade=" + gradeIndex);
+        plugin.getLogger().info("[ArtifactDebug] finishCraft for " + p.getName() + " recipe=" + recipe.getId() + " grade=" + gradeIndex);
 
-        double chance = recipe.successChance;
+        double chance = recipe.getSuccessChance();
         int levelBonus = (data != null) ? data.getLevel() : 0;
         chance += levelBonus * 1.0;
         chance = Math.min(chance, 90.0);
@@ -522,23 +583,20 @@ public class ArtifactCraftGUI implements Listener {
             int manaReduction = (int)(bonus * 100);
 
             // Lấy recipe index để ánh xạ material theo grade
-            int recipeIndex = -1;
-            for (int i = 0; i < RECIPES.size(); i++) {
-                if (RECIPES.get(i).id.equals(recipe.id)) { recipeIndex = i; break; }
-            }
-            Material finalMaterial = recipe.resultMaterial;
+            int recipeIndex = getRecipeIndex(recipe.getId());
+            Material finalMaterial = recipe.getResultMaterial();
             if (recipeIndex >= 0 && recipeIndex < ARTIFACT_MATERIALS.length
                     && gradeIndex < ARTIFACT_MATERIALS[recipeIndex].length) {
                 finalMaterial = ARTIFACT_MATERIALS[recipeIndex][gradeIndex];
             }
 
             // Use baseName + grade format - crafted by grade-based Material
-            String craftedName = gradeDisplayName(gradeIndex) + " &f&l" + recipe.displayName;
+            String craftedName = gradeDisplayName(gradeIndex) + " &f&l" + recipe.getDisplayName();
 
             ItemStack result = new ItemBuilder(finalMaterial)
                     .setName(craftedName)
                     .setGlow(true)
-                    .setLore("", recipe.lore, "",
+                    .setLore("", recipe.getLore(), "",
                             gradeDisplay,
                             "&6✦ Pháp bảo luyện khí thành công ✦",
                             (manaReduction > 0 ? "&bGiảm tiêu hao LL: " + manaReduction + "%" : "&7Pháp bảo cơ bản"),
@@ -547,7 +605,7 @@ public class ArtifactCraftGUI implements Listener {
 
             inv.setItem(SLOT_RESULT, result);
             inv.setItem(SLOT_STATUS, new ItemBuilder(Material.EMERALD).setName("&a&l✦ Luyện Khí Thành Công ✦")
-                    .setLore("", "&7Pháp bảo: &f&l" + recipe.displayName, gradeDisplay).build());
+                    .setLore("", "&7Pháp bảo: &f&l" + recipe.getDisplayName(), gradeDisplay).build());
             p.updateInventory();
 
             MessageUtils.send(p, "&6✦ Luyện khí thành công! Nhận " + craftedName);
@@ -560,7 +618,7 @@ public class ArtifactCraftGUI implements Listener {
                 MessageUtils.send(p, "&6✦ Luyện Khí Thuật: &e" + usageCount + " lần → " + ColorUtils.colorize(newProf.getDisplayName()));
             }
             if (data != null) {
-                double expReward = recipe.craftingTime * 3;
+                double expReward = recipe.getCookingTime() * 3;
                 plugin.getCultivationManager().addExperience(p, expReward);
                 MessageUtils.send(p, "&6✦ Nhận &e" + (int)expReward + " &6tu vi!");
             }
@@ -572,24 +630,61 @@ public class ArtifactCraftGUI implements Listener {
         }
     }
 
-    private boolean matchesRecipe(ArtifactRecipe recipe, Map<Material, Integer> ingredients) {
-        if (recipe.ingredients.size() != ingredients.size()) return false;
-        for (Map.Entry<Material, Integer> entry : recipe.ingredients.entrySet()) {
-            Integer count = ingredients.get(entry.getKey());
-            if (count == null || count < entry.getValue()) return false;
+    /**
+     * Kiểm tra nguyên liệu có khớp với công thức không
+     * Kiểm tra cả herbId (vnmine_herb) và Material
+     */
+    private boolean matchesRecipe(ArtifactRecipe recipe,
+                                   Map<String, Integer> inputHerbs,
+                                   Map<Material, Integer> inputMaterials) {
+        // Gom yêu cầu từ recipe
+        Map<String, Integer> requiredHerbs = new HashMap<>();
+        Map<Material, Integer> requiredMats = new HashMap<>();
+        for (ArtifactRecipe.IngredientDef ing : recipe.getIngredients()) {
+            if (ing.isHerb()) {
+                requiredHerbs.put(ing.getHerbId(), requiredHerbs.getOrDefault(ing.getHerbId(), 0) + ing.getCount());
+            } else {
+                requiredMats.put(ing.getMaterial(), requiredMats.getOrDefault(ing.getMaterial(), 0) + ing.getCount());
+            }
         }
+
+        // Kiểm tra số lượng loại nguyên liệu
+        if (requiredHerbs.size() != inputHerbs.size() || requiredMats.size() != inputMaterials.size()) {
+            return false;
+        }
+
+        // Kiểm tra herbs
+        for (Map.Entry<String, Integer> req : requiredHerbs.entrySet()) {
+            Integer count = inputHerbs.get(req.getKey());
+            if (count == null || count < req.getValue()) return false;
+        }
+
+        // Kiểm tra materials
+        for (Map.Entry<Material, Integer> req : requiredMats.entrySet()) {
+            Integer count = inputMaterials.get(req.getKey());
+            if (count == null || count < req.getValue()) return false;
+        }
+
         return true;
     }
 
     private void showRecipe(Player player) {
         MessageUtils.send(player, "&6&l══════ Công Thức Luyện Khí ══════");
-        MessageUtils.send(player, "&b◆ Kiếm Phi Hành ◆: &71 Kiếm Kim Cương + 8 Kim Cương + 4 Lông Vũ");
-        MessageUtils.send(player, "&6◆ Linh Chung ◆: &71 Chuông + 4 Vàng + 2 Kim Cương");
-        MessageUtils.send(player, "&5◆ Bát Quái Kính ◆: &71 Khiên + 4 Đá Obsidian + 4 Ngọc Lục Bảo");
-        MessageUtils.send(player, "&a◆ Hồn Ngọc ◆: &71 Ngọc Lục Bảo + 4 Vàng + 2 Mắt End");
-        MessageUtils.send(player, "&4◆ Thiên Linh Thuẫn ◆: &71 Giáp Netherite + 8 Mắt Ender");
-        MessageUtils.send(player, "&e◆ Lôi Ấn ◆: &71 Đinh Ba + 4 Kim Cương + 2 Hơi Rồng");
-        MessageUtils.send(player, "&6◆ Phượng Hoàng Lệnh ◆: &71 Lông + 8 Khối Vàng + 4 Netherite + 1 Trứng Rồng");
+        List<ArtifactRecipe> recipes = getRecipes();
+        for (ArtifactRecipe recipe : recipes) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("&b◆ ").append(recipe.getDisplayName()).append(" ◆: &7");
+            List<String> parts = new ArrayList<>();
+            for (ArtifactRecipe.IngredientDef ing : recipe.getIngredients()) {
+                if (ing.isHerb()) {
+                    parts.add(ing.getHerbId() + " x" + ing.getCount());
+                } else {
+                    parts.add(formatMaterialName(ing.getMaterial().name()) + " x" + ing.getCount());
+                }
+            }
+            sb.append(String.join(" + ", parts));
+            MessageUtils.send(player, ColorUtils.colorize(sb.toString()));
+        }
     }
 
     @EventHandler
@@ -609,18 +704,41 @@ public class ArtifactCraftGUI implements Listener {
         activeSessions.remove(player.getUniqueId());
     }
 
-    private static class ArtifactRecipe {
-        final String id; final String displayName; final Material resultMaterial;
-        final String lore; final Map<Material, Integer> ingredients;
-        final int requiredLevel; final int craftingTime; final double successChance;
-        final String requiredSkill; final int skillLevel;
-        ArtifactRecipe(String id, String displayName, Material resultMaterial, String lore,
-                      Map<Material, Integer> ingredients, int requiredLevel, int craftingTime, double successChance,
-                      String requiredSkill, int skillLevel) {
-            this.id = id; this.displayName = displayName; this.resultMaterial = resultMaterial;
-            this.lore = lore; this.ingredients = ingredients; this.requiredLevel = requiredLevel;
-            this.craftingTime = craftingTime; this.successChance = successChance;
-            this.requiredSkill = requiredSkill; this.skillLevel = skillLevel;
+    /**
+     * Format Material name sang tên tiếng Việt dễ đọc
+     */
+    private String formatMaterialName(String materialName) {
+        switch (materialName) {
+            case "POTION": return "Nước Tinh Khiết";
+            case "BLAZE_POWDER": return "Bột Blaze";
+            case "SUGAR": return "Đường";
+            case "FEATHER": return "Lông Vũ";
+            case "REDSTONE": return "Huyết Thạch";
+            case "GOLD_INGOT": return "Vàng Thanh";
+            case "IRON_INGOT": return "Sắt";
+            case "BLUE_ICE": return "Băng Lam";
+            case "PRISMARINE_SHARD": return "Long Lân";
+            case "DRAGON_BREATH": return "Hơi Rồng";
+            case "NETHERITE_INGOT": return "Netherite Thanh";
+            case "DIAMOND": return "Kim Cương";
+            case "EMERALD": return "Ngọc Lục Bảo";
+            case "OBSIDIAN": return "Đá Obsidian";
+            case "ENDER_PEARL": return "Mắt End";
+            case "IRON_NUGGET": return "Ngân Sa";
+            case "END_STONE": return "Thiên Thạch";
+            case "GOLDEN_APPLE": return "Táo Vàng";
+            case "GOLD_BLOCK": return "Khối Vàng";
+            case "END_CRYSTAL": return "Pha Lê End";
+            default: {
+                String[] words = materialName.toLowerCase().split("_");
+                StringBuilder sb = new StringBuilder();
+                for (String w : words) {
+                    if (w.length() > 0) {
+                        sb.append(Character.toUpperCase(w.charAt(0))).append(w.substring(1)).append(" ");
+                    }
+                }
+                return sb.toString().trim();
+            }
         }
     }
 
