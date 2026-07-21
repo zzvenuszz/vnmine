@@ -1,0 +1,516 @@
+# =====================================
+# herbs.yml - Định nghĩa Linh Thảo
+# =====================================
+# Hỗ trợ mã màu & cho name, lore, effects...
+# Format tham khảo: https://www.tutienchibao.info.vn/linh-moc
+
+# ==================== HẠ PHẨM (5 loại) ====================
+
+LINH_THAO:
+  name: "&fLinh Thảo"
+  type: "Linh thảo"
+  rank: "Hạ Phẩm"
+  element: "Mộc"
+  age: "10 năm"
+  rarity: "Phổ thông"
+  material: SHORT_GRASS
+  custom-model-data: 4001
+  category: herb
+  effects:
+    - "&7Khôi phục linh lực cơ bản"
+    - "&7Nguyên liệu nền cho các loại đan dược"
+  grow-environment:
+    - "&7Đồng bằng, thảo nguyên"
+    - "&7Bất kỳ vùng đất có linh khí loãng"
+  compatible-alchemy:
+    - "Hồi Linh Đan"
+    - "Thanh Tâm Đan"
+  lore:
+    - "&7Loại linh thảo phổ biến nhất trong tu tiên giới."
+    - "&7Mọc hoang khắp nơi, hấp thu linh khí đất trời."
+    - "&7Tuy chỉ là linh thảo cấp thấp nhưng là nguyên liệu"
+    - "&7không thể thiếu cho mọi luyện đan sư mới vào nghề."
+
+NGUYET_QUANG_THAO:
+  name: "&fNguyệt Quang Thảo"
+  type: "Linh thảo"
+  rank: "Hạ Phẩm"
+  element: "Âm"
+  age: "10 năm"
+  rarity: "Phổ thông"
+  material: FERN
+  custom-model-data: 4002
+  category: herb
+  effects:
+    - "&7Thanh lọc tạp chất trong cơ thể"
+    - "&7Hấp thu ánh trăng, tăng cảm ngộ âm hệ"
+  grow-environment:
+    - "&7Vùng đồi núi thoáng đãng"
+    - "&7Nơi có nhiều ánh trăng"
+  compatible-alchemy:
+    - "Thanh Tâm Đan"
+    - "Bách Độc Đan"
+  lore:
+    - "&7Linh thảo hấp thu tinh hoa mặt trăng."
+    - "&7Lá cây lấp lánh ánh bạc dưới trăng rằm."
+    - "&7Có tác dụng thanh lọc tạp chất, giải trừ độc tố"
+    - "&7nhẹ, thường dùng trong các đan dược thanh tâm."
+
+BINH_LINH_THAO:
+  name: "&fBình Linh Thảo"
+  type: "Linh thảo"
+  rank: "Hạ Phẩm"
+  element: "Băng"
+  age: "10 năm"
+  rarity: "Phổ thông"
+  material: AZURE_BLUET
+  custom-model-data: 4003
+  category: herb
+  effects:
+    - "&7Giải nhiệt, giảm hỏa khí"
+    - "&7Tinh hoa giải độc nhẹ"
+  grow-environment:
+    - "&7Vùng núi tuyết"
+    - "&7Nơi có khí hậu lạnh giá"
+  compatible-alchemy:
+    - "Hàn Băng Đan"
+    - "Thanh Tâm Đan"
+  lore:
+    - "&7Loài hoa nhỏ màu xanh lam mọc trên vùng tuyết trắng."
+    - "&7Tinh hoa của nó có tính hàn, có thể giải độc và"
+    - "&7hạ hỏa khí trong cơ thể tu sĩ. Rất hiếm ở vùng"
+    - "&7nóng, thường phải lên núi cao mới tìm thấy."
+
+LAM_LINH_THAO:
+  name: "&fLam Linh Thảo"
+  type: "Linh thảo"
+  rank: "Hạ Phẩm"
+  element: "Thủy"
+  age: "10 năm"
+  rarity: "Phổ thông"
+  material: CORNFLOWER
+  custom-model-data: 4004
+  category: herb
+  effects:
+    - "&7Tăng linh lực thủy hệ"
+    - "&7Dưỡng ẩm, hồi phục kinh mạch"
+  grow-environment:
+    - "&7Ven sông, hồ, ao"
+    - "&7Vùng đất ẩm ướt"
+  compatible-alchemy:
+    - "Hồi Linh Đan"
+    - "Thiên Hồi Đan"
+  lore:
+    - "&7Linh thảo thủy hệ mọc ven các dòng suối linh khí."
+    - "&7Cánh hoa xanh lam như nước biển, khi phơi khô"
+    - "&7có thể dùng để luyện đan hồi phục linh lực."
+    - "&7Người tu luyện thủy hệ rất ưa chuộng loại thảo dược này."
+
+LOI_LINH_THAO:
+  name: "&fLôi Linh Thảo"
+  type: "Linh thảo"
+  rank: "Hạ Phẩm"
+  element: "Lôi"
+  age: "10 năm"
+  rarity: "Phổ thông"
+  material: DANDELION
+  custom-model-data: 4005
+  category: herb
+  effects:
+    - "&7Hấp thu lôi khí, tăng tốc độ"
+    - "&7Kích thích kinh mạch"
+  grow-environment:
+    - "&7Vùng đồi núi cao"
+    - "&7Nơi thường có giông bão"
+  compatible-alchemy:
+    - "Tốc Thánh Đan"
+    - "Cương Thể Đan"
+  lore:
+    - "&7Mọc ở những nơi thường xuyên có sấm sét."
+    - "&7Hoa có màu vàng rực như tia chớp giữa trời."
+    - "&7Hấp thu lôi khí thiên địa, tăng cường tốc độ"
+    - "&7và phản xạ cho tu sĩ khi luyện thành đan dược."
+
+# ==================== TRUNG PHẨM (5 loại) ====================
+
+HUYEN_BINH_THAO:
+  name: "&eHuyền Băng Thảo"
+  type: "Linh thảo"
+  rank: "Trung Phẩm"
+  element: "Băng"
+  age: "50 năm"
+  rarity: "Phổ thông"
+  material: BLUE_ORCHID
+  custom-model-data: 4006
+  effects:
+    - "&7Tăng giáp băng, chống hàn"
+    - "&7Làm chậm kẻ địch khi dùng"
+  grow-environment:
+    - "&7Đỉnh núi tuyết vạn năm"
+    - "&7Hang động băng"
+  compatible-alchemy:
+    - "Hàn Băng Đan"
+    - "Bách Độc Đan"
+  lore:
+    - "&7Kỳ hoa mọc trên đỉnh núi tuyết ngàn năm không tan."
+    - "&7Cả cây toát ra hàn khí thấu xương, người thường"
+    - "&7không thể đến gần. Cánh hoa xanh thẫm như băng"
+    - "&7ngàn năm, dùng luyện đan tăng cường hàn băng chi lực."
+
+HUYET_LINH_THAO:
+  name: "&eHuyết Linh Thảo"
+  type: "Linh thảo"
+  rank: "Trung Phẩm"
+  element: "Huyết"
+  age: "50 năm"
+  rarity: "Phổ thông"
+  material: POPPY
+  custom-model-data: 4007
+  effects:
+    - "&7Tăng sát thương, cuồng huyết"
+    - "&7Hồi phục khí huyết nhanh"
+  grow-environment:
+    - "&7Chiến trường xưa"
+    - "&7Vùng đất nhiều sát khí"
+  compatible-alchemy:
+    - "Cương Thể Đan"
+    - "Cường Lực Đan"
+  lore:
+    - "&7Linh thảo màu đỏ như máu, mọc trên những chiến"
+    - "&7trường cổ xưa thấm đẫm tinh huyết của các tu sĩ."
+    - "&7Hấp thu sát khí và huyết khí, có tác dụng kích thích"
+    - "&7tiềm năng chiến đấu, tăng cường thể chất đáng kể."
+
+HOA_LINH_THAO:
+  name: "&eHoa Linh Thảo"
+  type: "Linh thảo"
+  rank: "Trung Phẩm"
+  element: "Hỏa"
+  age: "50 năm"
+  rarity: "Phổ thông"
+  material: ALLIUM
+  custom-model-data: 4008
+  effects:
+    - "&7Tăng hỏa hệ sát thương"
+    - "&7Tăng nhiệt độ luyện đan"
+  grow-environment:
+    - "&7Vùng núi lửa đã tắt"
+    - "&7Nơi có địa nhiệt"
+  compatible-alchemy:
+    - "Phê Ma Đan"
+    - "Hóa Long Đan"
+  lore:
+    - "&7Đóa hoa đỏ rực như lửa, mọc trên những vùng đất"
+    - "&7núi lửa đã tắt từ lâu. Trong lòng nó chứa hỏa khí"
+    - "&7nồng đượm, có thể dùng để gia tăng uy lực hỏa hệ."
+    - "&7Đan dược luyện từ Hoa Linh Thảo thường có màu đỏ cam."
+
+HAC_LINH_THAO:
+  name: "&eHạc Linh Thảo"
+  type: "Linh thảo"
+  rank: "Trung Phẩm"
+  element: "Phong"
+  age: "50 năm"
+  rarity: "Hiếm"
+  material: OXEYE_DAISY
+  custom-model-data: 4009
+  effects:
+    - "&7Tăng tu vi, thanh lọc linh khí"
+    - "&7Tăng cảm ngộ thiên địa"
+  grow-environment:
+    - "&7Vực sâu, khe núi"
+    - "&7Nơi linh khí kết tụ"
+  compatible-alchemy:
+    - "Tu Luyện Đan"
+    - "Phi Thăng Đan"
+  lore:
+    - "&7Cánh hoa trắng muốt như lông hạc, mọc ở những"
+    - "&7vách núi cheo leo, nơi linh khí thiên địa kết tụ."
+    - "&7Có thể hấp thu và thanh lọc linh khí, tăng tu vi"
+    - "&7cho người dùng. Được ví như linh dược thần kỳ."
+
+KIM_LINH_THAO:
+  name: "&eKim Linh Thảo"
+  type: "Linh thảo"
+  rank: "Trung Phẩm"
+  element: "Kim"
+  age: "50 năm"
+  rarity: "Hiếm"
+  material: SUNFLOWER
+  custom-model-data: 4010
+  effects:
+    - "&7Tăng phòng thủ, kiên cố thân thể"
+    - "&7Hấp thu nhật nguyệt tinh hoa"
+  grow-environment:
+    - "&7Cánh đồng nắng"
+    - "&7Vùng đất giàu khoáng sản"
+  compatible-alchemy:
+    - "Cương Thể Đan"
+    - "Kim Cương Đan"
+  lore:
+    - "&7Loài hoa cao lớn hướng về phía mặt trời, cánh"
+    - "&7hoa vàng rực như kim loại. Hấp thu tinh hoa mặt"
+    - "&7trời và đất, luyện thành đan dược có thể tăng"
+    - "&7cường phòng ngự, thân thể cứng như kim cương."
+
+# ==================== THƯỢNG PHẨM (5 loại) ====================
+
+LONG_HUYET_THAO:
+  name: "&aLong Huyết Thảo"
+  type: "Linh thảo"
+  rank: "Thượng Phẩm"
+  element: "Huyết Long"
+  age: "500 năm"
+  rarity: "Hiếm"
+  material: RED_TULIP
+  custom-model-data: 4011
+  effects:
+    - "&7Tẩy luyện thể chất, tăng long uy"
+    - "&7Hồi phục khí huyết nhanh chóng"
+  grow-environment:
+    - "&7Long mạch"
+    - "&7Nơi chân long táng"
+  compatible-alchemy:
+    - "Hóa Long Đan"
+    - "Thần Long Đan"
+  lore:
+    - "&7Truyền thuyết kể rằng nơi nào có chân long giáng thế,"
+    - "&7nơi đó sẽ mọc lên loại thảo dược đỏ như máu rồng."
+    - "&7Mỗi cây chỉ có một bông hoa, hấp thu long khí mà"
+    - "&7trưởng thành. Dùng luyện đan có thể tẩy luyện long"
+    - "&7huyết mạch, tăng cường thể chất đến mức phi thường."
+
+THIEN_LINH_THAO:
+  name: "&aThiên Linh Thảo"
+  type: "Linh thảo"
+  rank: "Thượng Phẩm"
+  element: "Quang"
+  age: "500 năm"
+  rarity: "Cực hiếm"
+  material: LILAC
+  custom-model-data: 4012
+  effects:
+    - "&7Tăng linh căn, cải thiện thiên tư"
+    - "&7Mở rộng kinh mạch"
+  grow-environment:
+    - "&7Thiên thượng (tiên giới)"
+    - "&7Đỉnh núi cao nhất nhân gian"
+  compatible-alchemy:
+    - "Phi Thăng Đan"
+    - "Thiên Linh Đan"
+  lore:
+    - "&7Linh thảo từ thượng giới rơi xuống, hấp thu tiên"
+    - "&7khí mà sinh trưởng. Hoa có bảy màu sắc biến ảo theo"
+    - "&7thời điểm trong ngày. Có khả năng cải thiện linh căn,"
+    - "&7mở rộng kinh mạch cho tu sĩ, là thánh dược trăm năm"
+    - "&7khó gặp. Mỗi cây sống được ba nghìn năm mới ra hoa."
+
+PHUNG_LINH_THAO:
+  name: "&aPhụng Linh Thảo"
+  type: "Linh thảo"
+  rank: "Thượng Phẩm"
+  element: "Hỏa"
+  age: "500 năm"
+  rarity: "Cực hiếm"
+  material: PEONY
+  custom-model-data: 4013
+  effects:
+    - "&7Hồi sinh khí huyết"
+    - "&7Cứu tử phù thương"
+  grow-environment:
+    - "&7Nơi phượng hoàng táng"
+    - "&7Linh địa hỏa hệ"
+  compatible-alchemy:
+    - "Trường Thọ Đan"
+    - "Thiên Hồi Đan"
+  lore:
+    - "&7Tương truyền do lửa của Phượng Hoàng thiêu rụi mà"
+    - "&7sinh ra. Mỗi khi Phượng Hoàng bị trọng thương huyết"
+    - "&7nhỏ xuống đất, nơi đó sẽ mọc lên một cây Phụng Linh."
+    - "&7Có khả năng hồi sinh khí huyết, kéo người từ cõi"
+    - "&7chết trở về. Là dược liệu chính của nhiều loại"
+    - "&7trường sinh đan dược cao cấp."
+
+VAN_NIEN_LINH_CHI:
+  name: "&aVạn Niên Linh Chi"
+  type: "Linh thảo"
+  rank: "Thượng Phẩm"
+  element: "Mộc"
+  age: "1000 năm"
+  rarity: "Thánh dược"
+  material: ROSE_BUSH
+  custom-model-data: 4014
+  effects:
+    - "&7Tăng 100 năm tu vi"
+    - "&7Kéo dài thọ nguyên"
+  grow-environment:
+    - "&7Linh mạch cấp cao"
+    - "&7Nơi âm khí và linh khí hội tụ"
+  compatible-alchemy:
+    - "Trường Thọ Đan"
+    - "Phi Thăng Đan"
+  lore:
+    - "&7Linh dược cực phẩm cần nghìn năm mới trưởng thành."
+    - "&7Mỗi trăm năm Linh Chi lớn thêm một vòng tròn trên"
+    - "&7mặt nấm. Vạn Niên Linh Chi có thể tăng một trăm năm"
+    - "&7tu vi cho người dùng, kéo dài thọ nguyên. Khi còn"
+    - "&7sống, nó có thể di chuyển chậm chạp trong lòng đất"
+    - "&7để trốn tránh người hái."
+
+LUYEN_THAN_THAO:
+  name: "&aLuyện Thần Thảo"
+  type: "Linh thảo"
+  rank: "Thượng Phẩm"
+  element: "Thần"
+  age: "500 năm"
+  rarity: "Cực hiếm"
+  material: WITHER_ROSE
+  custom-model-data: 4015
+  effects:
+    - "&7Luyện hóa thần hồn"
+    - "&7Tăng cường thần thức"
+  grow-environment:
+    - "&7Vùng tử khí nồng đậm"
+    - "&7Âm tào địa phủ"
+  compatible-alchemy:
+    - "Bách Độc Đan"
+    - "Phê Ma Đan"
+  lore:
+    - "&7Đóa hoa đen tuyền như màn đêm, mọc ở vùng đất"
+    - "&7thấm đẫm tử khí. Cây không cần ánh sáng mặt trời"
+    - "&7mà chỉ hấp thu thần hồn lực và tử khí để sống."
+    - "&7Cực kỳ nguy hiểm khi hái vì nó có thể ảnh hưởng"
+    - "&7đến thần trí của người đến gần. Luyện thành đan"
+    - "&7dược có thể luyện hóa thần hồn, tăng cường thần thức."
+
+# ==================== TIÊN PHẨM (5 loại) ====================
+
+TIEN_THAO:
+  name: "&dTiên Thảo"
+  type: "Linh thảo"
+  rank: "Tiên Phẩm"
+  element: "Tiên"
+  age: "3000 năm"
+  rarity: "Tiên dược"
+  material: TORCHFLOWER
+  custom-model-data: 4016
+  effects:
+    - "&7Tăng toàn bộ chỉ số"
+    - "&7Khai mở tiên căn"
+  grow-environment:
+    - "&7Tiên giới"
+    - "&7Động thiên phúc địa"
+  compatible-alchemy:
+    - "Phi Thăng Đan"
+    - "Vô Thượng Đan"
+  lore:
+    - "&7Tiên thảo chỉ có ở thượng giới, hấp thu tiên khí"
+    - "&7mà sinh trưởng. Cả cây tỏa ra ánh sáng dịu nhẹ,"
+    - "&7hương thơm của nó có thể khiến người ngửi thấy"
+    - "&7cảm giác sảng khoái, tâm thần thông suốt. Dùng"
+    - "&7luyện đan có thể tăng toàn bộ chỉ số, thậm chí"
+    - "&7khai mở tiên căn cho người dùng."
+
+LONG_LINH_THAO:
+  name: "&dLong Linh Thảo"
+  type: "Linh thảo"
+  rank: "Tiên Phẩm"
+  element: "Long"
+  age: "5000 năm"
+  rarity: "Tiên dược"
+  material: PINK_TULIP
+  custom-model-data: 4017
+  effects:
+    - "&7Tăng long uy, thức tỉnh long huyết"
+    - "&7Biến hóa long thân"
+  grow-environment:
+    - "&7Long cung"
+    - "&7Nơi có long khí nồng đậm"
+  compatible-alchemy:
+    - "Hóa Long Đan"
+    - "Thần Long Đan"
+  lore:
+    - "&7Linh thảo mọc từ long huyết của các chân long"
+    - "&7khi chúng chiến đấu và bị thương. Có vảy màu hồng"
+    - "&7như vảy rồng, toát ra uy áp khiến linh thú cấp thấp"
+    - "&7khiếp sợ. Dùng luyện đan tăng long uy, có thể thức"
+    - "&7tỉnh long huyết mạch tiềm ẩn trong cơ thể tu sĩ."
+
+THANH_LONG_THAO:
+  name: "&dThanh Long Thảo"
+  type: "Linh thảo"
+  rank: "Tiên Phẩm"
+  element: "Phong Long"
+  age: "3000 năm"
+  rarity: "Tiên dược"
+  material: PITCHER_PLANT
+  custom-model-data: 4018
+  effects:
+    - "&7Tăng pháp lực"
+    - "&7Thanh Long hộ thể"
+  grow-environment:
+    - "&4Rừng sâu linh khí đậm đặc"
+    - "&7Nơi Thanh Long giáng thế"
+  compatible-alchemy:
+    - "Thiên Linh Đan"
+    - "Linh Phong Đan"
+  lore:
+    - "&7Cây ăn thịt có màu xanh lục bảo, mọc ở những"
+    - "&7khu rừng sâu có linh khí cực kỳ nồng đậm. Nó"
+    - "&7có thể bắt và tiêu hóa cả yêu thú cấp thấp để"
+    - "&7hấp thu tinh hoa. Trong tu tiên giới, Thanh Long"
+    - "&7Thảo được xem là linh dược cực phẩm cho người"
+    - "&7tu luyện mộc hệ và phong hệ."
+
+HONG_MONG_THAO:
+  name: "&dHồng Mộng Thảo"
+  type: "Linh thảo"
+  rank: "Tiên Phẩm"
+  element: "Ảo"
+  age: "3000 năm"
+  rarity: "Tiên dược"
+  material: ORANGE_TULIP
+  custom-model-data: 4019
+  effects:
+    - "&7Tăng ảo giác, mê hoặc địch"
+    - "&7Nhập mộng tu luyện"
+  grow-environment:
+    - "&7Biên giới thực - ảo"
+    - "&7Nơi mộng cảnh và hiện thực giao thoa"
+  compatible-alchemy:
+    - "Tiềm Hành Đan"
+    - "Vô Thượng Đan"
+  lore:
+    - "&7Huyền thoại về loài hoa màu cam mọc ở ranh giới"
+    - "&7giữa thực và ảo. Ai hái được nó sẽ rơi vào giấc"
+    - "&7mộng kéo dài nghìn năm. Trong truyền thuyết, đây"
+    - "&7là loài hoa do Mộng Ma tu luyện thành tinh để lại."
+    - "&7Khi luyện thành đan, có thể đưa người dùng vào cảnh"
+    - "&7giới mộng tu luyện, một ngày trong mộng bằng trăm"
+    - "&7năm ngoài đời thực."
+
+THIEN_HA_THAO:
+  name: "&dThiên Hà Thảo"
+  type: "Linh thảo"
+  rank: "Tiên Phẩm"
+  element: "Sinh Mệnh"
+  age: "5000 năm"
+  rarity: "Chí Bảo"
+  material: WHITE_TULIP
+  custom-model-data: 4020
+  effects:
+    - "&7Kéo dài sinh mệnh"
+    - "&7Tái tạo thân thể"
+  grow-environment:
+    - "&7Ngân hà, tinh tú"
+    - "&7Nơi dòng chảy sinh mệnh"
+  compatible-alchemy:
+    - "Trường Thọ Đan"
+    - "Vô Thượng Đan"
+  lore:
+    - "&7Linh thảo được tạo ra từ dòng chảy năng lượng của"
+    - "&7Ngân Hà. Hoa có bảy cánh trắng tinh như dải thiên"
+    - "&7hà, mỗi cánh tượng trưng cho một loại linh khí cơ"
+    - "&7bản. Có thể hấp thu năng lượng từ tinh tú để sinh"
+    - "&7trưởng. Trong lịch sử tu tiên giới, chỉ có ba người"
+    - "&7từng tìm thấy loại thảo dược này."

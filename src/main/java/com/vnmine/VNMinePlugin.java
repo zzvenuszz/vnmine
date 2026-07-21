@@ -16,6 +16,7 @@ import com.vnmine.gui.ArtifactCraftGUI;
 import com.vnmine.gui.MainMenuGUI;
 import com.vnmine.gui.QuickMenuListener;
 import com.vnmine.item.ItemBuilder;
+import com.vnmine.item.ItemDataLoader;
 import com.vnmine.item.PillUseListener;
 import com.vnmine.item.artifacts.abilities.ArtifactAbilityListener;
 import com.vnmine.item.artifacts.abilities.MountItemListener;
@@ -45,6 +46,7 @@ import com.vnmine.biome.BiomeQiManager;
 import com.vnmine.world.WorldManager;
 import com.vnmine.spiritfarm.SpiritFarmManager;
 import com.vnmine.spiritfarm.SpiritFarmListener;
+import com.vnmine.spiritfarm.SpiritHerb;
 import com.vnmine.spiritfarm.SpiritNPCListener;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
@@ -103,6 +105,7 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
 
     private BiomeQiManager biomeQiManager;
     private PillConfig pillConfig;
+    private ItemDataLoader itemDataLoader;
     private SpiritFarmManager spiritFarmManager;
     private SpiritFarmListener spiritFarmListener;
     private SpiritNPCListener spiritNPCListener;
@@ -125,6 +128,7 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
     public AlchemyCraftGUI getAlchemyCraftGUI() { return alchemyCraftGUI; }
     public ArtifactCraftGUI getArtifactCraftGUI() { return artifactCraftGUI; }
     public SpiritFarmManager getSpiritFarmManager() { return spiritFarmManager; }
+    public ItemDataLoader getItemDataLoader() { return itemDataLoader; }
 
     @Override
     public void onEnable() {
@@ -173,6 +177,9 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         
         pillConfig = new PillConfig(this);
         pillConfig.load();
+        itemDataLoader = new ItemDataLoader(this);
+        itemDataLoader.loadAll();
+        SpiritHerb.setPlugin(this);
         biomeQiManager = new BiomeQiManager(this);
         meditationListener = new MeditationListener(this, meditationManager);
 
@@ -780,6 +787,7 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         if (skillManager != null) skillManager.reload();
         if (skillBookManager != null) skillBookManager.reload();
         if (currencyManager != null) currencyManager.loadConfig();
+        if (itemDataLoader != null) itemDataLoader.reload();
         if (npcManager != null) npcManager.reload();
         if (mountManager != null) mountManager.reload();
         if (timeManager.isRunning()) timeManager.updateSpeeds(dayMinutes, nightMinutes);

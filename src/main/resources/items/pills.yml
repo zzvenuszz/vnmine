@@ -1,0 +1,616 @@
+# =====================================
+# pills.yml - Định nghĩa Đan Dược + Công thức luyện đan
+# =====================================
+# Hỗ trợ mã màu & cho name, lore, effects...
+# Format tham khảo: https://www.tutienchibao.info.vn/dan-duoc
+# Category: pill
+# Các placeholder: {recover} - hồi linh lực, {heal} - hồi HP (%)
+# {regen} - hồi máu/giây, {duration} - thời gian (giây)
+# {dmg} - sát thương (%), {exp} - EXP tu luyện
+# ingredients format: "herb:ID:count" hoặc "mat:MATERIAL:count"
+# required-skills format: "SKILL_ID:level"
+
+HOI_LINH_DAN:
+  name: "&aHồi Linh Đan"
+  type: "Đan dược"
+  rank: "Hoàng cấp Hạ phẩm"
+  material: POTION
+  custom-model-data: 2001
+  category: pill
+  base-recover: 30
+  scale-with-grade: true
+  cooking-time: 10
+  success-chance: 80.0
+  required-level: 3
+  required-skills:
+    - "FIRE_CONTROL:1"
+  ingredients:
+    - "herb:LINH_THAO:3"
+    - "mat:POTION:1"
+  effects:
+    - "&7Hồi &b{recover} &7linh lực"
+  side_effects:
+    - "&7Không có tác dụng phụ"
+  lore:
+    - "&7Viên đan dược cơ bản nhất trong luyện đan thuật."
+    - "&7Được luyện từ linh thảo thường, hồi phục linh lực"
+    - "&7cho người mới bắt đầu tu luyện."
+
+DAI_HOI_LINH_DAN:
+  name: "&bĐại Hồi Linh Đan"
+  type: "Đan dược"
+  rank: "Hoàng cấp Thượng phẩm"
+  material: LINGERING_POTION
+  custom-model-data: 2002
+  category: pill
+  base-recover: 100
+  base-regen: 1
+  base-duration: 30
+  scale-with-grade: true
+  cooking-time: 15
+  success-chance: 70.0
+  required-level: 5
+  required-skills:
+    - "FIRE_CONTROL:1"
+  ingredients:
+    - "herb:HUYET_LINH_THAO:2"
+    - "herb:LINH_THAO:5"
+  effects:
+    - "&7Hồi &b{recover} &7linh lực"
+    - "&7Hồi thêm &a{regen} &7linh lực mỗi giây trong &a{duration}s"
+  side_effects:
+    - "&7Không dùng chung với các thuốc hồi linh lực khác"
+  lore:
+    - "&7Phiên bản cải tiến của Hồi Linh Đan, luyện chế cầu kỳ"
+    - "&7hơn với sự kết hợp của Huyết Linh Thảo."
+
+CUONG_THE_DAN:
+  name: "&cCương Thể Đan"
+  type: "Đan dược"
+  rank: "Huyền cấp Trung phẩm"
+  material: SPLASH_POTION
+  custom-model-data: 2003
+  category: pill
+  base-dmg: 20
+  base-duration: 60
+  scale-with-grade: true
+  scale-duration: true
+  cooking-time: 20
+  success-chance: 60.0
+  required-level: 10
+  required-skills:
+    - "FIRE_CONTROL:2"
+  ingredients:
+    - "herb:HUYET_LINH_THAO:3"
+    - "herb:LINH_THAO:5"
+    - "mat:BLAZE_POWDER:1"
+  effects:
+    - "&7Tăng &c{dmg}% &7sát thương trong &c{duration}s"
+  side_effects:
+    - "&7Mệt mỏi sau khi hết hiệu lực"
+  lore:
+    - "&7Đan dược tăng cường thể chất, làm thân thể cứng như thép."
+
+THANH_TAM_DAN:
+  name: "&eThanh Tâm Đan"
+  type: "Đan dược"
+  rank: "Hoàng cấp Trung phẩm"
+  material: HONEY_BOTTLE
+  custom-model-data: 2004
+  category: pill
+  cooking-time: 12
+  success-chance: 85.0
+  required-level: 3
+  required-skills:
+    - "FIRE_CONTROL:1"
+  ingredients:
+    - "herb:BINH_LINH_THAO:3"
+    - "mat:POTION:1"
+  effects:
+    - "&7Giải trừ mọi trạng thái xấu"
+  side_effects:
+    - "&7Không có tác dụng phụ"
+  lore:
+    - "&7Loại đan dược màu xanh nhạt, có mùi thơm mát."
+
+TOC_THANH_DAN:
+  name: "&bTốc Thánh Đan"
+  type: "Đan dược"
+  rank: "Huyền cấp Thượng phẩm"
+  material: POTION
+  custom-model-data: 2005
+  category: pill
+  base-regen: 50
+  base-duration: 300
+  scale-duration: true
+  cooking-time: 18
+  success-chance: 65.0
+  required-level: 8
+  required-skills:
+    - "FIRE_CONTROL:1"
+  ingredients:
+    - "herb:LOI_LINH_THAO:3"
+    - "mat:SUGAR:2"
+    - "mat:FEATHER:1"
+  effects:
+    - "&7Tăng &a{regen}% &7tốc độ di chuyển trong &a{duration}s"
+  side_effects:
+    - "&7Tiêu hao thể lực nhanh hơn"
+  lore:
+    - "&7Khi uống viên đan màu xanh lam này, cơ thể trở nên nhẹ bẫng."
+
+TU_LUYEN_DAN:
+  name: "&5Tu Luyện Đan"
+  type: "Đan dược"
+  rank: "Huyền cấp Trung phẩm"
+  material: EXPERIENCE_BOTTLE
+  custom-model-data: 2006
+  category: pill
+  base-exp: 50
+  scale-with-grade: true
+  cooking-time: 25
+  success-chance: 50.0
+  required-level: 15
+  required-skills:
+    - "FIRE_CONTROL:2"
+  ingredients:
+    - "herb:LINH_THAO:10"
+    - "herb:HUYET_LINH_THAO:5"
+    - "herb:LONG_HUYET_THAO:2"
+    - "mat:GOLD_INGOT:1"
+  effects:
+    - "&7Tăng &5+{exp} EXP &7tu luyện"
+  side_effects:
+    - "&7Dùng nhiều sẽ giảm hiệu quả"
+  lore:
+    - "&7Viên đan màu tím sẫm ngưng tụ tinh hoa luyện đạo."
+
+PHI_THANG_DAN:
+  name: "&6Phi Thăng Đan"
+  type: "Đan dược"
+  rank: "Địa cấp Thượng phẩm"
+  material: DRAGON_BREATH
+  custom-model-data: 2007
+  category: pill
+  base-exp: 500
+  scale-with-grade: true
+  cooking-time: 60
+  success-chance: 25.0
+  required-level: 30
+  required-skills:
+    - "FIRE_CONTROL:3"
+  ingredients:
+    - "herb:TIEN_THAO:10"
+    - "mat:DRAGON_BREATH:1"
+    - "mat:NETHERITE_INGOT:2"
+  effects:
+    - "&7+{exp} EXP (1 lần/đại cảnh giới)"
+  side_effects:
+    - "&7Chỉ sử dụng được một lần mỗi đại cảnh giới"
+  lore:
+    - "&7Đan dược cao cấp luyện từ Tiên Thảo và Hơi Rồng."
+
+BACH_DOC_DAN:
+  name: "&9Bách Độc Đan"
+  type: "Đan dược"
+  rank: "Huyền cấp Hạ phẩm"
+  material: POTION
+  custom-model-data: 2008
+  category: pill
+  base-duration: 300
+  scale-duration: true
+  cooking-time: 15
+  success-chance: 60.0
+  required-level: 10
+  required-skills:
+    - "FIRE_CONTROL:1"
+  ingredients:
+    - "herb:BINH_LINH_THAO:3"
+    - "mat:REDSTONE:2"
+    - "mat:BLAZE_POWDER:1"
+  effects:
+    - "&7Miễn nhiễm độc trong &b{duration}s"
+  side_effects:
+    - "&7Làm giảm vị giác tạm thời"
+  lore:
+    - "&7Loại đan dược màu xanh đen, luyện từ Bình Linh Thảo."
+
+THIEN_HOI_DAN:
+  name: "&6Thiên Hồi Đan"
+  type: "Đan dược"
+  rank: "Địa cấp Trung phẩm"
+  material: LINGERING_POTION
+  custom-model-data: 2009
+  category: pill
+  base-heal: 50
+  base-recover: 50
+  scale-with-grade: true
+  cooking-time: 35
+  success-chance: 45.0
+  required-level: 25
+  required-skills:
+    - "FIRE_CONTROL:3"
+  ingredients:
+    - "herb:THIEN_LINH_THAO:5"
+    - "herb:HOA_LINH_THAO:3"
+    - "mat:PRISMARINE_SHARD:1"
+  effects:
+    - "&7Hồi &a{heal}% HP &7+ &b{recover}% &7linh lực"
+  side_effects:
+    - "&7Hồi phục chậm hơn nếu dùng liên tiếp"
+  lore:
+    - "&7Đan dược màu vàng kim luyện từ Thiên Linh Thảo."
+
+PHE_MA_DAN:
+  name: "&8Phê Ma Đan"
+  type: "Đan dược"
+  rank: "Địa cấp Hạ phẩm"
+  material: SPLASH_POTION
+  custom-model-data: 2010
+  category: pill
+  base-dmg: 30
+  base-duration: 120
+  scale-with-grade: true
+  scale-duration: true
+  cooking-time: 30
+  success-chance: 40.0
+  required-level: 20
+  required-skills:
+    - "FIRE_CONTROL:2"
+  ingredients:
+    - "herb:LOI_LINH_THAO:3"
+    - "mat:IRON_INGOT:2"
+    - "mat:END_STONE:1"
+  effects:
+    - "&7Tăng &c{dmg}% &7sát thương vs quái trong &c{duration}s"
+  side_effects:
+    - "&7Có thể gây cuồng loạn nhẹ"
+  lore:
+    - "&7Viên đan màu đen kịt, tỏa ra sát khí nồng nặc."
+
+TRUONG_THO_DAN:
+  name: "&6Trường Thọ Đan"
+  type: "Đan dược"
+  rank: "Địa cấp Thượng phẩm"
+  material: HONEY_BOTTLE
+  custom-model-data: 2011
+  category: pill
+  cooking-time: 45
+  success-chance: 25.0
+  required-level: 35
+  required-skills:
+    - "FIRE_CONTROL:3"
+  ingredients:
+    - "herb:VAN_NIEN_LINH_CHI:5"
+    - "mat:IRON_NUGGET:3"
+    - "mat:EMERALD:2"
+  effects:
+    - "&7Tự động hồi sinh 1 lần sau khi chết"
+  side_effects:
+    - "&7Hiệu quả chỉ kích hoạt 1 lần"
+  lore:
+    - "&7Đan dược cực phẩm, được xem là 'kim bài miễn tử'."
+
+KIM_CUONG_DAN:
+  name: "&bKim Cương Đan"
+  type: "Đan dược"
+  rank: "Huyền cấp Thượng phẩm"
+  material: SPLASH_POTION
+  custom-model-data: 2012
+  category: pill
+  base-dmg: 30
+  base-duration: 60
+  scale-with-grade: true
+  scale-duration: true
+  cooking-time: 25
+  success-chance: 50.0
+  required-level: 15
+  required-skills:
+    - "FIRE_CONTROL:2"
+  ingredients:
+    - "herb:KIM_LINH_THAO:5"
+    - "mat:DIAMOND:2"
+    - "mat:OBSIDIAN:1"
+  effects:
+    - "&7Giảm &b{dmg}% &7sát thương nhận vào trong &b{duration}s"
+  side_effects:
+    - "&7Giảm tốc độ di chuyển khi dùng"
+  lore:
+    - "&7Luyện từ Kim Linh Thảo và bột kim cương nghiền nhỏ."
+
+LINH_NHIEN_DAN:
+  name: "&aLinh Nhiên Đan"
+  type: "Đan dược"
+  rank: "Huyền cấp Thượng phẩm"
+  material: POTION
+  custom-model-data: 2013
+  category: pill
+  base-regen: 20
+  base-dmg: 15
+  base-duration: 45
+  scale-with-grade: true
+  scale-duration: true
+  cooking-time: 28
+  success-chance: 55.0
+  required-level: 18
+  required-skills:
+    - "FIRE_CONTROL:2"
+  ingredients:
+    - "herb:HAC_LINH_THAO:5"
+    - "mat:SUGAR:3"
+    - "mat:FEATHER:2"
+  effects:
+    - "&7Tăng &a{regen}% &7tốc độ đánh + &c{dmg}% &7crit trong &a{duration}s"
+  side_effects:
+    - "&7Làm hoa mắt nếu dùng quá liều"
+  lore:
+    - "&7Viên đan màu xanh lá nhẹ nhàng tăng linh hoạt."
+
+TIEM_HANH_DAN:
+  name: "&8Tiềm Hành Đan"
+  type: "Đan dược"
+  rank: "Địa cấp Hạ phẩm"
+  material: POTION
+  custom-model-data: 2014
+  category: pill
+  base-duration: 30
+  base-dmg: 50
+  scale-with-grade: true
+  scale-duration: true
+  cooking-time: 30
+  success-chance: 45.0
+  required-level: 22
+  required-skills:
+    - "FIRE_CONTROL:3"
+  ingredients:
+    - "herb:NGUYET_QUANG_THAO:5"
+    - "mat:ENDER_PEARL:2"
+    - "mat:FEATHER:1"
+  effects:
+    - "&7Tàng hình &a{duration}s &7+ tăng &c{dmg}% &7sát thương đòn đầu"
+  side_effects:
+    - "&7Đòn tàng hình bị phá khi tấn công"
+  lore:
+    - "&7Đan dược màu tím đen, hòa vào bóng tối."
+
+PHAP_TUONG_DAN:
+  name: "&5Pháp Tướng Đan"
+  type: "Đan dược"
+  rank: "Địa cấp Trung phẩm"
+  material: LINGERING_POTION
+  custom-model-data: 2015
+  category: pill
+  base-recover: 50
+  base-duration: 120
+  scale-with-grade: true
+  scale-duration: true
+  cooking-time: 35
+  success-chance: 40.0
+  required-level: 25
+  required-skills:
+    - "FIRE_CONTROL:3"
+  ingredients:
+    - "herb:LONG_HUYET_THAO:5"
+    - "mat:GOLD_INGOT:2"
+    - "mat:DIAMOND:1"
+  effects:
+    - "&7Tăng &b{recover}% &7max mana trong &b{duration}s"
+  side_effects:
+    - "&7Mana hồi chậm hơn sau khi hết hiệu lực"
+  lore:
+    - "&7Dành riêng cho các Pháp tu, mở rộng đan điền."
+
+THAN_LONG_DAN:
+  name: "&6Thần Long Đan"
+  type: "Đan dược"
+  rank: "Thiên cấp Hạ phẩm"
+  material: DRAGON_BREATH
+  custom-model-data: 2016
+  category: pill
+  base-heal: 100
+  base-recover: 100
+  base-duration: 3
+  scale-with-grade: true
+  cooking-time: 50
+  success-chance: 20.0
+  required-level: 40
+  required-skills:
+    - "FIRE_CONTROL:4"
+  ingredients:
+    - "herb:TIEN_THAO:8"
+    - "mat:DRAGON_BREATH:2"
+    - "mat:NETHERITE_INGOT:1"
+    - "mat:GOLDEN_APPLE:1"
+  effects:
+    - "&7Hồi &a{heal}% HP &7+ &b{recover}% &7linh lực + miễn dịch &b{duration}s"
+  side_effects:
+    - "&7Sau dùng yếu ớt 10 giây"
+  lore:
+    - "&7Khi dùng, cơ thể được bao phủ bởi long uy."
+
+CUONG_LUC_DAN:
+  name: "&cCường Lực Đan"
+  type: "Đan dược"
+  rank: "Địa cấp Hạ phẩm"
+  material: SPLASH_POTION
+  custom-model-data: 2017
+  category: pill
+  base-dmg: 40
+  base-duration: 60
+  scale-with-grade: true
+  scale-duration: true
+  cooking-time: 32
+  success-chance: 50.0
+  required-level: 20
+  required-skills:
+    - "FIRE_CONTROL:2"
+  ingredients:
+    - "herb:HUYET_LINH_THAO:5"
+    - "mat:BLAZE_POWDER:3"
+    - "mat:IRON_INGOT:2"
+  effects:
+    - "&7Tăng &c{dmg}% &7sát thương cận chiến trong &c{duration}s"
+  side_effects:
+    - "&7Gây mỏi cơ sau khi hết hiệu lực"
+  lore:
+    - "&7Đan dược đỏ rực như lửa tăng cường sức mạnh."
+
+HAN_BANG_DAN:
+  name: "&bHàn Băng Đan"
+  type: "Đan dược"
+  rank: "Địa cấp Trung phẩm"
+  material: LINGERING_POTION
+  custom-model-data: 2018
+  category: pill
+  base-duration: 60
+  scale-duration: true
+  cooking-time: 33
+  success-chance: 45.0
+  required-level: 22
+  required-skills:
+    - "FIRE_CONTROL:2"
+  ingredients:
+    - "herb:HUYEN_BINH_THAO:5"
+    - "mat:BLUE_ICE:2"
+    - "mat:PRISMARINE_SHARD:2"
+  effects:
+    - "&7Làm chậm kẻ địch, tăng giáp băng trong &a{duration}s"
+  side_effects:
+    - "&7Cảm thấy lạnh cóng sau khi dùng"
+  lore:
+    - "&7Viên đan trong suốt như băng, tỏa hàn khí."
+
+LINH_PHONG_DAN:
+  name: "&aLinh Phong Đan"
+  type: "Đan dược"
+  rank: "Địa cấp Hạ phẩm"
+  material: POTION
+  custom-model-data: 2019
+  category: pill
+  base-regen: 30
+  base-duration: 45
+  scale-with-grade: true
+  scale-duration: true
+  cooking-time: 27
+  success-chance: 60.0
+  required-level: 18
+  required-skills:
+    - "FIRE_CONTROL:2"
+  ingredients:
+    - "herb:LAM_LINH_THAO:3"
+    - "mat:FEATHER:3"
+    - "mat:SUGAR:2"
+  effects:
+    - "&7Tăng &a{regen}% &7tốc độ + nhảy cao trong &a{duration}s"
+  side_effects:
+    - "&7Mất kiểm soát khi rơi từ độ cao lớn"
+  lore:
+    - "&7Viên đan màu xanh gió, di chuyển như bay."
+
+HOA_LONG_DAN:
+  name: "&6Hóa Long Đan"
+  type: "Đan dược"
+  rank: "Thiên cấp Trung phẩm"
+  material: DRAGON_BREATH
+  custom-model-data: 2020
+  category: pill
+  base-duration: 10
+  base-dmg: 50
+  base-recover: 50
+  scale-with-grade: true
+  cooking-time: 55
+  success-chance: 20.0
+  required-level: 50
+  required-skills:
+    - "FIRE_CONTROL:4"
+  ingredients:
+    - "herb:TIEN_THAO:8"
+    - "mat:DRAGON_BREATH:3"
+    - "mat:NETHERITE_INGOT:2"
+    - "mat:GOLD_BLOCK:1"
+  effects:
+    - "&7Biến rồng &a{duration}s &7tăng &c{dmg}% &7sát thương + &b{recover}% &7phòng thủ"
+  side_effects:
+    - "&7Kiệt sức hoàn toàn sau khi hết hiệu lực"
+    - "&7Một ngày chỉ dùng được 1 lần"
+  lore:
+    - "&7Đan dược tối thượng biến người dùng thành rồng."
+
+THIEN_LINH_DAN:
+  name: "&dThiên Linh Đan"
+  type: "Đan dược"
+  rank: "Thiên cấp Thượng phẩm"
+  material: EXPERIENCE_BOTTLE
+  custom-model-data: 2021
+  category: pill
+  base-exp: 2000
+  scale-with-grade: true
+  cooking-time: 50
+  success-chance: 20.0
+  required-level: 45
+  required-skills:
+    - "FIRE_CONTROL:4"
+  ingredients:
+    - "herb:THIEN_LINH_THAO:8"
+    - "mat:DIAMOND:3"
+    - "mat:NETHERITE_INGOT:2"
+    - "mat:DRAGON_BREATH:1"
+  effects:
+    - "&7+{exp} EXP (1 lần/đại cảnh giới)"
+  side_effects:
+    - "&7Chỉ dùng được 1 lần mỗi đại cảnh giới"
+  lore:
+    - "&7Viên đan hoa lệ nhất trong số các loại đan tăng tu vi."
+
+DAC_COC_DAN:
+  name: "&5Đặc Cốc Đan"
+  type: "Đan dược"
+  rank: "Địa cấp Thượng phẩm"
+  material: HONEY_BOTTLE
+  custom-model-data: 2022
+  category: pill
+  cooking-time: 38
+  success-chance: 35.0
+  required-level: 30
+  required-skills:
+    - "FIRE_CONTROL:3"
+  ingredients:
+    - "herb:PHUNG_LINH_THAO:5"
+    - "mat:EMERALD:3"
+    - "mat:GOLD_INGOT:2"
+    - "mat:BLAZE_POWDER:1"
+  effects:
+    - "&7Reset cooldown tất cả skill (1 lần/giờ)"
+  side_effects:
+    - "&7Chỉ dùng được 1 lần mỗi giờ"
+  lore:
+    - "&7Viên đan tái tạo toàn bộ năng lượng kỹ năng."
+
+VO_THUONG_DAN:
+  name: "&4Vô Thượng Đan"
+  type: "Đan dược"
+  rank: "Thiên cấp Thượng phẩm"
+  material: DRAGON_BREATH
+  custom-model-data: 2023
+  category: pill
+  base-duration: 10
+  base-dmg: 100
+  base-regen: 100
+  base-recover: 100
+  scale-with-grade: true
+  cooking-time: 70
+  success-chance: 10.0
+  required-level: 60
+  required-skills:
+    - "FIRE_CONTROL:5"
+  ingredients:
+    - "herb:LUYEN_THAN_THAO:10"
+    - "mat:NETHERITE_INGOT:3"
+    - "mat:DRAGON_BREATH:2"
+    - "mat:END_CRYSTAL:1"
+  effects:
+    - "&7Tăng &c{dmg}% &7sát thương + &a{regen}% &7tốc độ + &b{recover}% &7phòng thủ trong &c{duration}s (1 lần/ngày)"
+  side_effects:
+    - "&7Kiệt sức hoàn toàn trong 1 phút sau đó"
+  lore:
+    - "&7Vô Thượng Đan - loại đan dược mạnh nhất."

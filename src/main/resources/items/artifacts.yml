@@ -1,0 +1,220 @@
+# =====================================
+# artifacts.yml - Định nghĩa Pháp Bảo
+# =====================================
+# Hỗ trợ mã màu & cho name, lore, effects...
+# Format tham khảo: https://www.tutienchibao.info.vn/phap-bao
+
+# ==================== PHÁP BẢO ====================
+
+FLYING_SWORD:
+  name: "&bKiếm Phi Hành"
+  type: "Pháp bảo"
+  rank: "Phàm Giai - Hậu Thiên"
+  element: "Kim"
+  rarity: "Phổ thông"
+  material: DIAMOND_SWORD
+  custom-model-data: 3001
+  category: artifact
+  cooking-time: 30
+  success-chance: 60.0
+  required-level: 21
+  required-skills:
+    - "FORGE_MASTERY:1"
+  ingredients:
+    - "herb:KIM_LINH_THAO:5"
+    - "mat:IRON_INGOT:3"
+    - "mat:DIAMOND:1"
+  effects:
+    - "&7Ngự kiếm phi hành, di chuyển nhanh"
+    - "&7Tấn công từ xa bằng kiếm"
+  compatible_alchemy: []
+  lore:
+    - "&7Thanh kiếm nhỏ có thể điều khiển bằng thần thức."
+    - "&7Là pháp bảo cơ bản nhất của tu tiên giới,"
+    - "&7được luyện chế từ các mảnh thiên thạch."
+    - "&7Khi đạt tới cảnh giới Trúc Cơ có thể ngự kiếm"
+    - "&7phi hành, di chuyển nhanh gấp bội."
+
+SPIRIT_BELL:
+  name: "&6Linh Chung"
+  type: "Pháp bảo"
+  rank: "Phàm Giai - Tiên Thiên"
+  element: "Âm"
+  rarity: "Hiếm"
+  material: BELL
+  custom-model-data: 3002
+  category: artifact
+  cooking-time: 25
+  success-chance: 65.0
+  required-level: 15
+  required-skills:
+    - "FORGE_MASTERY:1"
+  ingredients:
+    - "herb:NGUYET_QUANG_THAO:3"
+    - "mat:GOLD_INGOT:2"
+  effects:
+    - "&7Làm choáng quái AOE"
+    - "&7Khiến địch mất phương hướng"
+  compatible_alchemy: []
+  lore:
+    - "&7Chiếc chuông nhỏ màu đồng thau, khi rung lên"
+    - "&7phát ra âm thanh làm chấn động nguyên thần"
+    - "&7kẻ địch. Có thể làm choáng tất cả yêu thú"
+    - "&7trong phạm vi vài trượng. Cần linh lực duy trì."
+    - "&7Tương truyền do Vong Ngữ luyện chế từ đồng"
+    - "&7xanh vạn năm."
+
+BAGUA_MIRROR:
+  name: "&5Bát Quái Kính"
+  type: "Pháp bảo"
+  rank: "Linh Giai - Địa Cấp"
+  element: "Quang"
+  rarity: "Hiếm"
+  material: SHIELD
+  custom-model-data: 3003
+  category: artifact
+  cooking-time: 35
+  success-chance: 50.0
+  required-level: 25
+  required-skills:
+    - "FORGE_MASTERY:2"
+  ingredients:
+    - "herb:THIEN_LINH_THAO:3"
+    - "mat:OBSIDIAN:2"
+    - "mat:GOLD_INGOT:2"
+  effects:
+    - "&7Giảm sát thương nhận vào"
+    - "&7Phản chiếu pháp thuật"
+  compatible_alchemy: []
+  lore:
+    - "&7Tấm kính bát quái phản chiếu mọi công kích."
+    - "&7Mặt kính khắc bát quái đồ trận, khi kích hoạt"
+    - "&7sẽ tạo ra một lớp bảo hộ vô hình."
+    - "&7Có thể phản chiếu đòn tấn công bằng pháp thuật"
+    - "&7trở lại kẻ địch. Càng nhiều linh lực đổ vào,"
+    - "&7khả năng phòng ngự càng mạnh."
+
+SOUL_JADE:
+  name: "&aHồn Ngọc"
+  type: "Pháp bảo"
+  rank: "Linh Giai - Thiên Cấp"
+  element: "Sinh Mệnh"
+  rarity: "Cực hiếm"
+  material: EMERALD
+  custom-model-data: 3004
+  category: artifact
+  cooking-time: 40
+  success-chance: 45.0
+  required-level: 30
+  required-skills:
+    - "FORGE_MASTERY:2"
+  ingredients:
+    - "herb:LONG_HUYET_THAO:3"
+    - "mat:EMERALD:3"
+    - "mat:PRISMARINE_SHARD:2"
+  effects:
+    - "&7Tự động hồi máu khi HP thấp"
+    - "&7Bảo vệ nguyên thần"
+  compatible_alchemy: []
+  lore:
+    - "&7Viên ngọc xanh lục bảo chứa đựng sinh mệnh lực."
+    - "&7Được luyện từ một mảnh linh hồn của đại năng"
+    - "&7nào đó. Khi người dùng bị thương nặng, nó tự"
+    - "&7động giải phóng sinh mệnh lực để chữa trị."
+    - "&7Cũng có khả năng bảo vệ nguyên thần khỏi các"
+    - "&7đòn tấn công thần thức."
+
+HEAVEN_SHIELD:
+  name: "&4Thiên Linh Thuẫn"
+  type: "Pháp bảo"
+  rank: "Vương Giai - Hoàng Cấp"
+  element: "Quang"
+  rarity: "Cực hiếm"
+  material: NETHERITE_CHESTPLATE
+  custom-model-data: 3005
+  category: artifact
+  cooking-time: 50
+  success-chance: 35.0
+  required-level: 40
+  required-skills:
+    - "FORGE_MASTERY:3"
+  ingredients:
+    - "herb:VAN_NIEN_LINH_CHI:2"
+    - "mat:NETHERITE_INGOT:2"
+    - "mat:OBSIDIAN:3"
+  effects:
+    - "&7Bất tử tạm thời khi kích hoạt"
+    - "&7Tạo lớp giáp bảo hộ"
+  compatible_alchemy: []
+  lore:
+    - "&7Chiếc khiên huyền thoại được luyện từ mảnh vỡ"
+    - "&7của thiên thạch rơi xuống nhân gian."
+    - "&7Khi kích hoạt, nó tạo ra một lớp bảo hộ"
+    - "&7khiến người dùng bất tử trong thời gian ngắn."
+    - "&7Dù chỉ kéo dài vài giây, nhưng trong thời gian"
+    - "&7đó, người dùng có thể tung ra đòn quyết định."
+    - "&7Cần nạp linh khí sau mỗi lần dùng."
+
+THUNDER_SEAL:
+  name: "&eLôi Ấn"
+  type: "Pháp bảo"
+  rank: "Thánh Giai - Đại Thánh"
+  element: "Lôi"
+  rarity: "Thánh vật"
+  material: TRIDENT
+  custom-model-data: 3006
+  category: artifact
+  cooking-time: 60
+  success-chance: 25.0
+  required-level: 50
+  required-skills:
+    - "FORGE_MASTERY:3"
+  ingredients:
+    - "herb:TIEN_THAO:5"
+    - "mat:NETHERITE_INGOT:2"
+    - "mat:DRAGON_BREATH:2"
+    - "mat:END_CRYSTAL:1"
+  effects:
+    - "&7Gọi sét đánh kẻ địch"
+    - "&7Lôi điện phạm vi rộng"
+  compatible_alchemy: []
+  lore:
+    - "&7Ấn lôi đình chứa đựng uy lực của thiên kiếp."
+    - "&7Được luyện chế từ một tia sét đánh xuống từ"
+    - "&7trên trời trong cơn lôi kiếp của một đại năng."
+    - "&7Khi kích hoạt có thể gọi sấm sét từ trời đánh"
+    - "&7xuống kẻ địch. Mỗi lần dùng đều tiêu hao một"
+    - "&7lượng linh lực cực lớn. Uy lực của nó có thể"
+    - "&7sánh ngang với lôi kiếp thực thụ."
+
+PHOENIX_REBIRTH:
+  name: "&6Phượng Hoàng Lệnh"
+  type: "Pháp bảo"
+  rank: "Tiên Giai - Chân Tiên"
+  element: "Hỏa"
+  rarity: "Tiên bảo"
+  material: FEATHER
+  custom-model-data: 3007
+  category: artifact
+  cooking-time: 70
+  success-chance: 15.0
+  required-level: 60
+  required-skills:
+    - "FORGE_MASTERY:4"
+  ingredients:
+    - "herd:THIEN_HA_THAO:3"
+    - "mat:NETHERITE_INGOT:3"
+    - "mat:DRAGON_BREATH:3"
+    - "mat:END_CRYSTAL:2"
+  effects:
+    - "&7Hồi sinh sau khi chết"
+    - "&7Lửa Phượng Hoàng bảo hộ"
+  compatible_alchemy: []
+  lore:
+    - "&7Lông vũ của Phượng Hoàng lửa - loài thần điểu"
+    - "&7bất tử trong truyền thuyết. Khi người dùng gặp"
+    - "&7nguy hiểm sinh tử, nó sẽ kích hoạt, lửa Phượng"
+    - "&7Hoàng bao bọc và tái tạo thân thể từ tro tàn."
+    - "&7Tuy nhiên, sau khi dùng, pháp bảo sẽ biến mất"
+    - "&7và cần tìm một chiếc lông Phượng Hoàng mới."
+    - "&7Chỉ những người có duyên mới sở hữu được nó."

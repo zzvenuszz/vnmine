@@ -1,0 +1,49 @@
+# =====================================
+# mounts.yml - Định nghĩa Tọa Kỵ Keys
+# =====================================
+
+PHUONG_HOANG_LENH_BAI:
+  name: "&6Phượng Hoàng Lệnh Bài"
+  type: "Tọa kỵ"
+  rank: "Tiên Giai"
+  element: "Hỏa"
+  rarity: "Tiên bảo"
+  material: FEATHER
+  custom-model-data: 7001
+  category: mount
+  effects:
+    - "&7Triệu hồi Phượng Hoàng để cưỡi"
+    - "&7Bay cao và nhanh"
+  lore:
+    - "&7Lệnh bài màu đỏ rực, có khắc hình Phượng Hoàng."
+    - "&7Kích hoạt để triệu hồi thần điểu làm tọa kỵ."
+
+BACH_HO_LENH_BAI:
+  name: "&fBạch Hổ Lệnh Bài"
+  type: "Tọa kỵ"
+  rank: "Vương Giai"
+  element: "Kim"
+  rarity: "Thánh vật"
+  material: BONE
+  custom-model-data: 7002
+  category: mount
+  effects:
+    - "&7Triệu hồi Bạch Hổ để cưỡi"
+    - "&7Chạy nhanh trên mặt đất"
+  lore:
+    - "&7Lệnh bài trắng muốt, khắc hình Bạch Hổ uy nghiêm."
+
+THANH_LONG_LENH_BAI:
+  name: "&aThanh Long Lệnh Bài"
+  type: "Tọa kỵ"
+  rank: "Thiên Giai"
+  element: "Phong"
+  rarity: "Tiên bảo"
+  material: DRAGON_BREATH
+  custom-model-data: 7003
+  category: mount
+  effects:
+    - "&7Triệu hồi Thanh Long để cưỡi"
+    - "&7Di chuyển cả trên không và dưới nước"
+  lore:
+    - "&7Lệnh bài màu xanh lục, toát ra uy áp của thần long."

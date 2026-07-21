@@ -191,5 +191,16 @@ Mô tả ngắn gọn các chỉnh sửa đã thực hiện.
 
 ---
 
+## Item Data Source Rules (Nguồn dữ liệu vật phẩm)
+Khi tạo ra các loại pháp bảo, đan dược, pháp khí, linh thảo, công pháp, tọa kỵ... bắt buộc phải:
+1. Tham khảo nội dung tại https://www.tutienchibao.info.vn (bao gồm cả các link phụ bên trong trang web).
+2. Thêm dữ liệu vào file YML tương ứng trong thư mục `items/` (herbs.yml, pills.yml, artifacts.yml, skills.yml, materials.yml, mounts.yml, currency.yml).
+3. Không hardcode item data trong Java code.
+4. Mỗi item phải có đầy đủ: name, type, rank, material, effects, lore mô tả chi tiết.
+5. Sử dụng mã màu & cho name, lore, effects... để hiển thị đẹp trong game.
+6. Khi cập nhật dữ liệu item, chỉ cần sửa file YML tương ứng, không cần biên dịch lại code.
+
+---
+
 ## Completion Rules (Quy định hoàn thành)
 Cline không được tuyên bố hoàn thành công việc nếu chưa đi qua đủ các bước: Phân tích nguyên nhân -> Sửa lỗi trong Act Mode -> Build thành công bằng lệnh Maven thủ công -> Xác minh sinh file JAR mới -> Tính mã SHA256 -> Gửi báo cáo đầy đủ.

@@ -1,0 +1,45 @@
+# =====================================
+# currency.yml - Định nghĩa Linh Thạch
+# =====================================
+
+LINH_THACH_HA:
+  name: "&bLinh Thạch Hạ Phẩm"
+  type: "Linh thạch"
+  rank: "Hạ Phẩm"
+  element: "Linh"
+  rarity: "Phổ thông"
+  material: PRISMARINE_SHARD
+  custom-model-data: 8001
+  category: currency
+  effects:
+    - "&71 LT Hạ = 1 linh thạch"
+  lore:
+    - "&7Đơn vị tiền tệ cơ bản trong tu tiên giới."
+
+LINH_THACH_TRUNG:
+  name: "&dLinh Thạch Trung Phẩm"
+  type: "Linh thạch"
+  rank: "Trung Phẩm"
+  element: "Linh"
+  rarity: "Hiếm"
+  material: DARK_PRISMARINE
+  custom-model-data: 8002
+  category: currency
+  effects:
+    - "&71 LT Trung = 100 LT Hạ"
+  lore:
+    - "&7Linh thạch phẩm cấp cao hơn, linh khí tinh khiết hơn."
+
+LINH_THACH_THUONG:
+  name: "&6Linh Thạch Thượng Phẩm"
+  type: "Linh thạch"
+  rank: "Thượng Phẩm"
+  element: "Linh"
+  rarity: "Cực hiếm"
+  material: HEART_OF_THE_SEA
+  custom-model-data: 8003
+  category: currency
+  effects:
+    - "&71 LT Thượng = 10000 LT Hạ"
+  lore:
+    - "&7Linh thạch cao cấp nhất, chứa linh khí nguyên chất."

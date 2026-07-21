@@ -2,6 +2,8 @@ package com.vnmine.spiritfarm;
 
 import com.vnmine.VNMinePlugin;
 import com.vnmine.item.ItemBuilder;
+import com.vnmine.item.ItemDataLoader;
+import com.vnmine.item.ItemDefinition;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -10,10 +12,22 @@ import java.util.Map;
 
 /**
  * SpiritHerb - Định nghĩa linh thảo
- * Có 5 giai đoạn tuổi: Mầm Non (0), Trưởng Thành (1), 10 Năm (2), 100 Năm (3), 1000 Năm (4), 1 Vạn Năm (5)
- * Quy đổi age code từ lệnh: 1→Trưởng Thành, 2→1 Năm, 3→10 Năm, 4→100 Năm, 5→1000 Năm, 6→10000 Năm
+ * 
+ * Giữ enum HerbQuality, HerbRarity cho logic game (trồng trọt, tuổi)
+ * Dữ liệu item đọc từ ItemDataLoader (herbs.yml)
+ * 
+ * Backward compatible: getHerb(id) vẫn hoạt động như cũ
  */
 public class SpiritHerb {
+
+    private static VNMinePlugin pluginInstance = null;
+
+    /**
+     * Set plugin instance (gọi từ VNMinePlugin.onEnable)
+     */
+    public static void setPlugin(VNMinePlugin plugin) {
+        pluginInstance = plugin;
+    }
 
     /**
      * HerbQuality - Chất lượng (tuổi) của linh thảo
@@ -25,7 +39,7 @@ public class SpiritHerb {
         MUOI_NAM(3, "&6&l10 Năm", 2.0),
         TRAM_NAM(4, "&c&l100 Năm", 3.0),
         NGAN_NAM(5, "&5&l1000 Năm", 4.5),
-        VAN_NAM(6, "&4&l1 Vạn Năm", 7.0); // Chỉ dùng cho lệnh admin give, không trồng được
+        VAN_NAM(6, "&4&l1 Vạn Năm", 7.0);
 
         private final int level;
         private final String display;
@@ -41,9 +55,6 @@ public class SpiritHerb {
         public String getDisplay() { return display; }
         public double getMultiplier() { return multiplier; }
 
-        /**
-         * Lấy từ age code (1-6)
-         */
         public static HerbQuality fromAgeCode(int ageCode) {
             for (HerbQuality q : values()) {
                 if (q.ordinal() == ageCode) return q;
@@ -51,9 +62,6 @@ public class SpiritHerb {
             return TRUONG_THANH;
         }
 
-        /**
-         * Lấy từ level (0-6)
-         */
         public static HerbQuality fromLevel(int level) {
             for (HerbQuality q : values()) {
                 if (q.level == level) return q;
@@ -61,9 +69,6 @@ public class SpiritHerb {
             return MAM_NON;
         }
 
-        /**
-         * Lấy chất lượng tối đa có thể trồng (không tính Vạn Năm)
-         */
         public static HerbQuality maxGrowable() {
             return NGAN_NAM;
         }
@@ -90,44 +95,27 @@ public class SpiritHerb {
         public double getMultiplier() { return multiplier; }
     }
 
-    private final String id;
-    private final String name;
-    private final Material material;     // Material trong game (cây cỏ)
-    private final Material seedMaterial; // Material hạt giống
-    private final HerbRarity rarity;     // Phẩm cấp
-    private final int totalStages;       // Tổng số giai đoạn trưởng thành
-
-    // Cache tất cả herb types
+    // Cache cũ (backward compatibility)
     private static final Map<String, SpiritHerb> ALL_HERBS = new HashMap<>();
 
-    // Danh sách herb ID theo thứ tự
-    private static final String[] HERB_IDS = {
-        "LINH_THAO", "NGUYET_QUANG_THAO", "BINH_LINH_THAO", "LAM_LINH_THAO", "LOI_LINH_THAO",
-        "HUYEN_BINH_THAO", "HUYET_LINH_THAO", "HOA_LINH_THAO", "HAC_LINH_THAO", "KIM_LINH_THAO",
-        "LONG_HUYET_THAO", "THIEN_LINH_THAO", "PHUNG_LINH_THAO", "VAN_NIEN_LINH_CHI", "LUYEN_THAN_THAO",
-        "TIEN_THAO", "LONG_LINH_THAO", "THANH_LONG_THAO", "HONG_MONG_THAO", "THIEN_HA_THAO"
-    };
-
+    // Static data: đảm bảo ALL_HERBS có dữ liệu ngay cả khi ItemDataLoader chưa load
+    // Dữ liệu này sẽ được ghi đè bởi YML khi plugin khởi tạo đầy đủ
     static {
-        // Hạ Phẩm (5 loại)
-        register("LINH_THAO", "Linh Thảo", Material.SHORT_GRASS, Material.WHEAT_SEEDS, HerbRarity.HA, 5);
-        register("NGUYET_QUANG_THAO", "Nguyệt Quang Thảo", Material.FERN, Material.WHEAT_SEEDS, HerbRarity.HA, 5);
-        register("BINH_LINH_THAO", "Bình Linh Thảo", Material.AZURE_BLUET, Material.WHEAT_SEEDS, HerbRarity.HA, 5);
-        register("LAM_LINH_THAO", "Lam Linh Thảo", Material.CORNFLOWER, Material.WHEAT_SEEDS, HerbRarity.HA, 5);
-        register("LOI_LINH_THAO", "Lôi Linh Thảo", Material.DANDELION, Material.WHEAT_SEEDS, HerbRarity.HA, 5);
-        // Trung Phẩm (5 loại)
+        register("LINH_THAO", "Linh Thảo", Material.SHORT_GRASS, Material.BEETROOT_SEEDS, HerbRarity.HA, 5);
+        register("NGUYET_QUANG_THAO", "Nguyệt Quang Thảo", Material.FERN, Material.BEETROOT_SEEDS, HerbRarity.HA, 5);
+        register("BINH_LINH_THAO", "Bình Linh Thảo", Material.AZURE_BLUET, Material.BEETROOT_SEEDS, HerbRarity.HA, 5);
+        register("LAM_LINH_THAO", "Lam Linh Thảo", Material.CORNFLOWER, Material.BEETROOT_SEEDS, HerbRarity.HA, 5);
+        register("LOI_LINH_THAO", "Lôi Linh Thảo", Material.DANDELION, Material.BEETROOT_SEEDS, HerbRarity.HA, 5);
         register("HUYEN_BINH_THAO", "Huyền Băng Thảo", Material.BLUE_ORCHID, Material.BEETROOT_SEEDS, HerbRarity.TRUNG, 5);
         register("HUYET_LINH_THAO", "Huyết Linh Thảo", Material.POPPY, Material.BEETROOT_SEEDS, HerbRarity.TRUNG, 5);
         register("HOA_LINH_THAO", "Hoa Linh Thảo", Material.ALLIUM, Material.BEETROOT_SEEDS, HerbRarity.TRUNG, 5);
         register("HAC_LINH_THAO", "Hạc Linh Thảo", Material.OXEYE_DAISY, Material.BEETROOT_SEEDS, HerbRarity.TRUNG, 5);
         register("KIM_LINH_THAO", "Kim Linh Thảo", Material.SUNFLOWER, Material.BEETROOT_SEEDS, HerbRarity.TRUNG, 5);
-        // Thượng Phẩm (5 loại)
         register("LONG_HUYET_THAO", "Long Huyết Thảo", Material.RED_TULIP, Material.MELON_SEEDS, HerbRarity.THUONG, 5);
         register("THIEN_LINH_THAO", "Thiên Linh Thảo", Material.LILAC, Material.MELON_SEEDS, HerbRarity.THUONG, 5);
         register("PHUNG_LINH_THAO", "Phụng Linh Thảo", Material.PEONY, Material.MELON_SEEDS, HerbRarity.THUONG, 5);
         register("VAN_NIEN_LINH_CHI", "Vạn Niên Linh Chi", Material.ROSE_BUSH, Material.MELON_SEEDS, HerbRarity.THUONG, 6);
         register("LUYEN_THAN_THAO", "Luyện Thần Thảo", Material.WITHER_ROSE, Material.MELON_SEEDS, HerbRarity.THUONG, 5);
-        // Tiên Phẩm (5 loại)
         register("TIEN_THAO", "Tiên Thảo", Material.TORCHFLOWER, Material.PUMPKIN_SEEDS, HerbRarity.TIEN, 5);
         register("LONG_LINH_THAO", "Long Linh Thảo", Material.PINK_TULIP, Material.PUMPKIN_SEEDS, HerbRarity.TIEN, 5);
         register("THANH_LONG_THAO", "Thanh Long Thảo", Material.PITCHER_PLANT, Material.PUMPKIN_SEEDS, HerbRarity.TIEN, 5);
@@ -139,7 +127,15 @@ public class SpiritHerb {
         ALL_HERBS.put(id, new SpiritHerb(id, name, material, seedMaterial, rarity, totalStages));
     }
 
-    public SpiritHerb(String id, String name, Material material, Material seedMaterial, HerbRarity rarity, int totalStages) {
+    private final String id;
+    private final String name;
+    private final Material material;
+    private final Material seedMaterial;
+    private final HerbRarity rarity;
+    private final int totalStages;
+
+    // Constructor private - chỉ tạo từ static register hoặc từ ItemDataLoader
+    private SpiritHerb(String id, String name, Material material, Material seedMaterial, HerbRarity rarity, int totalStages) {
         this.id = id;
         this.name = name;
         this.material = material;
@@ -164,8 +160,27 @@ public class SpiritHerb {
 
     /**
      * Tạo item linh thảo với chất lượng (tuổi) cụ thể
+     * Dùng ItemBuilder.buildFromDefinition() nếu có ItemDataLoader
      */
     public ItemStack createHerbItem(HerbQuality quality, int amount) {
+        // Nếu có ItemDataLoader, dùng dữ liệu từ YML
+        if (pluginInstance != null) {
+            ItemDataLoader loader = pluginInstance.getItemDataLoader();
+            if (loader != null) {
+                ItemDefinition def = loader.getItem(id);
+                if (def != null) {
+                    ItemStack item = ItemBuilder.buildFromDefinition(def);
+                    item.setAmount(Math.min(amount, 64));
+                    // Thêm persistent data cho herb age
+                    ItemBuilder builder = new ItemBuilder(item);
+                    builder.setPersistentData("vnmine_herb", id);
+                    builder.setPersistentData("vnmine_herb_age", String.valueOf(quality.getLevel()));
+                    return builder.build();
+                }
+            }
+        }
+
+        // Fallback: tạo item kiểu cũ
         String displayName = getQualityName(quality);
         String ageDesc;
         switch (quality) {
@@ -214,7 +229,6 @@ public class SpiritHerb {
 
     /**
      * Tính giá bán linh thảo (dùng cho NPC mua)
-     * Giá = base_price * rarity_multiplier * quality_multiplier
      */
     public int calculateSellPrice(HerbQuality quality) {
         double basePrice = 5;
@@ -225,16 +239,85 @@ public class SpiritHerb {
 
     // ==================== STATIC HELPERS ====================
 
+    /**
+     * Lấy SpiritHerb theo ID
+     * Kiểm tra cache cũ trước, sau đó fallback sang ItemDataLoader
+     */
     public static SpiritHerb getHerb(String id) {
-        return ALL_HERBS.get(id);
+        if (id == null) return null;
+        // Check old cache first
+        SpiritHerb herb = ALL_HERBS.get(id.toUpperCase());
+        if (herb != null) return herb;
+
+        // Fallback to ItemDataLoader
+        if (pluginInstance != null) {
+            ItemDataLoader loader = pluginInstance.getItemDataLoader();
+            if (loader != null) {
+                ItemDefinition def = loader.getItem(id);
+                if (def != null && def.isHerb()) {
+                    // Create SpiritHerb from ItemDefinition
+                    HerbRarity rarity = parseRarity(def.getRank());
+                    Material seedMat = getSeedMaterial(rarity);
+                    SpiritHerb newHerb = new SpiritHerb(def.getId(), 
+                        stripColorRaw(def.getName()), 
+                        def.getMaterial(), 
+                        seedMat, 
+                        rarity, 
+                        5);
+                    ALL_HERBS.put(def.getId(), newHerb);
+                    return newHerb;
+                }
+            }
+        }
+        return null;
     }
 
     public static Map<String, SpiritHerb> getAllHerbs() {
+        // Merge old cache with ItemDataLoader herbs
+        if (pluginInstance != null) {
+            ItemDataLoader loader = pluginInstance.getItemDataLoader();
+            if (loader != null) {
+                for (ItemDefinition def : loader.getItemsByCategory("herb")) {
+                    if (!ALL_HERBS.containsKey(def.getId())) {
+                        HerbRarity rarity = parseRarity(def.getRank());
+                        Material seedMat = getSeedMaterial(rarity);
+                        ALL_HERBS.put(def.getId(), new SpiritHerb(def.getId(),
+                            stripColorRaw(def.getName()),
+                            def.getMaterial(),
+                            seedMat,
+                            rarity,
+                            5));
+                    }
+                }
+            }
+        }
         return ALL_HERBS;
     }
 
     public static String[] getHerbIds() {
-        return HERB_IDS;
+        return getAllHerbs().keySet().toArray(new String[0]);
+    }
+
+    private static HerbRarity parseRarity(String rank) {
+        if (rank == null) return HerbRarity.HA;
+        if (rank.contains("Tiên")) return HerbRarity.TIEN;
+        if (rank.contains("Thượng")) return HerbRarity.THUONG;
+        if (rank.contains("Trung")) return HerbRarity.TRUNG;
+        return HerbRarity.HA;
+    }
+
+    private static Material getSeedMaterial(HerbRarity rarity) {
+        switch (rarity) {
+            case TIEN: return Material.PUMPKIN_SEEDS;
+            case THUONG: return Material.MELON_SEEDS;
+            case TRUNG: return Material.BEETROOT_SEEDS;
+            default: return Material.WHEAT_SEEDS;
+        }
+    }
+
+    private static String stripColorRaw(String input) {
+        if (input == null) return "";
+        return input.replaceAll("§[0-9a-fk-or]", "").replaceAll("&[0-9a-fk-or]", "").trim();
     }
 
     /**

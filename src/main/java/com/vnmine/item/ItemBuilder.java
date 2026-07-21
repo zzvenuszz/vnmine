@@ -296,6 +296,122 @@ public class ItemBuilder {
         return item;
     }
 
+    // ==================== BUILD FROM DEFINITION ====================
+
+    /**
+     * Xây dựng ItemStack từ ItemDefinition
+     * Tự động sinh lore từ tất cả thông tin có sẵn
+     */
+    public static ItemStack buildFromDefinition(ItemDefinition def) {
+        if (def == null) return new ItemStack(Material.STONE);
+        
+        ItemBuilder builder = new ItemBuilder(def.getMaterial())
+                .setName(def.getName())
+                .setGlow(true)
+                .setCustomModelData(def.getCustomModelData());
+        
+        List<String> lore = new ArrayList<>();
+        
+        // Thông tin cơ bản
+        if (def.getType() != null && !def.getType().isEmpty()) {
+            lore.add("&8✦ " + def.getType());
+        }
+        if (def.getRank() != null && !def.getRank().isEmpty()) {
+            lore.add("&7Phẩm cấp: " + def.getRank());
+        }
+        if (def.getElement() != null && !def.getElement().isEmpty()) {
+            lore.add("&7Thuộc tính: " + def.getElement());
+        }
+        if (def.getRarity() != null && !def.getRarity().isEmpty()) {
+            lore.add("&7Độ hiếm: " + def.getRarity());
+        }
+        
+        // Effects
+        if (!def.getEffects().isEmpty()) {
+            lore.add("");
+            lore.add("&6&l✦ Hiệu ứng:");
+            lore.addAll(def.getEffects());
+        }
+        
+        // Grow environment (cho linh thảo)
+        if (!def.getGrowEnvironment().isEmpty()) {
+            lore.add("");
+            lore.add("&a&l✦ Môi trường sinh trưởng:");
+            lore.addAll(def.getGrowEnvironment());
+        }
+        
+        // Compatible alchemy (cho linh thảo)
+        if (!def.getCompatibleAlchemy().isEmpty()) {
+            lore.add("");
+            lore.add("&b&l✦ Có thể luyện:");
+            lore.addAll(def.getCompatibleAlchemy());
+        }
+        
+        // Ingredients (cho recipe)
+        if (!def.getIngredients().isEmpty()) {
+            lore.add("");
+            lore.add("&e&l✦ Nguyên liệu:");
+            for (String ing : def.getIngredients()) {
+                lore.add(" &7- " + ing);
+            }
+        }
+        
+        // Required skills
+        if (!def.getRequiredSkills().isEmpty()) {
+            lore.add("");
+            lore.add("&c&l✦ Yêu cầu kỹ năng:");
+            for (String req : def.getRequiredSkills()) {
+                String[] parts = req.split(":");
+                String skillId = parts.length > 0 ? parts[0] : req;
+                String level = parts.length > 1 ? " cấp " + parts[1] : "";
+                lore.add(" &7- " + skillId + level);
+            }
+        }
+        
+        // Required level
+        if (def.getRequiredLevel() > 0) {
+            lore.add("&7Yêu cầu cấp độ: &e" + def.getRequiredLevel());
+        }
+        
+        // Cooking time
+        if (def.getCookingTime() > 0) {
+            lore.add("&7Thời gian chế tạo: &e" + def.getCookingTime() + "s");
+        }
+        if (def.getSuccessChance() > 0) {
+            lore.add("&7Tỷ lệ thành công: &e" + def.getSuccessChance() + "%");
+        }
+        
+        // Side effects
+        if (!def.getSideEffects().isEmpty()) {
+            lore.add("");
+            lore.add("&c&l✦ Tác dụng phụ:");
+            lore.addAll(def.getSideEffects());
+        }
+        
+        // Custom lore
+        if (!def.getLore().isEmpty()) {
+            lore.add("");
+            lore.addAll(def.getLore());
+        }
+        
+        // Hướng dẫn sử dụng
+        if (def.isPill()) {
+            lore.add("");
+            lore.add("&a✦ Click phải để sử dụng!");
+        } else if (def.isHerb()) {
+            lore.add("");
+            lore.add("&7Dùng để luyện đan hoặc bán cho NPC");
+        }
+        
+        builder.setLore(lore);
+        
+        // Persistent data
+        builder.setPersistentData("vnmine_item", "true");
+        builder.setPersistentData("vnmine_item_id", def.getId());
+        
+        return builder.build();
+    }
+
     // ==================== STATIC HELPERS ====================
 
     /**

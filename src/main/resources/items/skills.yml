@@ -1,0 +1,210 @@
+# =====================================
+# skills.yml - Định nghĩa Công Pháp (Skill Books)
+# =====================================
+# Hỗ trợ mã màu & cho name, lore, effects...
+# Format tham khảo: https://www.tutienchibao.info.vn/cong-phap
+
+BASIC_HEAL:
+  name: "&aTrúc Cơ Liệu Thương"
+  type: "Công pháp"
+  rank: "Hoàng cấp Hạ phẩm"
+  element: "Mộc"
+  rarity: "Phổ thông"
+  material: ENCHANTED_BOOK
+  custom-model-data: 6001
+  category: skill
+  skill-ids:
+    - "BASIC_HEAL"
+  effects:
+    - "&7Hồi phục HP cho bản thân"
+    - "&7Tiêu hao ít linh lực"
+  lore:
+    - "&7Công pháp cơ bản dùng để hồi phục thương thế."
+    - "&7Thích hợp cho các tu sĩ mới tập luyện."
+    - "&7Luyện đến đại thành có thể chữa trị nội thương."
+
+QI_SHIELD:
+  name: "&bLinh Khí Hộ Thể"
+  type: "Công pháp"
+  rank: "Hoàng cấp Trung phẩm"
+  element: "Thổ"
+  rarity: "Phổ thông"
+  material: ENCHANTED_BOOK
+  custom-model-data: 6002
+  category: skill
+  skill-ids:
+    - "QI_SHIELD"
+  effects:
+    - "&7Tạo lớp giáp linh khí bảo vệ"
+    - "&7Chống lại sát thương vật lý"
+  lore:
+    - "&7Vận chuyển linh khí bao phủ toàn thân,"
+    - "&7tạo thành một lớp giáp vô hình."
+    - "&7Cảnh giới cao có thể chống lại cả pháp thuật."
+
+FIRE_BALL:
+  name: "&cHỏa Cầu Thuật"
+  type: "Công pháp"
+  rank: "Huyền cấp Hạ phẩm"
+  element: "Hỏa"
+  rarity: "Phổ thông"
+  material: ENCHANTED_BOOK
+  custom-model-data: 6003
+  category: skill
+  skill-ids:
+    - "FIRE_BALL"
+  effects:
+    - "&7Bắn quả cầu lửa gây sát thương"
+    - "&7Có thể gây cháy kẻ địch"
+  lore:
+    - "&7Ngưng tụ hỏa linh khí trong lòng bàn tay,"
+    - "&7tạo thành quả cầu lửa bắn về phía kẻ địch."
+    - "&7Là công pháp cơ bản của hỏa hệ. Khi đạt tới"
+    - "&7cảnh giới cao, quả cầu lửa có thể phá tan"
+    - "&7vách núi."
+
+LIGHTNING_STRIKE:
+  name: "&eThiên Lôi Đạn"
+  type: "Công pháp"
+  rank: "Huyền cấp Trung phẩm"
+  element: "Lôi"
+  rarity: "Hiếm"
+  material: ENCHANTED_BOOK
+  custom-model-data: 6004
+  category: skill
+  skill-ids:
+    - "LIGHTNING_STRIKE"
+  effects:
+    - "&7Gọi sét từ trên trời đánh xuống"
+    - "&7Sát thương diện rộng"
+  lore:
+    - "&7Mượn lôi lực của thiên địa, triệu hồi tia sét"
+    - "&7từ trên trời đánh xuống kẻ địch. Công pháp"
+    - "&7này cực kỳ mạnh mẽ nhưng tiêu hao linh lực"
+    - "&7lớn. Người tu luyện cần thân thể cường tráng"
+    - "&7để chịu được phản phệ của lôi điện."
+
+SPEED_STEP:
+  name: "&aPhi Vân Bộ"
+  type: "Công pháp"
+  rank: "Huyền cấp Hạ phẩm"
+  element: "Phong"
+  rarity: "Phổ thông"
+  material: ENCHANTED_BOOK
+  custom-model-data: 6005
+  category: skill
+  skill-ids:
+    - "SPEED_STEP"
+  effects:
+    - "&7Tăng tốc độ di chuyển"
+    - "&7Bay lượn trong thời gian ngắn"
+  lore:
+    - "&7Bộ pháp huyền diệu, khi thi triển thân thể"
+    - "&7nhẹ như mây, bước chân như bay. Luyện đến"
+    - "&7cảnh giới cao có thể phi hành trên không."
+    - "&7Là công pháp bảo mệnh cho các tán tu."
+
+TELEPORT:
+  name: "&5Thuấn Di"
+  type: "Công pháp"
+  rank: "Địa cấp Hạ phẩm"
+  element: "Không Gian"
+  rarity: "Cực hiếm"
+  material: ENCHANTED_BOOK
+  custom-model-data: 6006
+  category: skill
+  skill-ids:
+    - "TELEPORT"
+  effects:
+    - "&7Dịch chuyển tức thời đến vị trí chỉ định"
+    - "&7Vượt qua chướng ngại vật"
+  lore:
+    - "&7Công pháp cao cấp không gian hệ, có thể xé"
+    - "&7rách hư không, dịch chuyển tức thời. Cần linh"
+    - "&7lực và thần thức cực lớn để thi triển."
+    - "&7Nếu thất bại có thể bị xé xác, vì vậy chỉ"
+    - "&7có tu sĩ từ Nguyên Anh kỳ trở lên mới dám dùng."
+
+WIND_BLADE:
+  name: "&bPhong Nhận"
+  type: "Công pháp"
+  rank: "Huyền cấp Thượng phẩm"
+  element: "Phong"
+  rarity: "Hiếm"
+  material: ENCHANTED_BOOK
+  custom-model-data: 6007
+  category: skill
+  skill-ids:
+    - "WIND_BLADE"
+  effects:
+    - "&7Tạo lưỡi dao gió sắc bén"
+    - "&7Tấn công tầm xa, xuyên thủng giáp"
+  lore:
+    - "&7Ngưng tụ phong linh khí thành lưỡi dao vô hình."
+    - "&7Có thể cắt đứt thép cứng từ xa. Người luyện"
+    - "&7thành công pháp này có thể dùng Phong Nhận"
+    - "&7để tấn công mục tiêu ở cự ly xa mà không"
+    - "&7cần di chuyển."
+
+METEOR_STORM:
+  name: "&6Tinh Thần Bào"
+  type: "Công pháp"
+  rank: "Thiên cấp Hạ phẩm"
+  element: "Hỏa Thổ"
+  rarity: "Cực hiếm"
+  material: ENCHANTED_BOOK
+  custom-model-data: 6008
+  category: skill
+  skill-ids:
+    - "METEOR_STORM"
+  effects:
+    - "&7Triệu hồi mưa sao băng"
+    - "&7Sát thương cực lớn diện tích rộng"
+  lore:
+    - "&7Đệ nhất cường công dưới Thiên cấp! Mượn lực"
+    - "&7từ các thiên thạch trên trời, kéo chúng xuống"
+    - "&7tạo thành mưa sao băng hủy diệt. Mỗi lần thi"
+    - "&7triển đều tiêu hao hầu hết linh lực, nhưng uy"
+    - "&7lực của nó đủ để xóa sổ cả một đội quân."
+
+FIRE_CONTROL:
+  name: "&cKhống Hỏa Thuật"
+  type: "Công pháp (Phụ trợ)"
+  rank: "Hoàng cấp Hạ phẩm"
+  element: "Hỏa"
+  rarity: "Phổ thông"
+  material: ENCHANTED_BOOK
+  custom-model-data: 6009
+  category: skill
+  skill-ids:
+    - "FIRE_CONTROL"
+  effects:
+    - "&7Kiểm soát hỏa hậu khi luyện đan"
+    - "&7Tăng tỷ lệ thành công luyện đan"
+  lore:
+    - "&7Công pháp phụ trợ cho luyện đan sư."
+    - "&7Giúp kiểm soát nhiệt độ và hỏa hậu"
+    - "&7chính xác hơn trong quá trình luyện đan."
+    - "&7Luyện đến đại thành có thể phân hỏa thành"
+    - "&7nhiều luồng, cùng lúc luyện nhiều lò."
+
+FORGE_MASTERY:
+  name: "&aLuyện Khí Thuật"
+  type: "Công pháp (Phụ trợ)"
+  rank: "Huyền cấp Trung phẩm"
+  element: "Kim"
+  rarity: "Hiếm"
+  material: ENCHANTED_BOOK
+  custom-model-data: 6010
+  category: skill
+  skill-ids:
+    - "FORGE_MASTERY"
+  effects:
+    - "&7Thuật luyện khí đỉnh cao"
+    - "&7Chế tạo pháp bảo phẩm chất cao"
+  lore:
+    - "&7Tuyệt kỹ luyện chế pháp bảo, được truyền"
+    - "&7thừa từ các bậc thầy luyện khí. Người nắm"
+    - "&7giữ công pháp này có thể luyện chế pháp bảo"
+    - "&7với phẩm chất vượt trội. Càng luyện tập,"
+    - "&7khả năng dung hợp linh vật liệu càng cao."

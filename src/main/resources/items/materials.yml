@@ -1,0 +1,247 @@
+# =====================================
+# materials.yml - Định nghĩa Nguyên Liệu
+# =====================================
+
+# ==================== HẠ PHẨM ====================
+
+NUOC_TINH_KHIET:
+  name: "&fNước Tinh Khiết"
+  type: "Nguyên liệu"
+  rank: "Hạ Phẩm"
+  element: "Thủy"
+  rarity: "Phổ thông"
+  material: POTION
+  custom-model-data: 5001
+  category: material
+  effects:
+    - "&7Dùng để luyện đan, dung môi cơ bản"
+  lore:
+    - "&7Nước được lọc từ suối linh khí, tinh khiết không tạp chất."
+
+NGAN_SA:
+  name: "&fNgân Sa"
+  type: "Nguyên liệu"
+  rank: "Hạ Phẩm"
+  element: "Kim"
+  rarity: "Phổ thông"
+  material: IRON_NUGGET
+  custom-model-data: 5002
+  category: material
+  effects:
+    - "&7Giảm thời gian nấu chảy khi luyện khí"
+  lore:
+    - "&7Bột bạc nghiền mịn, tăng hiệu suất truyền dẫn linh khí."
+
+LONG_VU:
+  name: "&fLông Vũ"
+  type: "Nguyên liệu"
+  rank: "Hạ Phẩm"
+  element: "Phong"
+  rarity: "Phổ thông"
+  material: FEATHER
+  custom-model-data: 5003
+  category: material
+  effects:
+    - "&7Nguyên liệu phong hệ, nhẹ nhàng"
+  lore:
+    - "&7Lông vũ của các loài yêu cầm, dùng chế tạo pháp bảo phong hệ."
+
+BOT_BLAZE:
+  name: "&fBột Blaze"
+  type: "Nguyên liệu"
+  rank: "Hạ Phẩm"
+  element: "Hỏa"
+  rarity: "Phổ thông"
+  material: BLAZE_POWDER
+  custom-model-data: 5004
+  category: material
+  effects:
+    - "&7Tinh hoa lửa, tăng nhiệt luyện đan"
+  lore:
+    - "&7Bột lửa màu cam đỏ, chứa tinh hoa hỏa linh khí."
+
+# ==================== TRUNG PHẨM ====================
+
+VANG_THANH:
+  name: "&eVàng Thanh"
+  type: "Nguyên liệu"
+  rank: "Trung Phẩm"
+  element: "Kim"
+  rarity: "Phổ thông"
+  material: GOLD_INGOT
+  custom-model-data: 5005
+  category: material
+  effects:
+    - "&7Kim loại quý, dùng luyện chế pháp bảo"
+  lore:
+    - "&7Vàng đã qua tinh luyện, dẫn linh khí tốt."
+
+KIM_CUONG:
+  name: "&eKim Cương"
+  type: "Nguyên liệu"
+  rank: "Trung Phẩm"
+  element: "Kim"
+  rarity: "Hiếm"
+  material: DIAMOND
+  custom-model-data: 5006
+  category: material
+  effects:
+    - "&7Tăng độ cứng cho pháp bảo"
+  lore:
+    - "&7Kim cương thô, cứng nhất trong các loại vật liệu."
+
+NGOC_LUC_BAO:
+  name: "&eNgọc Lục Bảo"
+  type: "Nguyên liệu"
+  rank: "Trung Phẩm"
+  element: "Mộc"
+  rarity: "Hiếm"
+  material: EMERALD
+  custom-model-data: 5007
+  category: material
+  effects:
+    - "&7Tăng sinh mệnh lực khi dung hợp"
+  lore:
+    - "&7Ngọc quý màu xanh lục bảo, chứa sinh mệnh lực dồi dào."
+
+HUYET_THACH:
+  name: "&eHuyết Thạch"
+  type: "Nguyên liệu"
+  rank: "Trung Phẩm"
+  element: "Huyết"
+  rarity: "Hiếm"
+  material: REDSTONE
+  custom-model-data: 5008
+  category: material
+  effects:
+    - "&7Tăng phẩm cấp đan dược"
+  lore:
+    - "&7Đá màu đỏ như máu, hình thành từ máu các tu sĩ thời thượng cổ."
+
+LONG_LAN:
+  name: "&eLong Lân"
+  type: "Nguyên liệu"
+  rank: "Trung Phẩm"
+  element: "Long"
+  rarity: "Cực hiếm"
+  material: PRISMARINE_SHARD
+  custom-model-data: 5009
+  category: material
+  effects:
+    - "&7Vật liệu pháp khí siêu phẩm"
+  lore:
+    - "&7Vảy rồng, chỉ một mảnh cũng đủ nâng phẩm cấp pháp bảo."
+
+THIEN_THACH:
+  name: "&eThiên Thạch"
+  type: "Nguyên liệu"
+  rank: "Trung Phẩm"
+  element: "Kim Hỏa"
+  rarity: "Cực hiếm"
+  material: END_STONE
+  custom-model-data: 5010
+  category: material
+  effects:
+    - "&7Nguyên liệu thiên ngoại, chứa năng lượng đặc biệt"
+  lore:
+    - "&7Mảnh vỡ từ các vì sao rơi xuống trần gian."
+
+HUYEN_KIM:
+  name: "&eHuyền Kim"
+  type: "Nguyên liệu"
+  rank: "Trung Phẩm"
+  element: "Kim"
+  rarity: "Hiếm"
+  material: IRON_INGOT
+  custom-model-data: 5011
+  category: material
+  effects:
+    - "&7Kim loại huyền bí, bền chắc"
+  lore:
+    - "&7Sắt đã qua tôi luyện bằng linh hỏa, cứng cáp hơn sắt thường."
+
+# ==================== THƯỢNG PHẨM ====================
+
+DA_OBSIDIAN:
+  name: "&aĐá Obsidian"
+  type: "Nguyên liệu"
+  rank: "Thượng Phẩm"
+  element: "Hỏa Thổ"
+  rarity: "Hiếm"
+  material: OBSIDIAN
+  custom-model-data: 5012
+  category: material
+  effects:
+    - "&7Vật liệu phong hỏa, chịu nhiệt cao"
+  lore:
+    - "&7Đá núi lửa đã kết tinh, chịu được nhiệt độ cực cao."
+
+MAT_END:
+  name: "&aMắt End"
+  type: "Nguyên liệu"
+  rank: "Thượng Phẩm"
+  element: "Không Gian"
+  rarity: "Cực hiếm"
+  material: ENDER_PEARL
+  custom-model-data: 5013
+  category: material
+  effects:
+    - "&7Vật liệu không gian, chứa thuộc tính dịch chuyển"
+  lore:
+    - "&7Viên ngọc của không gian, chứa năng lượng dịch chuyển."
+
+MAT_ENDER:
+  name: "&aMắt Ender"
+  type: "Nguyên liệu"
+  rank: "Thượng Phẩm"
+  element: "Không Gian Thần"
+  rarity: "Thánh vật"
+  material: ENDER_EYE
+  custom-model-data: 5014
+  category: material
+  effects:
+    - "&7Kích hoạt linh khí, dẫn đường cho đan dược"
+  lore:
+    - "&7Viên ngọc kỳ bí có thể nhìn thấu không gian và thời gian."
+
+NETHERITE_THANH:
+  name: "&aNetherite Thanh"
+  type: "Nguyên liệu"
+  rank: "Thượng Phẩm"
+  element: "Tối thượng"
+  rarity: "Thánh vật"
+  material: NETHERITE_INGOT
+  custom-model-data: 5015
+  category: material
+  effects:
+    - "&7Vật liệu tối thượng, không thể phá hủy"
+  lore:
+    - "&7Hợp kim cổ xưa từ địa ngục, mạnh hơn mọi kim loại trần gian."
+
+HOI_RONG:
+  name: "&aHơi Rồng"
+  type: "Nguyên liệu"
+  rank: "Thượng Phẩm"
+  element: "Long Hỏa"
+  rarity: "Cực hiếm"
+  material: DRAGON_BREATH
+  custom-model-data: 5016
+  category: material
+  effects:
+    - "&7Hơi thở của rồng, chất dẫn linh khí mạnh nhất"
+  lore:
+    - "&7Hơi thở thuần khiết của rồng, được thu thập từ hang động sâu."
+
+KHOI_VANG:
+  name: "&aKhối Vàng"
+  type: "Nguyên liệu"
+  rank: "Thượng Phẩm"
+  element: "Kim"
+  rarity: "Hiếm"
+  material: GOLD_BLOCK
+  custom-model-data: 5017
+  category: material
+  effects:
+    - "&7Khối vàng nguyên chất, vật liệu xa xỉ"
+  lore:
+    - "&7Khối vàng nguyên chất đã qua tinh luyện cao cấp."
