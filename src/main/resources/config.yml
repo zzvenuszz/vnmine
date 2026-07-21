@@ -1089,7 +1089,46 @@ currency-exchange:
   npc-name: "&e&l◆ Thương Nhân Đổi Tiền ◆"
 
 # =============================================
-# XIII. HỆ THỐNG TỌA KỴ (MOUNT)
+# XIII. HỆ THỐNG TEXTURE GUI (Resource Pack Support)
+# =============================================
+gui:
+  textures:
+    border:
+      material: BLACK_STAINED_GLASS_PANE
+      custom-model-data: 1001
+    input-slot:
+      material: BLACK_STAINED_GLASS_PANE
+      custom-model-data: 1002
+    output-slot:
+      material: BLACK_STAINED_GLASS_PANE
+      custom-model-data: 1003
+    craft-button:
+      material: FIRE_CHARGE
+      custom-model-data: 1004
+    back-button:
+      material: ARROW
+      custom-model-data: 1005
+    close-button:
+      material: BARRIER
+      custom-model-data: 1006
+    page-info:
+      material: PAPER
+      custom-model-data: 1007
+    status-idle:
+      material: PAPER
+      custom-model-data: 1008
+    status-crafting:
+      material: FURNACE
+      custom-model-data: 1009
+    status-success:
+      material: EMERALD
+      custom-model-data: 1010
+    status-fail:
+      material: REDSTONE_BLOCK
+      custom-model-data: 1011
+
+# =============================================
+# XIV. HỆ THỐNG TỌA KỴ (MOUNT)
 # =============================================
 mount:
   enabled: true

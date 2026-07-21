@@ -1,0 +1,296 @@
+# ============================================================
+# item-textures.yml - Cấu hình texture cho items
+# 
+# File này cho phép thay đổi texture của items mà không cần
+# compile lại plugin. Khi có resource pack, chỉ cần sửa
+# custom-model-data và material tương ứng.
+#
+# Format:
+#   item_key:
+#     material: MATERIAL_NAME      # Fallback material
+#     custom-model-data: 1234      # Custom model data (0 = không dùng)
+#     name: "&aTên Item"           # Tên hiển thị
+#     lore:                        # Mô tả
+#       - "&7Dòng 1"
+#       - "&7Dòng 2"
+# ============================================================
+
+# ==================== ĐAN DƯỢC (PILLS) ====================
+pills:
+  HOI_LINH_DAN:
+    material: POTION
+    custom-model-data: 2001
+    name: "&aHồi Linh Đan"
+  DAI_HOI_LINH_DAN:
+    material: LINGERING_POTION
+    custom-model-data: 2002
+    name: "&bĐại Hồi Linh Đan"
+  CUONG_THE_DAN:
+    material: SPLASH_POTION
+    custom-model-data: 2003
+    name: "&cCương Thể Đan"
+  THANH_TAM_DAN:
+    material: HONEY_BOTTLE
+    custom-model-data: 2004
+    name: "&aThanh Tâm Đan"
+  TOC_THANH_DAN:
+    material: POTION
+    custom-model-data: 2005
+    name: "&bTốc Thánh Đan"
+  TU_LUYEN_DAN:
+    material: EXPERIENCE_BOTTLE
+    custom-model-data: 2006
+    name: "&5Tu Luyện Đan"
+  PHI_THANG_DAN:
+    material: DRAGON_BREATH
+    custom-model-data: 2007
+    name: "&6Phi Thăng Đan"
+  BACH_DOC_DAN:
+    material: POTION
+    custom-model-data: 2008
+    name: "&9Bách Độc Đan"
+  THIEN_HOI_DAN:
+    material: LINGERING_POTION
+    custom-model-data: 2009
+    name: "&6Thiên Hồi Đan"
+  PHE_MA_DAN:
+    material: SPLASH_POTION
+    custom-model-data: 2010
+    name: "&8Phê Ma Đan"
+  TRUONG_THO_DAN:
+    material: HONEY_BOTTLE
+    custom-model-data: 2011
+    name: "&6Trường Thọ Đan"
+  KIM_CUONG_DAN:
+    material: SPLASH_POTION
+    custom-model-data: 2012
+    name: "&bKim Cương Đan"
+  LINH_NHIEN_DAN:
+    material: POTION
+    custom-model-data: 2013
+    name: "&aLinh Nhiên Đan"
+  TIEM_HANH_DAN:
+    material: POTION
+    custom-model-data: 2014
+    name: "&8Tiềm Hành Đan"
+  PHAP_TUONG_DAN:
+    material: LINGERING_POTION
+    custom-model-data: 2015
+    name: "&5Pháp Tướng Đan"
+  THAN_LONG_DAN:
+    material: DRAGON_BREATH
+    custom-model-data: 2016
+    name: "&6Thần Long Đan"
+  CUONG_LUC_DAN:
+    material: SPLASH_POTION
+    custom-model-data: 2017
+    name: "&cCường Lực Đan"
+  HAN_BANG_DAN:
+    material: LINGERING_POTION
+    custom-model-data: 2018
+    name: "&bHàn Băng Đan"
+  LINH_PHONG_DAN:
+    material: POTION
+    custom-model-data: 2019
+    name: "&aLinh Phong Đan"
+  HOA_LONG_DAN:
+    material: DRAGON_BREATH
+    custom-model-data: 2020
+    name: "&6Hóa Long Đan"
+  THIEN_LINH_DAN:
+    material: EXPERIENCE_BOTTLE
+    custom-model-data: 2021
+    name: "&dThiên Linh Đan"
+  DAC_COC_DAN:
+    material: HONEY_BOTTLE
+    custom-model-data: 2022
+    name: "&5Đặc Cốc Đan"
+  VO_THUONG_DAN:
+    material: DRAGON_BREATH
+    custom-model-data: 2023
+    name: "&4Vô Thượng Đan"
+
+# ==================== PHÁP BẢO (ARTIFACTS) ====================
+artifacts:
+  FLYING_SWORD:
+    material: DIAMOND_SWORD
+    custom-model-data: 3001
+    name: "&bKiếm Phi Hành"
+  SPIRIT_BELL:
+    material: BELL
+    custom-model-data: 3002
+    name: "&6Linh Chung"
+  BAGUA_MIRROR:
+    material: SHIELD
+    custom-model-data: 3003
+    name: "&5Bát Quái Kính"
+  SOUL_JADE:
+    material: EMERALD
+    custom-model-data: 3004
+    name: "&aHồn Ngọc"
+  HEAVEN_SHIELD:
+    material: NETHERITE_CHESTPLATE
+    custom-model-data: 3005
+    name: "&4Thiên Linh Thuẫn"
+  THUNDER_SEAL:
+    material: TRIDENT
+    custom-model-data: 3006
+    name: "&eLôi Ấn"
+  PHOENIX_REBIRTH:
+    material: FEATHER
+    custom-model-data: 3007
+    name: "&6Phượng Hoàng Lệnh"
+
+# ==================== LINH THẢO (HERBS) ====================
+herbs:
+  LINH_THAO:
+    material: SHORT_GRASS
+    custom-model-data: 4001
+    name: "&fLinh Thảo"
+  NGUYET_QUANG_THAO:
+    material: FERN
+    custom-model-data: 4002
+    name: "&fNguyệt Quang Thảo"
+  BINH_LINH_THAO:
+    material: AZURE_BLUET
+    custom-model-data: 4003
+    name: "&fBình Linh Thảo"
+  LAM_LINH_THAO:
+    material: CORNFLOWER
+    custom-model-data: 4004
+    name: "&fLam Linh Thảo"
+  LOI_LINH_THAO:
+    material: DANDELION
+    custom-model-data: 4005
+    name: "&fLôi Linh Thảo"
+  HUYEN_BINH_THAO:
+    material: BLUE_ORCHID
+    custom-model-data: 4006
+    name: "&eHuyền Băng Thảo"
+  HUYET_LINH_THAO:
+    material: POPPY
+    custom-model-data: 4007
+    name: "&eHuyết Linh Thảo"
+  HOA_LINH_THAO:
+    material: ALLIUM
+    custom-model-data: 4008
+    name: "&eHoa Linh Thảo"
+  HAC_LINH_THAO:
+    material: OXEYE_DAISY
+    custom-model-data: 4009
+    name: "&eHạc Linh Thảo"
+  KIM_LINH_THAO:
+    material: SUNFLOWER
+    custom-model-data: 4010
+    name: "&eKim Linh Thảo"
+  LONG_HUYET_THAO:
+    material: RED_TULIP
+    custom-model-data: 4011
+    name: "&aLong Huyết Thảo"
+  THIEN_LINH_THAO:
+    material: LILAC
+    custom-model-data: 4012
+    name: "&aThiên Linh Thảo"
+  PHUNG_LINH_THAO:
+    material: PEONY
+    custom-model-data: 4013
+    name: "&aPhụng Linh Thảo"
+  VAN_NIEN_LINH_CHI:
+    material: ROSE_BUSH
+    custom-model-data: 4014
+    name: "&aVạn Niên Linh Chi"
+  LUYEN_THAN_THAO:
+    material: WITHER_ROSE
+    custom-model-data: 4015
+    name: "&aLuyện Thần Thảo"
+  TIEN_THAO:
+    material: TORCHFLOWER
+    custom-model-data: 4016
+    name: "&dTiên Thảo"
+  LONG_LINH_THAO:
+    material: PINK_TULIP
+    custom-model-data: 4017
+    name: "&dLong Linh Thảo"
+  THANH_LONG_THAO:
+    material: PITCHER_PLANT
+    custom-model-data: 4018
+    name: "&dThanh Long Thảo"
+  HONG_MONG_THAO:
+    material: ORANGE_TULIP
+    custom-model-data: 4019
+    name: "&dHồng Mộng Thảo"
+  THIEN_HA_THAO:
+    material: WHITE_TULIP
+    custom-model-data: 4020
+    name: "&dThiên Hà Thảo"
+
+# ==================== NGUYÊN LIỆU (MATERIALS) ====================
+materials:
+  NENE_KHIET:
+    material: POTION
+    custom-model-data: 5001
+    name: "&fNước Tinh Khiết"
+  NGAN_SA:
+    material: IRON_NUGGET
+    custom-model-data: 5002
+    name: "&fNgân Sa"
+  LONG_VU:
+    material: FEATHER
+    custom-model-data: 5003
+    name: "&fLông Vũ"
+  BOT_BLAZE:
+    material: BLAZE_POWDER
+    custom-model-data: 5004
+    name: "&fBột Blaze"
+  VANG_THANH:
+    material: GOLD_INGOT
+    custom-model-data: 5005
+    name: "&eVàng Thanh"
+  KIM_CUONG:
+    material: DIAMOND
+    custom-model-data: 5006
+    name: "&eKim Cương"
+  NGOC_LUC_BAO:
+    material: EMERALD
+    custom-model-data: 5007
+    name: "&eNgọc Lục Bảo"
+  HUYET_THACH:
+    material: REDSTONE
+    custom-model-data: 5008
+    name: "&eHuyết Thạch"
+  LONG_LAN:
+    material: PRISMARINE_SHARD
+    custom-model-data: 5009
+    name: "&eLong Lân"
+  THIEN_THACH:
+    material: END_STONE
+    custom-model-data: 5010
+    name: "&eThiên Thạch"
+  HUYEN_KIM:
+    material: IRON_INGOT
+    custom-model-data: 5011
+    name: "&eHuyền Kim"
+  DA_OBSIDIAN:
+    material: OBSIDIAN
+    custom-model-data: 5012
+    name: "&aĐá Obsidian"
+  MAT_END:
+    material: ENDER_PEARL
+    custom-model-data: 5013
+    name: "&aMắt End"
+  MAT_ENDER:
+    material: ENDER_EYE
+    custom-model-data: 5014
+    name: "&aMắt Ender"
+  NETHERITE_THANH:
+    material: NETHERITE_INGOT
+    custom-model-data: 5015
+    name: "&aNetherite Thanh"
+  HOI_RONG:
+    material: DRAGON_BREATH
+    custom-model-data: 5016
+    name: "&aHơi Rồng"
+  KHOI_VANG:
+    material: GOLD_BLOCK
+    custom-model-data: 5017
+    name: "&aKhối Vàng"
