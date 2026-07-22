@@ -191,6 +191,10 @@ Mô tả ngắn gọn các chỉnh sửa đã thực hiện.
 
 ---
 
+## Environment Rules (Quy tắc môi trường)
+* Nơi build mã nguồn (code-server) và nơi chạy server Minecraft là 2 môi trường hoàn toàn khác nhau. Nếu đã xác minh file JAR hợp lệ ở local build machine, đừng nghi ngờ lỗi do build process khi server báo lỗi đọc JAR.
+* Nếu server Paper đã chạy bình thường với các phiên bản plugin cũ, **KHÔNG** được nghiên cứu filesystem/storage layer. Nguyên nhân nằm ở artifact được tạo ra, không phải môi trường chạy.
+
 ## Item Data Source Rules (Nguồn dữ liệu vật phẩm)
 Khi tạo ra các loại pháp bảo, đan dược, pháp khí, linh thảo, công pháp, tọa kỵ... bắt buộc phải:
 1. Tham khảo nội dung tại https://www.tutienchibao.info.vn (bao gồm cả các link phụ bên trong trang web).
