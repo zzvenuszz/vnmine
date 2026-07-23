@@ -385,12 +385,13 @@ public class AlchemyCraftGUI implements Listener {
     }
 
     /**
-     * Kiểm tra nguyên liệu dựa trên herb ID (vnmine_herb) và Material
+     * Kiểm tra nguyên liệu dựa trên herb ID (vnmine_herb) và item ID (vnmine_item_id)
+     * Hỗ trợ cả material items có persistent data (vd: NUOC_TINH_KHIET)
      */
     private IngredientCheckResult checkIngredients(Inventory gui) {
-        // Thu thập input: herbId -> count và material name -> count
-        Map<String, Integer> inputHerbs = new HashMap<>();    // herbId -> count
-        Map<String, Integer> inputMaterials = new HashMap<>(); // material name -> count
+        // Thu thập input: herbId -> count và itemId -> count
+        Map<String, Integer> inputHerbs = new HashMap<>();      // herbId -> count
+        Map<String, Integer> inputMaterials = new HashMap<>();   // itemId hoặc material name -> count
         int totalSlots = 0;
 
         for (int slot : INPUT_SLOTS) {
@@ -403,9 +404,16 @@ public class AlchemyCraftGUI implements Listener {
                 // Đây là linh thảo chính hãng
                 inputHerbs.put(herbId, inputHerbs.getOrDefault(herbId, 0) + item.getAmount());
             } else {
-                // Nguyên liệu thường (Nước Tinh Khiết, Bột Blaze, v.v.)
-                String matName = item.getType().name();
-                inputMaterials.put(matName, inputMaterials.getOrDefault(matName, 0) + item.getAmount());
+                // Kiểm tra vnmine_item_id trước (cho material items như NUOC_TINH_KHIET)
+                String itemId = ItemBuilder.getPersistentData(item, "vnmine_item_id");
+                if (itemId != null) {
+                    // Dùng item ID làm key (vd: "NUOC_TINH_KHIET")
+                    inputMaterials.put(itemId.toUpperCase(), inputMaterials.getOrDefault(itemId.toUpperCase(), 0) + item.getAmount());
+                } else {
+                    // Fallback: dùng material name (vd: "POTION", "BLAZE_POWDER")
+                    String matName = item.getType().name();
+                    inputMaterials.put(matName, inputMaterials.getOrDefault(matName, 0) + item.getAmount());
+                }
             }
         }
 
@@ -421,7 +429,9 @@ public class AlchemyCraftGUI implements Listener {
                 if (ing.isHerb()) {
                     requiredHerbs.put(ing.getHerbId(), requiredHerbs.getOrDefault(ing.getHerbId(), 0) + ing.getCount());
                 } else {
-                    requiredMaterials.put(ing.getMaterial().name(), requiredMaterials.getOrDefault(ing.getMaterial().name(), 0) + ing.getCount());
+                    // Ưu tiên dùng itemId nếu có, fallback sang material name
+                    String matKey = (ing.getItemId() != null) ? ing.getItemId() : ing.getMaterial().name();
+                    requiredMaterials.put(matKey, requiredMaterials.getOrDefault(matKey, 0) + ing.getCount());
                 }
             }
 

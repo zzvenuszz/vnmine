@@ -24,8 +24,11 @@ public class PlayerCultivationData {
     private int mana;
     private int maxMana;
 
-    // Kỹ năng đã học (skill_id → true)
-    private Map<String, Boolean> learnedSkills;
+    // Kỹ năng đã học (skill_id → grade)
+    private Map<String, String> learnedSkills;
+
+    // Phẩm cấp của từng skill đã học (skill_id → sub-grade: HA|TRUNG|THUONG)
+    private Map<String, String> learnedSkillSubGrades;
 
     // Kỹ năng Passive đang active
     private Map<String, Boolean> activePassiveSkills;
@@ -57,6 +60,7 @@ public class PlayerCultivationData {
         this.mana = 100;
         this.maxMana = 100;
         this.learnedSkills = new HashMap<>();
+        this.learnedSkillSubGrades = new HashMap<>();
         this.activePassiveSkills = new HashMap<>();
         this.lastCombatTime = 0;
         this.lastManaRegenTime = System.currentTimeMillis();
@@ -83,8 +87,29 @@ public class PlayerCultivationData {
     public int getMaxMana() { return maxMana; }
     public void setMaxMana(int maxMana) { this.maxMana = Math.max(1, maxMana); }
 
-    public Map<String, Boolean> getLearnedSkills() { return learnedSkills; }
-    public void setLearnedSkills(Map<String, Boolean> learnedSkills) { this.learnedSkills = learnedSkills; }
+    public Map<String, String> getLearnedSkills() { return learnedSkills; }
+    public void setLearnedSkills(Map<String, String> learnedSkills) { this.learnedSkills = learnedSkills; }
+
+    public Map<String, String> getLearnedSkillSubGrades() { return learnedSkillSubGrades; }
+    public void setLearnedSkillSubGrades(Map<String, String> learnedSkillSubGrades) { this.learnedSkillSubGrades = learnedSkillSubGrades; }
+
+    public String getSkillGrade(String skillId) {
+        return learnedSkills.getOrDefault(skillId, "HOANG");
+    }
+
+    public String getSkillSubGrade(String skillId) {
+        return learnedSkillSubGrades.getOrDefault(skillId, "HA");
+    }
+
+    public void setSkillGrade(String skillId, String grade, String subGrade) {
+        learnedSkills.put(skillId, grade);
+        learnedSkillSubGrades.put(skillId, subGrade);
+    }
+
+    public void removeSkill(String skillId) {
+        learnedSkills.remove(skillId);
+        learnedSkillSubGrades.remove(skillId);
+    }
 
     public Map<String, Boolean> getActivePassiveSkills() { return activePassiveSkills; }
     public void setActivePassiveSkills(Map<String, Boolean> activePassiveSkills) { this.activePassiveSkills = activePassiveSkills; }
@@ -211,14 +236,22 @@ public class PlayerCultivationData {
      * Kiểm tra đã học skill chưa
      */
     public boolean hasLearnedSkill(String skillId) {
-        return learnedSkills.getOrDefault(skillId, false);
+        return learnedSkills.containsKey(skillId);
     }
 
     /**
-     * Học skill
+     * Học skill với phẩm cấp mặc định
      */
     public void learnSkill(String skillId) {
-        learnedSkills.put(skillId, true);
+        learnSkill(skillId, "HOANG", "HA");
+    }
+
+    /**
+     * Học skill với phẩm cấp cụ thể
+     */
+    public void learnSkill(String skillId, String grade, String subGrade) {
+        learnedSkills.put(skillId, grade);
+        learnedSkillSubGrades.put(skillId, subGrade);
     }
 
     /**

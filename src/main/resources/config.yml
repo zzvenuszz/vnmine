@@ -416,6 +416,12 @@ skills:
 # =============================================
 skill-books:
   enabled: true
+  # Tỉ lệ học thành công theo phẩm cấp sách
+  success-rate:
+    THUONG: 0.90  # Thượng phẩm: 90%
+    TRUNG: 0.60   # Trung phẩm: 60%
+    HA: 0.20      # Hạ phẩm: 20%
+  # Tỉ lệ mất sách khi học thất bại (0.0-1.0)
   fail-lose-book-chance: 0.50
   drop-from-mobs:
     enabled: true
@@ -597,6 +603,41 @@ items:
       notify-player: true
       notify-message: "&6✦ Phượng Hoàng Lệnh! Hồi sinh thành công!"
       cooldown-message: "&cPhượng Hoàng Lệnh đang hồi phục! Còn &e{remaining} &cgiây!"
+
+# =============================================
+# IXb. HỆ THỐNG KỸ NĂNG PHÁP BẢO (ARTIFACT SKILLS)
+# =============================================
+artifact-skills:
+  FLYING_SWORD_ACTIVATE:
+    name: "&bKiếm Phi Hành - Kích Hoạt"
+    executor: "FLYING_SWORD_ACTIVATE"
+    mana-cost: 10
+    cooldown-seconds: 30
+    icon: "DIAMOND_SWORD"
+  FLYING_SWORD_ATTACK:
+    name: "&bKiếm Phi Hành - Tấn Công"
+    executor: "FLYING_SWORD_ATTACK"
+    mana-cost: 5
+    cooldown-seconds: 2
+    icon: "DIAMOND_SWORD"
+  SPIRIT_BELL_STUN:
+    name: "&6Linh Chung - Choáng"
+    executor: "SPIRIT_BELL_STUN"
+    mana-cost: 15
+    cooldown-seconds: 15
+    icon: "BELL"
+  THUNDER_SEAL_STRIKE:
+    name: "&eLôi Ấn - Thiên Lôi"
+    executor: "THUNDER_SEAL_STRIKE"
+    mana-cost: 25
+    cooldown-seconds: 10
+    icon: "TRIDENT"
+  HEAVEN_SHIELD_ACTIVATE:
+    name: "&4Thiên Linh Thuẫn - Hộ Thể"
+    executor: "HEAVEN_SHIELD_ACTIVATE"
+    mana-cost: 40
+    cooldown-seconds: 180
+    icon: "SHIELD"
 
 # =============================================
 # X. HỆ THỐNG LINH THẢO & LINH ĐIỀN (SPIRIT FARM)

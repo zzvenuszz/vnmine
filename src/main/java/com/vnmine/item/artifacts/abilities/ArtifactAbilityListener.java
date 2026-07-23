@@ -141,7 +141,9 @@ public class ArtifactAbilityListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerInteract(PlayerInteractEvent event) {
-        if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) {
+        Action action = event.getAction();
+        if (action != Action.RIGHT_CLICK_AIR && action != Action.RIGHT_CLICK_BLOCK &&
+            action != Action.LEFT_CLICK_AIR && action != Action.LEFT_CLICK_BLOCK) {
             return;
         }
 
@@ -162,6 +164,21 @@ public class ArtifactAbilityListener implements Listener {
 
         event.setCancelled(true);
 
+        // Determine click type
+        String clickType = (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK) ? "left-click" : "right-click";
+
+        // Try to get artifact skills from item definition (new system)
+        com.vnmine.item.ItemDefinition def = plugin.getItemDataLoader().getItem(artifactId.toUpperCase());
+        if (def != null && def.getClickBehavior() != null && !def.getClickBehavior().isEmpty()) {
+            String skillId = def.getClickBehavior().get(clickType);
+            if (skillId != null && !skillId.equalsIgnoreCase("none") && !skillId.isEmpty()) {
+                // Cast artifact skill via ArtifactSkillManager
+                plugin.getArtifactSkillManager().castArtifactSkill(player, skillId, plugin.getCultivationManager().getPlayerData(uuid));
+                return;
+            }
+        }
+
+        // Fallback to legacy hardcoded behavior (for backward compatibility)
         switch (artifactId) {
             case FLYING_SWORD:
                 activateFlyingSword(player, item);

@@ -300,10 +300,10 @@ public class SkillManager implements Listener {
                     PlayerSkillData.ProficiencyLevel profLevel = psd.getProficiencyLevel("FIRE_CONTROL");
                     double timeReduction = psd.getAlchemyTimeReduction();
                     int gradeBonus = psd.getAlchemyGradeBonus();
-                    int usage = psd.getSkillUsageCount("FIRE_CONTROL");
+                    int points = psd.getProficiencyPoints("FIRE_CONTROL");
                     MessageUtils.send(player, "&c✦ Khống Hỏa Thuật ✦");
-                    MessageUtils.send(player, "&7Độ thuần thục: " + profLevel.getDisplayName());
-                    MessageUtils.send(player, "&7Lần sử dụng: &e" + usage);
+                    MessageUtils.send(player, "&7Độ thành thục: " + profLevel.getDisplayName());
+                    MessageUtils.send(player, "&7Điểm thành thục: &e" + points);
                     MessageUtils.send(player, "&7Giảm thời gian luyện đan: &c" + (int)(timeReduction * 100) + "%");
                     MessageUtils.send(player, "&7Tăng phẩm cấp đan dược: &e+" + gradeBonus);
                 }
@@ -316,10 +316,10 @@ public class SkillManager implements Listener {
                     PlayerSkillData.ProficiencyLevel profLevel2 = psd2.getProficiencyLevel("FORGE_MASTERY");
                     double manaReduction2 = psd2.getForgeManaReduction();
                     int gradeBonus2 = psd2.getForgeGradeBonus();
-                    int usage2 = psd2.getSkillUsageCount("FORGE_MASTERY");
+                    int points2 = psd2.getProficiencyPoints("FORGE_MASTERY");
                     MessageUtils.send(player, "&6✦ Luyện Khí Thuật ✦");
-                    MessageUtils.send(player, "&7Độ thuần thục: " + profLevel2.getDisplayName());
-                    MessageUtils.send(player, "&7Lần sử dụng: &e" + usage2);
+                    MessageUtils.send(player, "&7Độ thành thục: " + profLevel2.getDisplayName());
+                    MessageUtils.send(player, "&7Điểm thành thục: &e" + points2);
                     MessageUtils.send(player, "&7Giảm tiêu hao linh lực: &6" + (int)(manaReduction2 * 100) + "%");
                     MessageUtils.send(player, "&7Tăng phẩm cấp pháp khí: &e+" + gradeBonus2);
                 }
@@ -337,7 +337,7 @@ public class SkillManager implements Listener {
                     fb.setDirection(dir);
                 }
                 MessageUtils.send(player, "&6✦ Tinh Thần Bạo: Hủy diệt khu vực!");
-                MessageUtils.broadcast("&6&l" + player.getName() + " &r&6đã thi triển &eTinh Thần Bạo&6!",
+                MessageUtils.broadcast("&6&l" + player.getName() + " &r&6đã thi triển &eTinh Thần Bạo &6!",
                         Sound.ENTITY_ENDER_DRAGON_HURT);
                 break;
             }

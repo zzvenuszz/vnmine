@@ -206,5 +206,38 @@ Khi tạo ra các loại pháp bảo, đan dược, pháp khí, linh thảo, cô
 
 ---
 
+## Debug Logs (Hướng dẫn lấy logs debug)
+Khi cần debug lỗi trên server Minecraft:
+
+1. **Build JAR mới:**
+   ```bash
+   timeout 15m mvn clean package
+   ```
+
+2. **Copy JAR vào test-server:**
+   ```bash
+   cp target/VNMine-2.1.0.jar /home/ubuntu/projects/test-server/plugins/
+   ```
+
+3. **Chạy server bằng run.sh (chạy trong nền, tự động dừng):**
+   - Mở terminal mới
+   - Chạy lệnh sau để chạy server trong 1-2 phút rồi tự động dừng:
+   ```bash
+   cd /home/ubuntu/projects/test-server && nohup ./run.sh > /dev/null 2>&1 & SERVER_PID=$!; sleep 120; kill $SERVER_PID 2>/dev/null
+   ```
+   - **Lưu ý:** KHÔNG ghi log ra file riêng, server sẽ tự ghi logs vào thư mục chuẩn
+
+4. **Đọc logs:**
+   - Logs được lưu tại: `/home/ubuntu/projects/test-server/logs/latest.log`
+   - Dùng lệnh: `tail -n 200 /home/ubuntu/projects/test-server/logs/latest.log`
+   - **CẤM** dùng `tail -f` (theo Anti-Hang Rules)
+
+5. **Dừng server:**
+   - Nhấn `Ctrl+C` trong terminal chạy server
+   - Hoặc dùng lệnh `stop` trong game
+   - Hoặc kill process: `kill <PID>`
+
+---
+
 ## Completion Rules (Quy định hoàn thành)
 Cline không được tuyên bố hoàn thành công việc nếu chưa đi qua đủ các bước: Phân tích nguyên nhân -> Sửa lỗi trong Act Mode -> Build thành công bằng lệnh Maven thủ công -> Xác minh sinh file JAR mới -> Tính mã SHA256 -> Gửi báo cáo đầy đủ.

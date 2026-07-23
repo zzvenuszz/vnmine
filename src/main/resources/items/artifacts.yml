@@ -15,6 +15,14 @@ FLYING_SWORD:
   material: DIAMOND_SWORD
   custom-model-data: 3001
   category: artifact
+  artifact-skills:
+    - "FLYING_SWORD_ACTIVATE"
+    - "FLYING_SWORD_ATTACK"
+  click-behavior:
+    right-click: "FLYING_SWORD_ACTIVATE"
+    left-click: "FLYING_SWORD_ATTACK"
+    hold-left-click: "none"
+    hold-right-click: "none"
   cooking-time: 30
   success-chance: 60.0
   required-level: 21
@@ -44,6 +52,13 @@ SPIRIT_BELL:
   material: BELL
   custom-model-data: 3002
   category: artifact
+  artifact-skills:
+    - "SPIRIT_BELL_STUN"
+  click-behavior:
+    right-click: "SPIRIT_BELL_STUN"
+    left-click: "none"
+    hold-left-click: "none"
+    hold-right-click: "none"
   cooking-time: 25
   success-chance: 65.0
   required-level: 15
@@ -133,6 +148,13 @@ HEAVEN_SHIELD:
   material: NETHERITE_CHESTPLATE
   custom-model-data: 3005
   category: artifact
+  artifact-skills:
+    - "HEAVEN_SHIELD_ACTIVATE"
+  click-behavior:
+    right-click: "HEAVEN_SHIELD_ACTIVATE"
+    left-click: "none"
+    hold-left-click: "none"
+    hold-right-click: "none"
   cooking-time: 50
   success-chance: 35.0
   required-level: 40
@@ -164,6 +186,13 @@ THUNDER_SEAL:
   material: TRIDENT
   custom-model-data: 3006
   category: artifact
+  artifact-skills:
+    - "THUNDER_SEAL_STRIKE"
+  click-behavior:
+    right-click: "THUNDER_SEAL_STRIKE"
+    left-click: "none"
+    hold-left-click: "none"
+    hold-right-click: "none"
   cooking-time: 60
   success-chance: 25.0
   required-level: 50

@@ -187,7 +187,20 @@ public class ItemDataLoader {
             }
             def.setAdditional(additional);
         }
-        
+
+        // Artifact skills
+        def.setArtifactSkills(section.getStringList("artifact-skills"));
+
+        // Click behavior
+        ConfigurationSection clickSection = section.getConfigurationSection("click-behavior");
+        if (clickSection != null) {
+            Map<String, String> behaviors = new HashMap<>();
+            for (String key : clickSection.getKeys(false)) {
+                behaviors.put(key, clickSection.getString(key, "none"));
+            }
+            def.setClickBehavior(behaviors);
+        }
+
         return def;
     }
     
@@ -362,7 +375,7 @@ public class ItemDataLoader {
         if (artIngredients == null) return result;
         for (ArtifactRecipe.IngredientDef ing : artIngredients) {
             String herbId = ing.isHerb ? ing.getHerbId() : null;
-            result.add(new PillRecipe.IngredientDef(herbId, ing.getMaterial(), ing.getCount(), ing.isHerb));
+            result.add(new PillRecipe.IngredientDef(herbId, null, ing.getMaterial(), ing.getCount(), ing.isHerb));
         }
         return result;
     }

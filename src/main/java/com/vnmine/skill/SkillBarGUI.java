@@ -6,19 +6,26 @@ import com.vnmine.gui.MainMenuGUI;
 import com.vnmine.item.ItemBuilder;
 import com.vnmine.util.ColorUtils;
 import com.vnmine.util.MessageUtils;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.Sound;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerItemHeldEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 
@@ -26,18 +33,18 @@ import java.util.*;
  * SkillBarGUI - Quản lý Skill Bar và Menu gán skill
  * 
  * Chức năng:
- * 1. Skill Bar 1x9: hiển thị khi bấm phím Q
- *    - Cancel mọi tương tác với bottom inventory để không mất đồ
- *    - Chỉ cast skill qua click skill hoặc bấm số 1-9
- * 2. Menu quản lý: xem danh sách skill đã học, gán skill vào bar
- * 3. Bấm số 1-9 khi skill bar mở → cast skill
+ * 1. Skill Bar Mode: bấm Q → vào chế độ skill bar (Action Bar hiển thị skill)
+ *    - Bấm số 1-9 để cast skill tương ứng
+ *    - Tự động thoát sau 7 giây không tương tác
+ *    - Bấm Q lần nữa để thoát thủ công
+ * 2. Menu quản lý: xem danh sách skill đã học, gán skill vào bar (giữ nguyên)
  */
 public class SkillBarGUI implements Listener {
 
     private final VNMinePlugin plugin;
 
-    // Map lưu trạng thái player đang mở skill bar
-    private final Set<UUID> skillBarOpen;
+    // Trạng thái player đang ở chế độ skill bar (Action Bar)
+    private final Set<UUID> skillBarMode;
 
     // Map lưu trạng thái player đang ở chế độ gán skill
     private final Map<UUID, Boolean> assignMode;
@@ -45,91 +52,170 @@ public class SkillBarGUI implements Listener {
     // Map lưu skill bar tạm thời khi đang gán (để lưu khi đóng)
     private final Map<UUID, String[]> tempSkillBar;
 
+    // Task ID cho auto-exit timer (mỗi player)
+    private final Map<UUID, Integer> exitTaskIds;
+
+    // Task ID cho refresh action bar (mỗi player)
+    private final Map<UUID, Integer> refreshTaskIds;
+
+    // Thời gian tối đa ở trong skill bar mode (giây)
+    private static final int SKILL_BAR_TIMEOUT = 7;
+
     public SkillBarGUI(VNMinePlugin plugin) {
         this.plugin = plugin;
-        this.skillBarOpen = new HashSet<>();
+        this.skillBarMode = new HashSet<>();
         this.assignMode = new HashMap<>();
         this.tempSkillBar = new HashMap<>();
+        this.exitTaskIds = new HashMap<>();
+        this.refreshTaskIds = new HashMap<>();
     }
 
-    // ==================== SKILL BAR (1x9) ====================
+    // ==================== SKILL BAR MODE (ACTION BAR) ====================
 
     /**
-     * Mở Skill Bar 1x9
-     * Chặn mọi click vào bottom inventory để không mất đồ
+     * Vào chế độ Skill Bar Mode
+     * Hiển thị Action Bar với danh sách skill đã gán
      */
-    public void openSkillBar(Player player) {
-        PlayerSkillData skillData = plugin.getCultivationManager().getPlayerSkillData(player.getUniqueId());
-        if (skillData == null) return;
-
-        Inventory bar = Bukkit.createInventory(null, 9,
-                ColorUtils.colorize("&8✦ Skill Bar ✦"));
-
-        // Gán các skill đã setup
-        for (int i = 0; i < 9; i++) {
-            String skillId = skillData.getSkillBarSlot(i);
-            if (skillId == null) continue;
-
-            SkillManager.SkillConfig skill = getSkillById(skillId);
-            if (skill == null) continue;
-
-            Material iconMat = Material.getMaterial(skill.icon.toUpperCase());
-            if (iconMat == null) iconMat = Material.STONE;
-
-            List<String> lore = new ArrayList<>();
-            for (String desc : skill.description) {
-                lore.add(desc);
-            }
-
-            // Thông tin cooldown
-            boolean onCooldown = skillData.isOnCooldown(skillId);
-            if (onCooldown) {
-                long remaining = skillData.getCooldownRemaining(skillId);
-                lore.add("");
-                lore.add("&c⏳ Hồi chiêu: &e" + remaining + "s");
-            }
-
-            // Thông tin thành thục
-            PlayerSkillData.ProficiencyLevel profLevel = skillData.getProficiencyLevel(skillId);
-            lore.add("");
-            lore.add("&7Độ thành thục: " + profLevel.getDisplayName());
-            lore.add("&7Hệ số: &6x" + String.format("%.1f", skillData.getProficiencyMultiplier(skillId)));
-
-            // Mana cost
-            lore.add("");
-            lore.add("&b✦ Linh lực: " + skill.manaCost);
-
-            // Số thứ tự
-            lore.add("");
-            lore.add("&eBấm &f" + (i + 1) + " &eđể thi triển");
-
-            ItemStack iconItem = new ItemBuilder(iconMat)
-                    .setName((onCooldown ? "&7" : "&a") + "◈ " + ColorUtils.stripColor(skill.name)
-                            + (onCooldown ? " &7[Cooldown]" : ""))
-                    .setLore(lore)
-                    .setGlow(!onCooldown)
-                    .build();
-
-            bar.setItem(i, iconItem);
+    public void enterSkillBarMode(Player player) {
+        UUID uuid = player.getUniqueId();
+        PlayerSkillData skillData = plugin.getCultivationManager().getPlayerSkillData(uuid);
+        if (skillData == null) {
+            MessageUtils.send(player, "&c✦ Bạn chưa có dữ liệu công pháp! Dùng &e/vnskill &cđể xem.");
+            return;
         }
 
-        skillBarOpen.add(player.getUniqueId());
-        player.openInventory(bar);
+        // Tạm dừng mana bar action bar để tránh xung đột action bar
+        plugin.getCultivationManager().pauseManaBar(uuid);
+
+        // Chuyển sang slot cuối (phím 9) để đảm bảo PlayerItemHeldEvent
+        // luôn fire khi bấm phím số (vì previousSlot=8 != newSlot=0-8)
+        player.getInventory().setHeldItemSlot(8);
+
+        // Thêm vào skill bar mode
+        skillBarMode.add(uuid);
+
+        // Gửi Action Bar ngay lập tức
+        sendSkillBarActionBar(player);
+
+        // Schedule tự động thoát sau SKILL_BAR_TIMEOUT giây
+        int exitTaskId = new BukkitRunnable() {
+            int countdown = SKILL_BAR_TIMEOUT;
+            @Override
+            public void run() {
+                if (!skillBarMode.contains(uuid)) {
+                    cancel();
+                    return;
+                }
+                countdown--;
+                if (countdown <= 0) {
+                    exitSkillBarMode(player, false);
+                    MessageUtils.send(player, "&7✦ Đã thoát Skill Bar (hết thời gian)");
+                }
+            }
+        }.runTaskTimer(plugin, 20L, 20L).getTaskId();
+
+        // Cancel task cũ nếu có
+        cancelExitTask(uuid);
+        exitTaskIds.put(uuid, exitTaskId);
+
+        // Schedule refresh action bar mỗi 2 giây
+        int refreshTaskId = new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (skillBarMode.contains(uuid)) {
+                    sendSkillBarActionBar(player);
+                } else {
+                    cancel();
+                }
+            }
+        }.runTaskTimer(plugin, 40L, 40L).getTaskId();
+
+        cancelRefreshTask(uuid);
+        refreshTaskIds.put(uuid, refreshTaskId);
     }
 
     /**
-     * Đóng Skill Bar
+     * Thoát khỏi chế độ Skill Bar Mode
      */
-    public void closeSkillBar(Player player) {
-        skillBarOpen.remove(player.getUniqueId());
-        player.closeInventory();
+    public void exitSkillBarMode(Player player, boolean sendMessage) {
+        UUID uuid = player.getUniqueId();
+        skillBarMode.remove(uuid);
+        cancelExitTask(uuid);
+        cancelRefreshTask(uuid);
+
+        // Clear action bar
+        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(""));
+
+        // Tiếp tục mana bar action bar
+        plugin.getCultivationManager().resumeManaBar(uuid);
     }
 
     /**
-     * Kiểm tra player đang mở skill bar không
+     * Gửi Action Bar hiển thị các skill đã gán
      */
-    public boolean isSkillBarOpen(Player player) {
-        return skillBarOpen.contains(player.getUniqueId());
+    private void sendSkillBarActionBar(Player player) {
+        PlayerSkillData skillData = plugin.getCultivationManager().getPlayerSkillData(player.getUniqueId());
+        if (skillData == null) {
+            exitSkillBarMode(player, false);
+            return;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("&8✦ &aSkill Bar &8✦");
+
+        for (int i = 0; i < 9; i++) {
+            String skillId = skillData.getSkillBarSlot(i);
+            if (skillId == null) {
+                sb.append(" &7[").append(i + 1).append("]&8-");
+                continue;
+            }
+
+            SkillManager.SkillConfig skill = getSkillById(skillId);
+            if (skill == null) {
+                sb.append(" &7[").append(i + 1).append("]&8-");
+                continue;
+            }
+
+            boolean onCooldown = skillData.isOnCooldown(skillId);
+
+            if (onCooldown) {
+                sb.append(" &7[").append(i + 1).append("]&8").append(ColorUtils.stripColor(skill.name));
+            } else {
+                sb.append(" &a[").append(i + 1).append("]&f").append(ColorUtils.stripColor(skill.name));
+            }
+        }
+
+        sb.append(" &8✦");
+
+        player.spigot().sendMessage(ChatMessageType.ACTION_BAR,
+                new TextComponent(ColorUtils.colorize(sb.toString())));
+    }
+
+    /**
+     * Kiểm tra player đang ở skill bar mode không
+     */
+    public boolean isInSkillBarMode(Player player) {
+        return skillBarMode.contains(player.getUniqueId());
+    }
+
+    /**
+     * Hủy task auto-exit
+     */
+    private void cancelExitTask(UUID uuid) {
+        Integer taskId = exitTaskIds.remove(uuid);
+        if (taskId != null) {
+            Bukkit.getScheduler().cancelTask(taskId);
+        }
+    }
+
+    /**
+     * Hủy task refresh action bar
+     */
+    private void cancelRefreshTask(UUID uuid) {
+        Integer taskId = refreshTaskIds.remove(uuid);
+        if (taskId != null) {
+            Bukkit.getScheduler().cancelTask(taskId);
+        }
     }
 
     // ==================== MENU QUẢN LÝ SKILL BAR ====================
@@ -406,15 +492,15 @@ public class SkillBarGUI implements Listener {
 
         String skillId = skillData.getSkillBarSlot(barSlot);
         if (skillId == null) {
-            MessageUtils.send(player, "&cSlot này trống!");
-            closeSkillBar(player);
+            MessageUtils.send(player, "&cSlot " + (barSlot + 1) + " trống!");
+            exitSkillBarMode(player, false);
             return;
         }
 
         SkillManager.SkillConfig skill = getSkillById(skillId);
         if (skill == null) {
             MessageUtils.send(player, "&cKỹ năng không tồn tại!");
-            closeSkillBar(player);
+            exitSkillBarMode(player, false);
             return;
         }
 
@@ -424,7 +510,7 @@ public class SkillBarGUI implements Listener {
         // Kiểm tra loại skill - chỉ ACTIVE mới cast được từ bar
         if (!skill.type.equals("ACTIVE")) {
             MessageUtils.send(player, "&cKỹ năng thụ động không thể cast từ Skill Bar!");
-            closeSkillBar(player);
+            exitSkillBarMode(player, false);
             return;
         }
 
@@ -438,7 +524,7 @@ public class SkillBarGUI implements Listener {
         if (!bypassCooldown && skillData.isOnCooldown(skillId)) {
             long remaining = skillData.getCooldownRemaining(skillId);
             MessageUtils.send(player, "&cKỹ năng &e" + ColorUtils.stripColor(skill.name) + " &cđang hồi chiêu! (&e" + remaining + "s&c)");
-            closeSkillBar(player);
+            exitSkillBarMode(player, false);
             return;
         }
 
@@ -446,7 +532,7 @@ public class SkillBarGUI implements Listener {
         if (skill.manaCost > 0) {
             if (!plugin.getCultivationManager().consumeMana(player, skill.manaCost)) {
                 MessageUtils.send(player, "&cKhông đủ linh lực! (Cần &b" + skill.manaCost + " &clinh lực)");
-                closeSkillBar(player);
+                exitSkillBarMode(player, false);
                 return;
             }
         }
@@ -460,16 +546,26 @@ public class SkillBarGUI implements Listener {
         // Cast skill với multiplier
         plugin.getSkillManager().castSkill(player, skill, cultData, multiplier);
 
-        // Tăng proficiency
+        // Tăng proficiency (usage count + points)
         skillData.incrementSkillUsage(skillId);
+        skillData.addProficiencyPoints(skillId, 1); // +1 điểm mỗi lần thi triển
+
+        // Kiểm tra lên bậc mới
+        PlayerSkillData.ProficiencyLevel oldLevel = skillData.getProficiencyLevel(skillId);
+        PlayerSkillData.ProficiencyLevel newLevel = skillData.getProficiencyLevel(skillId);
+        if (oldLevel != newLevel) {
+            MessageUtils.send(player, "&d&l✦ CÔNG PHÁP THĂNG CẤP! ✦");
+            MessageUtils.send(player, "&e" + ColorUtils.stripColor(skill.name) + " &7đạt &e" + newLevel.getDisplayName() + "&7!");
+            MessageUtils.playSound(player, Sound.ENTITY_PLAYER_LEVELUP);
+        }
 
         // Set cooldown (nếu không bypass)
         if (!bypassCooldown) {
             skillData.setCooldown(skillId, skill.cooldownSeconds);
         }
 
-        // Đóng skill bar
-        closeSkillBar(player);
+        // Thoát skill bar mode
+        exitSkillBarMode(player, false);
     }
 
     /**
@@ -499,20 +595,102 @@ public class SkillBarGUI implements Listener {
     }
 
     public void cleanupPlayer(UUID uuid) {
-        skillBarOpen.remove(uuid);
+        skillBarMode.remove(uuid);
         assignMode.remove(uuid);
         tempSkillBar.remove(uuid);
+        cancelExitTask(uuid);
+        cancelRefreshTask(uuid);
     }
 
     // ==================== EVENT HANDLERS ====================
 
+    /**
+     * Xử lý phím số 1-9 khi đang ở Skill Bar Mode
+     * PlayerItemHeldEvent luôn fire khi bấm số (không phụ thuộc GUI)
+     */
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onPlayerItemHeld(PlayerItemHeldEvent event) {
+        Player player = event.getPlayer();
+        UUID uuid = player.getUniqueId();
+
+        // Chỉ xử lý nếu player đang ở skill bar mode
+        if (!skillBarMode.contains(uuid)) return;
+
+        // Cancel để không đổi slot hotbar thật
+        event.setCancelled(true);
+
+        // event.getNewSlot() trả về 0-8 tương ứng phím 1-9
+        int barSlot = event.getNewSlot();
+
+        // Cast skill tương ứng
+        castSkillFromBar(player, barSlot);
+    }
+
+    /**
+     * Xử lý phím Q - vào/thoát Skill Bar Mode
+     * Chỉ active khi không mở inventory khác
+     */
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onPlayerDropItem(PlayerDropItemEvent event) {
+        Player player = event.getPlayer();
+        UUID uuid = player.getUniqueId();
+
+        // Kiểm tra nếu đang mở inventory khác (không phải crafting/player)
+        try {
+            InventoryView openInv = player.getOpenInventory();
+            if (openInv != null) {
+                org.bukkit.inventory.Inventory topInv = openInv.getTopInventory();
+                if (topInv != null) {
+                    InventoryType invType = topInv.getType();
+                    if (invType != InventoryType.CRAFTING && invType != InventoryType.PLAYER) {
+                        return;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // Bỏ qua lỗi
+        }
+
+        event.setCancelled(true);
+
+        // Nếu đang ở skill bar mode → thoát
+        if (skillBarMode.contains(uuid)) {
+            exitSkillBarMode(player, true);
+            MessageUtils.send(player, "&7✦ Đã thoát Skill Bar");
+            return;
+        }
+
+        // Kiểm tra player đã có dữ liệu skill chưa
+        PlayerSkillData skillData = plugin.getCultivationManager().getPlayerSkillData(uuid);
+        if (skillData == null) {
+            MessageUtils.send(player, "&c✦ Bạn chưa có dữ liệu công pháp! Dùng &e/vnskill &cđể xem.");
+            return;
+        }
+
+        // Vào skill bar mode
+        MessageUtils.send(player, "&a✦ Skill Bar &7- Bấm số &e1-9 &7để thi triển, bấm &eQ &7để thoát");
+        enterSkillBarMode(player);
+    }
+
+    /**
+     * Thoát skill bar mode khi player rời game
+     */
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        UUID uuid = event.getPlayer().getUniqueId();
+        cleanupPlayer(uuid);
+    }
+
+    /**
+     * Xử lý click trong Menu quản lý (giữ nguyên)
+     */
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player)) return;
         Player player = (Player) event.getWhoClicked();
         String title = event.getView().getTitle();
 
-        // Xử lý click trong Menu quản lý TRƯỚC (vì "Quản Lý Skill Bar" cũng chứa "Skill Bar")
+        // Xử lý click trong Menu quản lý
         if (title.contains("Quản Lý Skill Bar")) {
             int slot = event.getRawSlot();
             // Cancel tất cả click vào top inventory
@@ -526,30 +704,11 @@ public class SkillBarGUI implements Listener {
             }
             return;
         }
-
-        // Xử lý click trong Skill Bar (1x9)
-        if (title.contains("Skill Bar")) {
-            // Cancel MỌI click để không mất đồ từ bottom inventory
-            event.setCancelled(true);
-
-            // Xử lý bấm phím số 1-9
-            int hotbarSlot = event.getHotbarButton();
-            if (hotbarSlot >= 0 && hotbarSlot < 9) {
-                castSkillFromBar(player, hotbarSlot);
-                return;
-            }
-
-            int rawSlot = event.getRawSlot();
-
-            // Nếu click vào skill bar bằng chuột (rawSlot 0-8)
-            if (rawSlot >= 0 && rawSlot < 9) {
-                castSkillFromBar(player, rawSlot);
-            }
-            // Click vào bottom inventory (rawSlot >= 9) bị cancel, không làm gì cả
-            return;
-        }
     }
 
+    /**
+     * Xử lý drag trong Menu quản lý (giữ nguyên)
+     */
     @EventHandler
     public void onInventoryDrag(InventoryDragEvent event) {
         if (!(event.getWhoClicked() instanceof Player)) return;
@@ -583,6 +742,9 @@ public class SkillBarGUI implements Listener {
         event.setCancelled(true);
     }
 
+    /**
+     * Xử lý đóng Menu quản lý (giữ nguyên)
+     */
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
         if (!(event.getPlayer() instanceof Player)) return;
@@ -595,52 +757,9 @@ public class SkillBarGUI implements Listener {
             if (tempSkillBar.containsKey(uuid)) {
                 tempSkillBar.remove(uuid);
             }
-            skillBarOpen.remove(uuid);
+            skillBarMode.remove(uuid);
             tempSkillBar.remove(uuid);
             return;
         }
-
-        // Khi đóng Skill Bar (1x9)
-        if (title.contains("Skill Bar")) {
-            // Xóa trạng thái skill bar sau 1 tick
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                skillBarOpen.remove(uuid);
-            }, 1L);
-            return;
-        }
-    }
-
-    /**
-     * Xử lý phím Q - mở Skill Bar khi không mở inventory
-     */
-    @EventHandler
-    public void onPlayerDropItem(PlayerDropItemEvent event) {
-        Player player = event.getPlayer();
-
-        try {
-            InventoryView openInv = player.getOpenInventory();
-            if (openInv != null) {
-                org.bukkit.inventory.Inventory topInv = openInv.getTopInventory();
-                if (topInv != null) {
-                    InventoryType invType = topInv.getType();
-                    if (invType != InventoryType.CRAFTING && invType != InventoryType.PLAYER) {
-                        return;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            // Bỏ qua lỗi
-        }
-
-        // Kiểm tra player đã có dữ liệu skill chưa
-        PlayerSkillData skillData = plugin.getCultivationManager().getPlayerSkillData(player.getUniqueId());
-        if (skillData == null) {
-            MessageUtils.send(player, "&c✦ Bạn chưa có dữ liệu công pháp! Dùng &e/vnskill &cđể xem.");
-            return;
-        }
-
-        // Mở skill bar
-        event.setCancelled(true);
-        openSkillBar(player);
     }
 }

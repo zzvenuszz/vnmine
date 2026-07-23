@@ -23,13 +23,13 @@ public class SkillBookManager {
 
     private final VNMinePlugin plugin;
 
-    // Tỉ lệ học thành công theo phẩm cấp
-    private static final double RATE_THUONG = 0.90; // Thượng phẩm: 90%
-    private static final double RATE_TRUNG = 0.60;  // Trung phẩm: 60%
-    private static final double RATE_HA = 0.20;     // Hạ phẩm: 20%
+    // Tỉ lệ học thành công theo phẩm cấp (đọc từ config)
+    private double rateTHUONG = 0.90;
+    private double rateTRUNG = 0.60;
+    private double rateHA = 0.20;
 
-    // Tỉ lệ mất sách khi thất bại
-    private double failLoseBookChance = 0.50; // 50% mất sách, 50% giảm phẩm cấp
+    // Tỉ lệ mất sách khi thất bại (đọc từ config)
+    private double failLoseBookChance = 0.50;
 
     // Cấu hình drop sách từ quái
     private boolean bookDropEnabled;
@@ -48,6 +48,14 @@ public class SkillBookManager {
 
         bookDropEnabled = bookSection.getBoolean("drop-from-mobs.enabled", true);
         failLoseBookChance = bookSection.getDouble("fail-lose-book-chance", 0.50);
+
+        // Load success rates from config
+        ConfigurationSection rateSection = bookSection.getConfigurationSection("success-rate");
+        if (rateSection != null) {
+            rateTHUONG = rateSection.getDouble("THUONG", 0.90);
+            rateTRUNG = rateSection.getDouble("TRUNG", 0.60);
+            rateHA = rateSection.getDouble("HA", 0.20);
+        }
 
         // Load mob drop config
         ConfigurationSection dropsSection = bookSection.getConfigurationSection("drop-from-mobs.drops");
@@ -133,11 +141,6 @@ public class SkillBookManager {
             return false;
         }
 
-        if (data.hasLearnedSkill(skillId)) {
-            MessageUtils.send(player, "&cBạn đã học công pháp này rồi!");
-            return false;
-        }
-
         // Lấy thông tin skill
         SkillManager skillManager = plugin.getSkillManager();
         SkillManager.SkillConfig skill = null;
@@ -158,42 +161,68 @@ public class SkillBookManager {
             return false;
         }
 
-        // Tính tỉ lệ thành công
+        // Nếu đã học skill này: cho phép học lại để nâng cấp phẩm
+        if (data.hasLearnedSkill(skillId)) {
+            String currentGrade = data.getSkillGrade(skillId);
+            String currentSubGrade = data.getSkillSubGrade(skillId);
+
+            // So sánh phẩm cấp: sách mới phải cao hơn hoặc bằng
+            int currentGradeIndex = getGradeIndex(currentGrade, currentSubGrade);
+            int newGradeIndex = getGradeIndex(grade, subGrade);
+
+            if (newGradeIndex <= currentGradeIndex) {
+                MessageUtils.send(player, "&cBạn đã học công pháp này rồi! Phẩm cấp hiện tại: " + getGradeColor(currentGrade) + getGradeName(currentGrade) + " " + getSubGradeName(currentSubGrade));
+                MessageUtils.send(player, "&eDùng sách phẩm cấp cao hơn để nâng cấp!");
+                return false;
+            }
+
+            // Nâng cấp skill: thay thế grade mới, reset proficiency
+            data.setSkillGrade(skillId, grade, subGrade);
+            data.getSkillData().setSkillUsage(skillId, 0); // Reset proficiency
+
+            MessageUtils.sendTitle(player,
+                    "&6&l✦ NÂNG CẤP CÔNG PHÁP ✦",
+                    grade + "Công pháp " + ColorUtils.stripColor(skill.name) + " đã nâng cấp!",
+                    10, 60, 10);
+            MessageUtils.send(player, "&6✦ Nâng cấp công pháp: &e" + skill.name);
+            MessageUtils.send(player, "&a✦ Phẩm cấp mới: " + getGradeColor(grade) + getGradeName(grade) + " " + getSubGradeName(subGrade));
+            MessageUtils.send(player, "&7Độ thành thục đã reset về 0.");
+            MessageUtils.playSound(player, Sound.ENTITY_PLAYER_LEVELUP);
+
+            // Xóa sách
+            consumeBook(player, book);
+            return true;
+        }
+
+        // Chưa học: thử học
         double successRate = getSuccessRate(subGrade);
         Random random = new Random();
         boolean success = random.nextDouble() < successRate;
 
         // Xóa sách khỏi tay player
-        int heldSlot = player.getInventory().getHeldItemSlot();
-        ItemStack heldItem = player.getInventory().getItem(heldSlot);
-        if (heldItem != null && heldItem.equals(book)) {
-            heldItem.setAmount(heldItem.getAmount() - 1);
-            if (heldItem.getAmount() <= 0) {
-                player.getInventory().setItem(heldSlot, null);
-            }
-        }
+        consumeBook(player, book);
 
         String gradeColor = getGradeColor(grade);
         String gradeName = getGradeName(grade);
         String subGradeName = getSubGradeName(subGrade);
 
         if (success) {
-            // Thành công!
-            data.learnSkill(skillId);
+            // Thành công: lưu grade
+            data.learnSkill(skillId, grade, subGrade);
             MessageUtils.sendTitle(player,
                     "&a&l✦ HỌC THÀNH CÔNG ✦",
                     gradeColor + "Công pháp " + ColorUtils.stripColor(skill.name) + " đã được khắc vào thần thức!",
                     10, 60, 10);
             MessageUtils.send(player, "&a✦ Bạn đã học được công pháp: &e" + skill.name);
-            MessageUtils.send(player, "&a✦ Phẩm cấp sách: " + gradeColor + gradeName + " " + subGradeName);
+            MessageUtils.send(player, "&a✦ Phẩm cấp: " + gradeColor + gradeName + " " + subGradeName);
             MessageUtils.playSound(player, Sound.ENTITY_PLAYER_LEVELUP);
             return true;
         } else {
-            // Thất bại
+            // Thất bại: 50% mất sách, 50% giảm phẩm sách
             boolean loseBook = random.nextDouble() < failLoseBookChance;
 
             if (loseBook) {
-                // Mất sách
+                // Mất sách hoàn toàn
                 MessageUtils.sendTitle(player,
                         "&4&l✦ HỌC THẤT BẠI ✦",
                         "&cSách công pháp đã tan biến!",
@@ -202,12 +231,11 @@ public class SkillBookManager {
                 MessageUtils.send(player, "&7Phẩm cấp: " + gradeColor + gradeName + " " + subGradeName);
                 MessageUtils.playSound(player, Sound.ENTITY_ITEM_BREAK);
             } else {
-                // Giảm phẩm cấp
-                String newGrade = grade;
+                // Giảm phẩm cấp sách
                 String newSubGrade = downgradeSubGrade(subGrade);
 
-                // Nếu hạ phẩm giảm nữa thì mất sách
                 if (newSubGrade == null) {
+                    // Hạ phẩm giảm nữa → mất sách
                     MessageUtils.sendTitle(player,
                             "&4&l✦ HỌC THẤT BẠI ✦",
                             "&cSách công pháp đã tan biến sau khi giảm phẩm!",
@@ -215,14 +243,14 @@ public class SkillBookManager {
                     MessageUtils.send(player, "&c✦ Sách đã giảm xuống phẩm thấp nhất và biến mất!");
                     MessageUtils.playSound(player, Sound.ENTITY_ITEM_BREAK);
                 } else {
-                    // Tạo sách mới với phẩm cấp giảm và trả lại cho player
-                    ItemStack downgradedBook = createSkillBook(skillId, newGrade, newSubGrade);
+                    // Tạo sách mới với phẩm cấp giảm
+                    ItemStack downgradedBook = createSkillBook(skillId, grade, newSubGrade);
                     if (downgradedBook != null) {
                         player.getInventory().addItem(downgradedBook);
                     }
 
-                    String newGradeColor = getGradeColor(newGrade);
-                    String newGradeName = getGradeName(newGrade);
+                    String newGradeColor = getGradeColor(grade);
+                    String newGradeName = getGradeName(grade);
                     String newSubGradeName = getSubGradeName(newSubGrade);
 
                     MessageUtils.sendTitle(player,
@@ -235,7 +263,83 @@ public class SkillBookManager {
                     MessageUtils.playSound(player, Sound.BLOCK_ANVIL_USE);
                 }
             }
+
+            // NOTE: Không ảnh hưởng skill đã học (theo yêu cầu)
             return false;
+        }
+    }
+
+    /**
+     * Xóa/giảm sách khỏi inventory
+     */
+    private void consumeBook(Player player, ItemStack book) {
+        int heldSlot = player.getInventory().getHeldItemSlot();
+        ItemStack heldItem = player.getInventory().getItem(heldSlot);
+        if (heldItem != null && heldItem.equals(book)) {
+            heldItem.setAmount(heldItem.getAmount() - 1);
+            if (heldItem.getAmount() <= 0) {
+                player.getInventory().setItem(heldSlot, null);
+            }
+        }
+    }
+
+    /**
+     * Lấy tỉ lệ thành công dựa vào sub grade
+     */
+    public double getSuccessRate(String subGrade) {
+        switch (subGrade.toUpperCase()) {
+            case "THUONG": return rateTHUONG;
+            case "TRUNG": return rateTRUNG;
+            case "HA": return rateHA;
+            default: return rateHA;
+        }
+    }
+
+    /**
+     * Lấy tỉ lệ thành công dưới dạng phần trăm
+     */
+    public int getSuccessRatePercent(String subGrade) {
+        return (int)(getSuccessRate(subGrade) * 100);
+    }
+
+    /**
+     * Lấy grade index để so sánh (càng cao càng mạnh)
+     * THIEN_THUONG=11, DIA_THUONG=10, HUYEN_THUONG=9, HOANG_THUONG=8
+     * THIEN_TRUNG=7, DIA_TRUNG=6, HUYEN_TRUNG=5, HOANG_TRUNG=4
+     * THIEN_HA=3, DIA_HA=2, HUYEN_HA=1, HOANG_HA=0
+     */
+    private int getGradeIndex(String grade, String subGrade) {
+        String g = grade.toUpperCase();
+        String s = subGrade.toUpperCase();
+
+        int gradeBase = 0;
+        switch (g) {
+            case "THIEN": gradeBase = 3; break;
+            case "DIA": gradeBase = 2; break;
+            case "HUYEN": gradeBase = 1; break;
+            case "HOANG": gradeBase = 0; break;
+        }
+
+        int subBonus = 0;
+        switch (s) {
+            case "THUONG": subBonus = 3; break;
+            case "TRUNG": subBonus = 2; break;
+            case "HA": subBonus = 1; break;
+        }
+
+        return gradeBase * 4 + subBonus;
+    }
+
+    /**
+     * Lấy màu hiển thị cho grade
+     */
+    private String getGradeColor(String grade) {
+        switch (grade.toUpperCase()) {
+            case "THIEN": return "&6";
+            case "DIA": return "&5";
+            case "HUYEN": return "&b";
+            case "HOANG": return "&7";
+            default: return "&f";
         }
     }
 
@@ -248,38 +352,6 @@ public class SkillBookManager {
             case "TRUNG": return "HA";
             case "HA": return null;
             default: return null;
-        }
-    }
-
-    /**
-     * Lấy tỉ lệ thành công dựa vào sub grade
-     */
-    public double getSuccessRate(String subGrade) {
-        switch (subGrade.toUpperCase()) {
-            case "THUONG": return RATE_THUONG;
-            case "TRUNG": return RATE_TRUNG;
-            case "HA": return RATE_HA;
-            default: return RATE_HA;
-        }
-    }
-
-    /**
-     * Lấy tỉ lệ thành công dưới dạng phần trăm
-     */
-    public int getSuccessRatePercent(String subGrade) {
-        return (int)(getSuccessRate(subGrade) * 100);
-    }
-
-    /**
-     * Lấy màu sắc cho grade
-     */
-    public static String getGradeColor(String grade) {
-        switch (grade.toUpperCase()) {
-            case "THIEN": return "&6&l";
-            case "DIA": return "&5&l";
-            case "HUYEN": return "&b&l";
-            case "HOANG": return "&a&l";
-            default: return "&7";
         }
     }
 

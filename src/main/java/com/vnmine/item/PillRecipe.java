@@ -12,18 +12,21 @@ public class PillRecipe {
 
     public static class IngredientDef {
         final String herbId;      // null nếu không phải linh thảo
+        final String itemId;      // item ID từ YML (cho material items, vd: "NUOC_TINH_KHIET")
         final Material material;  // Material để kiểm tra fallback
         final int count;
         final boolean isHerb;
 
-        public IngredientDef(String herbId, Material material, int count, boolean isHerb) {
+        public IngredientDef(String herbId, String itemId, Material material, int count, boolean isHerb) {
             this.herbId = herbId;
+            this.itemId = itemId;
             this.material = material;
             this.count = count;
             this.isHerb = isHerb;
         }
 
         public String getHerbId() { return herbId; }
+        public String getItemId() { return itemId; }
         public Material getMaterial() { return material; }
         public int getCount() { return count; }
         public boolean isHerb() { return isHerb; }
@@ -91,7 +94,7 @@ public class PillRecipe {
 
             if ("HERB".equals(type)) {
                 // herbId, material sẽ được resolve sau
-                result.add(new IngredientDef(value, Material.SHORT_GRASS, count, true));
+                result.add(new IngredientDef(value, null, Material.SHORT_GRASS, count, true));
             } else if ("MAT".equals(type)) {
                 Material mat;
                 try {
@@ -99,7 +102,8 @@ public class PillRecipe {
                 } catch (IllegalArgumentException e) {
                     mat = Material.STONE;
                 }
-                result.add(new IngredientDef(null, mat, count, false));
+                // Lưu cả itemId gốc (value) để so sánh với vnmine_item_id
+                result.add(new IngredientDef(null, value.toUpperCase(), mat, count, false));
             }
         }
         return result;

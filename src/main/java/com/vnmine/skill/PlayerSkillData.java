@@ -16,8 +16,11 @@ public class PlayerSkillData {
     // Skill Bar: 9 slots, lưu skill_id
     private final String[] skillBarSlots;
 
-    // Proficiency: skill_id → số lần đã sử dụng
-    private final Map<String, Integer> proficiencyMap;
+    // Proficiency: skill_id → số điểm thành thục (points)
+    private final Map<String, Integer> proficiencyPointsMap;
+
+    // Proficiency: skill_id → số lần đã sử dụng (legacy, kept for backward compatibility)
+    private final Map<String, Integer> proficiencyUsageMap;
 
     // Cooldown tracking: skill_id → thời gian kết thúc cooldown (millis)
     private final Map<String, Long> cooldownMap;
@@ -29,7 +32,8 @@ public class PlayerSkillData {
         this.playerUUID = playerUUID;
         this.playerName = playerName;
         this.skillBarSlots = new String[9];
-        this.proficiencyMap = new HashMap<>();
+        this.proficiencyPointsMap = new HashMap<>();
+        this.proficiencyUsageMap = new HashMap<>();
         this.cooldownMap = new HashMap<>();
         this.cooldownBypass = false;
     }
@@ -68,16 +72,47 @@ public class PlayerSkillData {
     // ==================== PROFICIENCY ====================
 
     public int getSkillUsageCount(String skillId) {
-        return proficiencyMap.getOrDefault(skillId, 0);
+        return proficiencyUsageMap.getOrDefault(skillId, 0);
     }
 
     public void incrementSkillUsage(String skillId) {
-        proficiencyMap.put(skillId, proficiencyMap.getOrDefault(skillId, 0) + 1);
+        proficiencyUsageMap.put(skillId, proficiencyUsageMap.getOrDefault(skillId, 0) + 1);
     }
 
+    /**
+     * Lấy số điểm thành thục hiện tại
+     */
+    public int getProficiencyPoints(String skillId) {
+        return proficiencyPointsMap.getOrDefault(skillId, 0);
+    }
+
+    /**
+     * Thêm điểm thành thục
+     */
+    public void addProficiencyPoints(String skillId, int points) {
+        proficiencyPointsMap.put(skillId, getProficiencyPoints(skillId) + points);
+    }
+
+    /**
+     * Reset điểm thành thục về 0 (khi học skill mới hoặc nâng cấp)
+     */
+    public void resetProficiencyPoints(String skillId) {
+        proficiencyPointsMap.put(skillId, 0);
+    }
+
+    /**
+     * Set số điểm thành thục (cho load/upgrade)
+     */
+    public void setProficiencyPoints(String skillId, int points) {
+        proficiencyPointsMap.put(skillId, points);
+    }
+
+    /**
+     * Lấy bậc thành thục dựa trên điểm thành thục từ config
+     */
     public ProficiencyLevel getProficiencyLevel(String skillId) {
-        int usage = getSkillUsageCount(skillId);
-        return ProficiencyLevel.fromUsage(usage);
+        int points = getProficiencyPoints(skillId);
+        return ProficiencyLevel.fromPoints(points);
     }
 
     public double getProficiencyMultiplier(String skillId) {
@@ -95,11 +130,15 @@ public class PlayerSkillData {
     }
 
     public void setSkillUsage(String skillId, int count) {
-        proficiencyMap.put(skillId, count);
+        proficiencyUsageMap.put(skillId, count);
     }
 
-    public Map<String, Integer> getProficiencyMap() {
-        return proficiencyMap;
+    public Map<String, Integer> getProficiencyUsageMap() {
+        return proficiencyUsageMap;
+    }
+
+    public Map<String, Integer> getProficiencyPointsMap() {
+        return proficiencyPointsMap;
     }
 
     // ==================== KHỐNG HỎA THUẬT EFFECTS ====================
@@ -228,30 +267,54 @@ public class PlayerSkillData {
 
     // ==================== PROFICIENCY LEVEL ENUM ====================
 
-    public enum ProficiencyLevel {
-        NHAP_MON(0, 1.0, 0, 1.0),
-        TIEU_THANH(50, 1.5, 1, 1.1),
-        DAI_THANH(200, 2.0, 2, 1.2),
-        VIEN_MAN(500, 3.0, 3, 1.3),
-        XUAT_THAN_NHAP_HOA(1000, 4.5, 4, 1.4),
-        DANG_PHONG_TAO_CUC(2000, 7.0, 5, 1.5);
+    /**
+     * Cấu hình cho từng bậc thành thục từ YAML
+     */
+    public static class ProficiencyConfig {
+        public int requiredPoints;  // Điểm cần để lên bậc này
+        public double damageMultiplier;
+        public int cooldownReduction;
+        public double durationMultiplier;
+        public String displayName;
 
-        public final int requiredUsage;
+        public ProficiencyConfig(int requiredPoints, double damageMultiplier, int cooldownReduction, double durationMultiplier, String displayName) {
+            this.requiredPoints = requiredPoints;
+            this.damageMultiplier = damageMultiplier;
+            this.cooldownReduction = cooldownReduction;
+            this.durationMultiplier = durationMultiplier;
+            this.displayName = displayName;
+        }
+    }
+
+    public enum ProficiencyLevel {
+        NHAP_MON(0, 1.0, 0, 1.0, "&7Nhập Môn"),
+        TIEU_THANH(100, 1.5, 1, 1.1, "&aTiểu Thành"),
+        DAI_THANH(200, 2.0, 2, 1.2, "&bĐại Thành"),
+        VIEN_MAN(300, 3.0, 3, 1.3, "&dViên Mãn"),
+        XUAT_THAN_NHAP_HOA(400, 4.5, 4, 1.4, "&6Xuất Thần Nhập Hóa"),
+        DANG_PHONG_TAO_CUC(500, 7.0, 5, 1.5, "&c&lĐăng Phong Tạo Cực");
+
+        public final int requiredPoints;
         public final double multiplier;
         public final int cooldownReduction;
         public final double durationMultiplier;
+        public final String displayName;
 
-        ProficiencyLevel(int requiredUsage, double multiplier, int cooldownReduction, double durationMultiplier) {
-            this.requiredUsage = requiredUsage;
+        ProficiencyLevel(int requiredPoints, double multiplier, int cooldownReduction, double durationMultiplier, String displayName) {
+            this.requiredPoints = requiredPoints;
             this.multiplier = multiplier;
             this.cooldownReduction = cooldownReduction;
             this.durationMultiplier = durationMultiplier;
+            this.displayName = displayName;
         }
 
-        public static ProficiencyLevel fromUsage(int usage) {
+        /**
+         * Lấy bậc thành thục dựa trên số điểm (points system)
+         */
+        public static ProficiencyLevel fromPoints(int points) {
             ProficiencyLevel best = NHAP_MON;
             for (ProficiencyLevel level : values()) {
-                if (usage >= level.requiredUsage) {
+                if (points >= level.requiredPoints) {
                     best = level;
                 }
             }

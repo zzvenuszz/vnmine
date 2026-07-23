@@ -16,6 +16,7 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.bukkit.potion.PotionType;
@@ -296,17 +297,96 @@ public class ItemBuilder {
         return item;
     }
 
+    // ==================== PLACEHOLDER SYSTEM ====================
+
+    /**
+     * Xây dựng Map chứa tất cả các field config làm placeholder.
+     * Cho phép sử dụng {field-name} trong effects, lore, side_effects, v.v.
+     */
+    private static Map<String, String> buildPlaceholderMap(ItemDefinition def) {
+        Map<String, String> map = new HashMap<>();
+        
+        // Basic info
+        map.put("id", def.getId() != null ? def.getId() : "");
+        map.put("name", def.getName() != null ? ColorUtils.stripColor(def.getName()) : "");
+        map.put("type", def.getType() != null ? def.getType() : "");
+        map.put("rank", def.getRank() != null ? ColorUtils.stripColor(def.getRank()) : "");
+        map.put("element", def.getElement() != null ? def.getElement() : "");
+        map.put("age", def.getAge() != null ? def.getAge() : "");
+        map.put("rarity", def.getRarity() != null ? def.getRarity() : "");
+        map.put("material", def.getMaterial() != null ? def.getMaterial().name() : "STONE");
+        map.put("custom-model-data", String.valueOf(def.getCustomModelData()));
+        map.put("category", def.getCategory() != null ? def.getCategory() : "");
+        
+        // Pill parameters
+        map.put("base-recover", String.valueOf(def.getBaseRecover()));
+        map.put("base-heal", String.valueOf(def.getBaseHeal()));
+        map.put("base-regen", String.valueOf(def.getBaseRegen()));
+        map.put("base-duration", String.valueOf(def.getBaseDuration()));
+        map.put("base-dmg", String.valueOf(def.getBaseDmg()));
+        map.put("base-exp", String.valueOf(def.getBaseExp()));
+        map.put("scale-with-grade", String.valueOf(def.isScaleWithGrade()));
+        map.put("scale-duration", String.valueOf(def.isScaleDuration()));
+        
+        // Crafting parameters
+        map.put("cooking-time", String.valueOf(def.getCookingTime()));
+        map.put("success-chance", String.valueOf(def.getSuccessChance()));
+        map.put("required-level", String.valueOf(def.getRequiredLevel()));
+        
+        // Lists (joins as string)
+        List<String> reqSkills = def.getRequiredSkills();
+        map.put("required-skills", reqSkills != null ? String.join(", ", reqSkills) : "");
+        
+        List<String> ingredients = def.getIngredients();
+        map.put("ingredients", ingredients != null ? String.join(", ", ingredients) : "");
+        
+        // Additional
+        Map<String, String> additional = def.getAdditional();
+        if (additional != null) {
+            for (Map.Entry<String, String> entry : additional.entrySet()) {
+                map.put("additional." + entry.getKey(), entry.getValue());
+            }
+        }
+        
+        return map;
+    }
+
+    /**
+     * Thay thế tất cả {placeholder} trong một dòng text bằng giá trị từ map
+     */
+    private static String replaceSingleLine(String line, Map<String, String> placeholderMap) {
+        for (Map.Entry<String, String> entry : placeholderMap.entrySet()) {
+            line = line.replace("{" + entry.getKey() + "}", entry.getValue());
+        }
+        return line;
+    }
+
+    /**
+     * Thay thế placeholder trong toàn bộ List<String>
+     */
+    private static List<String> replacePlaceholders(List<String> lines, Map<String, String> placeholderMap) {
+        List<String> result = new ArrayList<>();
+        for (String line : lines) {
+            result.add(replaceSingleLine(line, placeholderMap));
+        }
+        return result;
+    }
+
     // ==================== BUILD FROM DEFINITION ====================
 
     /**
      * Xây dựng ItemStack từ ItemDefinition
      * Tự động sinh lore từ tất cả thông tin có sẵn
+     * Hỗ trợ placeholder {field-name} trong effects, lore, side_effects
      */
     public static ItemStack buildFromDefinition(ItemDefinition def) {
         if (def == null) return new ItemStack(Material.STONE);
         
+        // Build placeholder map để thay thế trong tất cả các dòng lore
+        Map<String, String> placeholderMap = buildPlaceholderMap(def);
+        
         ItemBuilder builder = new ItemBuilder(def.getMaterial())
-                .setName(def.getName())
+                .setName(replaceSingleLine(def.getName(), placeholderMap))
                 .setGlow(true)
                 .setCustomModelData(def.getCustomModelData());
         
@@ -317,7 +397,7 @@ public class ItemBuilder {
             lore.add("&8✦ " + def.getType());
         }
         if (def.getRank() != null && !def.getRank().isEmpty()) {
-            lore.add("&7Phẩm cấp: " + def.getRank());
+            lore.add("&7Phẩm cấp: " + replaceSingleLine(def.getRank(), placeholderMap));
         }
         if (def.getElement() != null && !def.getElement().isEmpty()) {
             lore.add("&7Thuộc tính: " + def.getElement());
@@ -326,11 +406,11 @@ public class ItemBuilder {
             lore.add("&7Độ hiếm: " + def.getRarity());
         }
         
-        // Effects
+        // Effects (có hỗ trợ placeholder)
         if (!def.getEffects().isEmpty()) {
             lore.add("");
             lore.add("&6&l✦ Hiệu ứng:");
-            lore.addAll(def.getEffects());
+            lore.addAll(replacePlaceholders(def.getEffects(), placeholderMap));
         }
         
         // Grow environment (cho linh thảo)
@@ -381,17 +461,17 @@ public class ItemBuilder {
             lore.add("&7Tỷ lệ thành công: &e" + def.getSuccessChance() + "%");
         }
         
-        // Side effects
+        // Side effects (có hỗ trợ placeholder)
         if (!def.getSideEffects().isEmpty()) {
             lore.add("");
             lore.add("&c&l✦ Tác dụng phụ:");
-            lore.addAll(def.getSideEffects());
+            lore.addAll(replacePlaceholders(def.getSideEffects(), placeholderMap));
         }
         
-        // Custom lore
+        // Custom lore (có hỗ trợ placeholder)
         if (!def.getLore().isEmpty()) {
             lore.add("");
-            lore.addAll(def.getLore());
+            lore.addAll(replacePlaceholders(def.getLore(), placeholderMap));
         }
         
         // Hướng dẫn sử dụng

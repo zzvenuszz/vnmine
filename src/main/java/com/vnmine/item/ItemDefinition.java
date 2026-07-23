@@ -51,6 +51,8 @@ public class ItemDefinition {
     private List<String> lore = new ArrayList<>();           // Lore tuỳ chỉnh
     private List<String> skillIds = new ArrayList<>();       // Cho skill books
     private Map<String, String> additional = new HashMap<>(); // Thông tin bổ sung
+    private List<String> artifactSkills = new ArrayList<>(); // Artifact skill IDs
+    private Map<String, String> clickBehavior = new HashMap<>(); // Click behavior: right-click -> skill ID
 
     public ItemDefinition() {}
 
@@ -152,6 +154,12 @@ public class ItemDefinition {
     
     public Map<String, String> getAdditional() { return additional; }
     public void setAdditional(Map<String, String> additional) { this.additional = additional; }
+
+    public List<String> getArtifactSkills() { return artifactSkills; }
+    public void setArtifactSkills(List<String> artifactSkills) { this.artifactSkills = artifactSkills; }
+
+    public Map<String, String> getClickBehavior() { return clickBehavior; }
+    public void setClickBehavior(Map<String, String> clickBehavior) { this.clickBehavior = clickBehavior; }
     
     /**
      * Kiểm tra có phải đan dược không (có effect numbers)

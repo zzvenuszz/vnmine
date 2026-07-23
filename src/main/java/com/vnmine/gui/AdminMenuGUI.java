@@ -215,8 +215,26 @@ public class AdminMenuGUI implements Listener {
     private void giveItemToPlayer(Player player, ItemDefinition def) {
         int amount = "material".equals(def.getCategory()) ? 64 : 1;
 
-        // Dùng ItemBuilder.buildFromDefinition() để tạo item đồng nhất
-        ItemStack giveItem = ItemBuilder.buildFromDefinition(def);
+        ItemStack giveItem;
+
+        // Với skill books: dùng createSkillBook() để đảm bảo NBT data đầy đủ
+        if ("skill".equals(def.getCategory()) && def.getSkillIds() != null && !def.getSkillIds().isEmpty()) {
+            String skillId = def.getSkillIds().get(0);
+            String[] gradeSub = parseGradeFromRank(def.getRank());
+            if (gradeSub != null) {
+                giveItem = plugin.getSkillBookManager().createSkillBook(skillId, gradeSub[0], gradeSub[1]);
+            } else {
+                giveItem = plugin.getSkillBookManager().createSkillBook(skillId, "HOANG", "HA");
+            }
+            // Fallback nếu createSkillBook trả về null
+            if (giveItem == null) {
+                giveItem = ItemBuilder.buildFromDefinition(def);
+            }
+        } else {
+            // Các item khác: dùng buildFromDefinition() bình thường
+            giveItem = ItemBuilder.buildFromDefinition(def);
+        }
+
         giveItem.setAmount(Math.min(amount, 64));
 
         Map<Integer, ItemStack> leftover = player.getInventory().addItem(giveItem);
@@ -225,6 +243,34 @@ public class AdminMenuGUI implements Listener {
         }
         MessageUtils.send(player, "&aĐã nhận &f" + def.getName() + " &r&a(" + (amount == 64 ? "x64" : "x1") + ")!");
         MessageUtils.playSound(player, Sound.ENTITY_ITEM_PICKUP);
+    }
+
+    /**
+     * Parse grade và subGrade từ rank string
+     * Ví dụ: "Hoàng cấp Hạ phẩm" → ["HOANG", "HA"]
+     * @return [grade, subGrade] hoặc null nếu không parse được
+     */
+    private static String[] parseGradeFromRank(String rank) {
+        if (rank == null || rank.isEmpty()) return null;
+
+        String upper = rank.toUpperCase();
+
+        // Xác định grade
+        String grade;
+        if (upper.contains("THIÊN") || upper.contains("THIEN")) grade = "THIEN";
+        else if (upper.contains("ĐỊA") || upper.contains("DIA")) grade = "DIA";
+        else if (upper.contains("HUYỀN") || upper.contains("HUYEN")) grade = "HUYEN";
+        else if (upper.contains("HOÀNG") || upper.contains("HOANG")) grade = "HOANG";
+        else return null;
+
+        // Xác định subGrade
+        String subGrade;
+        if (upper.contains("THƯỢNG") || upper.contains("THUONG")) subGrade = "THUONG";
+        else if (upper.contains("TRUNG")) subGrade = "TRUNG";
+        else if (upper.contains("HẠ") || upper.contains("HA")) subGrade = "HA";
+        else return null;
+
+        return new String[]{grade, subGrade};
     }
 
     private static String stripColor(String input) {

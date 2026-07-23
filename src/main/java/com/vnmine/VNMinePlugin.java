@@ -35,6 +35,7 @@ import com.vnmine.skill.SkillManager;
 import com.vnmine.skill.SkillBarGUI;
 import com.vnmine.skill.SkillBookListener;
 import com.vnmine.skill.SkillBookManager;
+import com.vnmine.skill.ArtifactSkillManager;
 import com.vnmine.util.ColorUtils;
 import com.vnmine.util.MessageUtils;
 import com.vnmine.util.NameTagManager;
@@ -83,6 +84,7 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
     private SkillManager skillManager;
     private SkillBookManager skillBookManager;
     private SkillBarGUI skillBarGUI;
+    private ArtifactSkillManager artifactSkillManager;
     private MainMenuGUI mainMenuGUI;
     private AlchemyCraftGUI alchemyCraftGUI;
     private ArtifactCraftGUI artifactCraftGUI;
@@ -115,6 +117,7 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
     public SkillManager getSkillManager() { return skillManager; }
     public SkillBookManager getSkillBookManager() { return skillBookManager; }
     public SkillBarGUI getSkillBarGUI() { return skillBarGUI; }
+    public ArtifactSkillManager getArtifactSkillManager() { return artifactSkillManager; }
     public MainMenuGUI getMainMenuGUI() { return mainMenuGUI; }
     public AdminMenuGUI getAdminMenuGUI() { return adminMenuGUI; }
     public PermissionManager getPermissionManager() { return permissionManager; }
@@ -152,6 +155,7 @@ public class VNMinePlugin extends JavaPlugin implements TabCompleter {
         skillManager = new SkillManager(this);
         skillBookManager = new SkillBookManager(this);
         skillBarGUI = new SkillBarGUI(this);
+        artifactSkillManager = new ArtifactSkillManager(this);
         adminMenuGUI = new AdminMenuGUI(this);
         mainMenuGUI = new MainMenuGUI(this, cultivationManager, skillManager, adminMenuGUI);
         alchemyCraftGUI = new AlchemyCraftGUI(this, mainMenuGUI);

@@ -62,6 +62,9 @@ public class CultivationManager {
     private int manaRegenInterval;
     private int combatDelayTicks;
     private boolean manaBossBarEnabled;
+    
+    // Danh sách player tạm dừng mana bar (để tránh xung đột action bar)
+    private final Set<UUID> pausedManaPlayers = new HashSet<>();
 
     // Cấu hình lôi kiếp
     private boolean tribulationEnabled;
@@ -235,10 +238,43 @@ public class CultivationManager {
                 data.setMaxMana(section.getInt("max-mana", baseMaxMana));
                 data.setWaitingForTribulation(section.getBoolean("waiting-tribulation", false));
 
-                // Load skills
+                // Load skills (backward compatible: list of skill_id -> learned)
                 List<String> skills = section.getStringList("learned-skills");
                 for (String skill : skills) {
                     data.learnSkill(skill);
+                }
+
+                // Load skill grades (optional: skill_id:grade format)
+                if (section.contains("learned-skills-grades")) {
+                    List<String> skillGrades = section.getStringList("learned-skills-grades");
+                    for (String entry : skillGrades) {
+                        String[] parts = entry.split(":");
+                        if (parts.length == 2) {
+                            String skillId = parts[0];
+                            String grade = parts[1];
+                            // Determine sub-grade from grade enum: THIEN|DIA|HUYEN|HOANG
+                            String gradeUpper = grade.toUpperCase();
+                            String subGrade = "HA"; // default
+                            if (gradeUpper.startsWith("THIEN")) subGrade = "THUONG";
+                            else if (gradeUpper.startsWith("DIA")) subGrade = "HA";
+                            else if (gradeUpper.startsWith("HUYEN")) subGrade = "HA";
+                            else if (gradeUpper.startsWith("HOANG")) subGrade = "HA";
+
+                            // Try to get sub-grade from configuration if available
+                            if (section.contains("learned-skills-subgrades")) {
+                                List<String> subGrades = section.getStringList("learned-skills-subgrades");
+                                for (String sgEntry : subGrades) {
+                                    String[] sgParts = sgEntry.split(":");
+                                    if (sgParts.length == 2 && sgParts[0].equals(skillId)) {
+                                        subGrade = sgParts[1];
+                                        break;
+                                    }
+                                }
+                            }
+
+                            data.learnSkill(skillId, grade, subGrade);
+                        }
+                    }
                 }
 
                 // Load active passives
@@ -274,8 +310,21 @@ public class CultivationManager {
             dataConfig.set(path + ".max-mana", data.getMaxMana());
             dataConfig.set(path + ".waiting-tribulation", data.isWaitingForTribulation());
 
+            // Save learned skills as list of IDs (for backward compatibility)
             List<String> skills = new ArrayList<>(data.getLearnedSkills().keySet());
             dataConfig.set(path + ".learned-skills", skills);
+
+            // Save skill grades (skill_id:grade format)
+            List<String> skillGrades = new ArrayList<>();
+            List<String> skillSubGrades = new ArrayList<>();
+            for (Map.Entry<String, String> gradeEntry : data.getLearnedSkills().entrySet()) {
+                skillGrades.add(gradeEntry.getKey() + ":" + gradeEntry.getValue());
+            }
+            for (Map.Entry<String, String> subGradeEntry : data.getLearnedSkillSubGrades().entrySet()) {
+                skillSubGrades.add(subGradeEntry.getKey() + ":" + subGradeEntry.getValue());
+            }
+            dataConfig.set(path + ".learned-skills-grades", skillGrades);
+            dataConfig.set(path + ".learned-skills-subgrades", skillSubGrades);
 
             List<String> passives = new ArrayList<>();
             for (Map.Entry<String, Boolean> p : data.getActivePassiveSkills().entrySet()) {
@@ -329,14 +378,44 @@ public class CultivationManager {
 
     /**
      * Cập nhật BossBar linh lực
+     * Bỏ qua nếu player đang tạm dừng mana bar (skill bar mode)
      */
     private void updateManaBossBar(Player player, PlayerCultivationData data) {
         if (data == null) return;
+        if (pausedManaPlayers.contains(player.getUniqueId())) return;
         double percent = data.getManaPercent();
         String bar = createProgressBar(percent, 20);
         String msg = ColorUtils.colorize("&b◆ Linh Lực ◆ &7[" + bar + "&7] &b" +
                 data.getMana() + "/" + data.getMaxMana());
         player.sendActionBar(ColorUtils.toComponent(msg));
+    }
+
+    /**
+     * Tạm dừng cập nhật mana action bar cho player
+     * Dùng khi skill bar mode active để tránh xung đột action bar
+     */
+    public void pauseManaBar(UUID uuid) {
+        pausedManaPlayers.add(uuid);
+        // Clear action bar ngay lập tức
+        Player player = Bukkit.getPlayer(uuid);
+        if (player != null) {
+            player.sendActionBar(net.kyori.adventure.text.Component.empty());
+        }
+    }
+
+    /**
+     * Tiếp tục cập nhật mana action bar cho player
+     */
+    public void resumeManaBar(UUID uuid) {
+        pausedManaPlayers.remove(uuid);
+        // Gửi lại mana bar ngay lập tức
+        Player player = Bukkit.getPlayer(uuid);
+        if (player != null) {
+            PlayerCultivationData data = getPlayerData(uuid);
+            if (data != null) {
+                updateManaBossBar(player, data);
+            }
+        }
     }
 
     /**
